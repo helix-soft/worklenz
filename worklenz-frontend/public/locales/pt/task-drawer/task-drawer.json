@@ -186,7 +186,10 @@
       "moveToTaskTooltip": "Reatribuir este registro de tempo a uma tarefa diferente",
       "selectTask": "Selecionar tarefa...",
       "backdateLimitError": "Os registos de tempo não podem ser retroagidos mais de {{days}} dias. A data mais antiga que pode registar é {{earliestDate}}.",
-      "saveError": "Não foi possível guardar o registo de tempo. Por favor, tente novamente."
+      "saveError": "Não foi possível guardar o registo de tempo. Por favor, tente novamente.",
+      "activity": "Atividade",
+      "selectActivityError": "Selecione uma atividade",
+      "sameStartEndError": "O horário de início e término não podem ser iguais"
     },
     "rollupLoggedTooltip": "Soma do tempo logado nas subtarefas"
   },

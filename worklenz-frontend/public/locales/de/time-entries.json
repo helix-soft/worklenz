@@ -79,5 +79,8 @@
     "week_total": "Diese Woche Gesamt",
     "week_billable": "Woche abrechenbar",
     "week_non_billable": "Woche nicht abrechenbar"
-  }
+  },
+  "activityLabel": "Tätigkeit",
+  "selectActivityError": "Wählen Sie eine Tätigkeit",
+  "sameStartEndError": "Start- und Endzeit dürfen nicht gleich sein"
 }

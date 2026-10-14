@@ -79,5 +79,8 @@
     "week_total": "本周总计",
     "week_billable": "本周可计费",
     "week_non_billable": "本周不可计费"
-  }
+  },
+  "activityLabel": "活动类型",
+  "selectActivityError": "请选择活动类型",
+  "sameStartEndError": "开始时间和结束时间不能相同"
 }

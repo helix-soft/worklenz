@@ -183,7 +183,7 @@
     "emptySubtitle": "Track your first entry using Quick Time Entry on the left.",
     "logTimeButton": "Log Time",
     "pageTitle": "Log Time",
-    "pageSubtitle": "Track your billable hours quickly",
+    "pageSubtitle": "Track time spent on your tasks.",
     "quickEntryTitle": "Quick Time Entry",
     "projectLabel": "Project",
     "projectPlaceholder": "Select project…",
@@ -236,7 +236,34 @@
     "weekdayThu": "Thu",
     "weekdayFri": "Fri",
     "weekdaySat": "Sat",
-    "weekdaySun": "Sun"
+    "weekdaySun": "Sun",
+    "week": {
+      "viewWeek": "Week",
+      "previous": "Previous week",
+      "next": "Next week",
+      "thisWeek": "This week",
+      "total": "Week total",
+      "overlap": "Overlap: {{duration}}",
+      "overlapHint": "Time logged in parallel. Allowed, but check that it was intentional.",
+      "dayOverlap": "{{duration}} logged in parallel on this day",
+      "blockOverlap": "Overlaps another log",
+      "errorTitle": "Couldn't load this week's logs",
+      "retry": "Try again",
+      "empty": "Nothing logged this week yet. Use Quick Time Entry to add time."
+    },
+    "rangeDuration": "Duration: {{duration}}",
+    "activityLabel": "Activity",
+    "activities": {
+      "development": "Development",
+      "specification": "Specification",
+      "management": "Management",
+      "testing": "Testing",
+      "support": "Support",
+      "pr": "PR",
+      "meeting": "Meeting"
+    },
+    "sameStartEnd": "Start and end time cannot be the same",
+    "rangeNextDay": "(ends the next day)"
   },
   "expenses": {
     "emptyTitle": "No expenses logged yet",

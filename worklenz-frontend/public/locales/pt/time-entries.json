@@ -79,5 +79,8 @@
     "week_total": "Total esta semana",
     "week_billable": "Faturável esta semana",
     "week_non_billable": "Não faturável esta semana"
-  }
+  },
+  "activityLabel": "Atividade",
+  "selectActivityError": "Selecione uma atividade",
+  "sameStartEndError": "O horário de início e término não podem ser iguais"
 }

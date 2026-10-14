@@ -1,5 +1,14 @@
 import React from 'react';
-import { Button, DatePicker, Form, Input, TimePicker, Flex, InputNumber, Segmented } from '@/shared/antd-imports';
+import { Button, DatePicker, Form, Input, Flex, InputRef } from '@/shared/antd-imports';
+import { TimeTextInput } from '@/components/common/time-text-input/TimeTextInput';
+import { getTimeRangeSeconds } from '@/utils/time-text-input';
+import {
+  DEFAULT_TIME_LOG_ACTIVITY,
+  isTimeLogActivity,
+  TimeLogActivity,
+} from '@/shared/time-log-activities';
+import { TimeLogActivitySelect } from '@/components/time-entries/TimeLogActivitySelect';
+import { TimeRangeDurationHint } from '@/components/time-entries/TimeRangeDurationHint';
 import { ClockCircleOutlined, InfoCircleOutlined } from '@/shared/antd-imports';
 
 import dayjs, { Dayjs } from 'dayjs';
@@ -32,14 +41,11 @@ interface TimeLogFormProps {
 
 }
 
-type TimeLogInputMode = 'duration' | 'timeRange';
-
 interface TimeLogFormValues {
+  activity: TimeLogActivity | null;
   date: Dayjs | null;
   startTime: Dayjs | null;
   endTime: Dayjs | null;
-  hours: number | null;
-  minutes: number | null;
   description?: string;
 }
 
@@ -57,14 +63,7 @@ const TimeLogForm = ({
   const currentSession = useAuthService().getCurrentSession();
   const { socket, connected } = useSocket();
   const [form] = Form.useForm();
-  // Edit opens in time-range so the saved start/end are visible immediately.
-  // Duration mode unmounts those fields; switching back was falling back to "now".
-  const [inputMode, setInputMode] = React.useState<TimeLogInputMode>(
-    mode === 'edit' ? 'timeRange' : 'duration'
-  );
-  // Tracks whether the "auto-clear minutes from 30→0 on first hours entry" has
-  // already fired for the current form session. Reset whenever the form resets.
-  const minutesAutoClearedRef = React.useRef(false);
+  const endTimeInputRef = React.useRef<InputRef>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
   // Reassign state — only used when allowReassign=true and mode=edit
@@ -85,8 +84,7 @@ const TimeLogForm = ({
     date: dayjs(),
     startTime: dayjs().second(0).millisecond(0),
     endTime: dayjs().second(0).millisecond(0).add(30, 'minute'),
-    hours: 0,
-    minutes: 30,
+    activity: DEFAULT_TIME_LOG_ACTIVITY,
   });
 
   const themeMode = useAppSelector(state => state.themeReducer.mode);
@@ -135,42 +133,6 @@ const TimeLogForm = ({
     return dayjs().second(0).millisecond(0);
   }, []);
 
-  const getDurationFromRange = React.useCallback((startTime?: Dayjs | null, endTime?: Dayjs | null) => {
-    if (!startTime || !endTime || endTime.isBefore(startTime)) {
-      return { hours: 0, minutes: 0 };
-    }
-
-    const totalMinutes = endTime.diff(startTime, 'minute');
-    return {
-      hours: Math.floor(totalMinutes / 60),
-      minutes: totalMinutes % 60,
-    };
-  }, []);
-
-  const getRangeFromDuration = React.useCallback(
-    (
-      dateValue?: Dayjs | null,
-      startTimeValue?: Dayjs | null,
-      hoursValue?: number | null,
-      minutesValue?: number | null
-    ) => {
-      const safeDate = dateValue || dayjs();
-      const safeStartTime = startTimeValue || getNowRoundedToMinute();
-      const totalMinutes = Math.max(0, Number(hoursValue || 0) * 60 + Number(minutesValue || 0));
-      const normalizedStart = dayjs(safeDate)
-        .hour(safeStartTime.hour())
-        .minute(safeStartTime.minute())
-        .second(0)
-        .millisecond(0);
-
-      return {
-        startTime: normalizedStart,
-        endTime: normalizedStart.add(totalMinutes, 'minute'),
-      };
-    },
-    [getNowRoundedToMinute]
-  );
-
   React.useEffect(() => {
     if (initialValues && mode === 'edit') {
       const createdAt = dayjs(initialValues.created_at);
@@ -185,33 +147,31 @@ const TimeLogForm = ({
         endTime = dayjs(initialValues.created_at);
       }
 
-      const { hours, minutes } = getDurationFromRange(startTime, endTime);
       const nextValues: TimeLogFormValues = {
         date: createdAt,
         startTime,
         endTime,
-        hours,
-        minutes,
         description: initialValues.description || '',
+        // Logs from before activities existed get the default
+        activity: isTimeLogActivity(initialValues.activity)
+          ? initialValues.activity
+          : DEFAULT_TIME_LOG_ACTIVITY,
       };
 
-      setInputMode('timeRange');
       form.setFieldsValue(nextValues);
       setFormValues(nextValues);
     } else if (mode === 'create') {
-      minutesAutoClearedRef.current = false;
       const now = getNowRoundedToMinute();
-      const nextHalfHour = now.add(30, 'minute');
-      setInputMode('duration');
-      form.setFieldsValue({
+      const nextValues: TimeLogFormValues = {
         date: dayjs(),
         startTime: now,
-        endTime: nextHalfHour,
-        hours: 0,
-        minutes: 30,
-      });
+        endTime: now.add(30, 'minute'),
+        activity: DEFAULT_TIME_LOG_ACTIVITY,
+      };
+      form.setFieldsValue(nextValues);
+      setFormValues(nextValues);
     }
-  }, [initialValues, mode, form, getDurationFromRange, getNowRoundedToMinute]);
+  }, [initialValues, mode, form, getNowRoundedToMinute]);
 
   // Load recent projects when reassign is enabled
   React.useEffect(() => {
@@ -296,86 +256,12 @@ const TimeLogForm = ({
     );
   };
 
-  const handleModeChange = (nextMode: TimeLogInputMode) => {
-    if (nextMode === inputMode) return;
-
-    // Prefer form store, then React state, then the log being edited.
-    // Duration mode unmounts start/end fields; getFieldValue alone can be empty
-    // and getRangeFromDuration would incorrectly fall back to the current clock.
-    const currentDate =
-      (form.getFieldValue('date') as Dayjs | null) || formValues.date;
-    const currentStartTime =
-      (form.getFieldValue('startTime') as Dayjs | null) ||
-      formValues.startTime ||
-      (initialValues?.start_time ? dayjs(initialValues.start_time) : null);
-    const currentEndTime =
-      (form.getFieldValue('endTime') as Dayjs | null) ||
-      formValues.endTime ||
-      (initialValues?.end_time ? dayjs(initialValues.end_time) : null);
-    const currentHours =
-      (form.getFieldValue('hours') as number | null) ?? formValues.hours;
-    const currentMinutes =
-      (form.getFieldValue('minutes') as number | null) ?? formValues.minutes;
-
-    if (nextMode === 'duration') {
-      const { hours, minutes } = getDurationFromRange(currentStartTime, currentEndTime);
-      form.setFieldsValue({ hours, minutes });
-      setFormValues(prev => ({ ...prev, hours, minutes }));
-    } else {
-      const { startTime, endTime } = getRangeFromDuration(
-        currentDate,
-        currentStartTime,
-        currentHours,
-        currentMinutes
-      );
-      form.setFieldsValue({ startTime, endTime });
-      setFormValues(prev => ({ ...prev, startTime, endTime }));
-    }
-
-    setInputMode(nextMode);
-  };
-
   const createReqBody = (values: TimeLogFormValues) => {
-    if (!values.date) return;
+    if (!values.date || !values.startTime || !values.endTime) return;
 
-    const dateValue = dayjs(values.date);
-    const startTimeValue = values.startTime || getNowRoundedToMinute();
-
-    if (inputMode === 'timeRange') {
-      if (!values.startTime || !values.endTime) return;
-
-      const formattedStartTime = dayjs(dateValue)
-        .hour(values.startTime.hour())
-        .minute(values.startTime.minute())
-        .second(0)
-        .millisecond(0);
-
-      const formattedEndTime = dayjs(dateValue)
-        .hour(values.endTime.hour())
-        .minute(values.endTime.minute())
-        .second(0)
-        .millisecond(0);
-
-      const diff = formattedEndTime.diff(formattedStartTime, 'seconds');
-
-      return {
-        id: mode === 'edit' && initialValues?.id ? initialValues.id : (taskIdProp ?? taskFormViewModel?.task?.id),
-        project_id: (projectIdProp ?? taskFormViewModel?.task?.project_id) as string,
-        formatted_start: formattedStartTime.toISOString(),
-        seconds_spent: Math.floor(Math.abs(diff)),
-        description: values.description,
-        // Only include new_task_id if user explicitly selected a different task
-        ...(mode === 'edit' && selectedReassignTaskId ? { new_task_id: selectedReassignTaskId } : {}),
-      };
-    }
-
-    const hours = Math.max(0, Number(values.hours || 0));
-    const minutes = Math.max(0, Number(values.minutes || 0));
-    const secondsSpent = hours * 3600 + minutes * 60;
-
-    const formattedStartTime = dayjs(dateValue)
-      .hour(startTimeValue.hour())
-      .minute(startTimeValue.minute())
+    const formattedStartTime = dayjs(values.date)
+      .hour(values.startTime.hour())
+      .minute(values.startTime.minute())
       .second(0)
       .millisecond(0);
 
@@ -383,61 +269,27 @@ const TimeLogForm = ({
       id: mode === 'edit' && initialValues?.id ? initialValues.id : (taskIdProp ?? taskFormViewModel?.task?.id),
       project_id: (projectIdProp ?? taskFormViewModel?.task?.project_id) as string,
       formatted_start: formattedStartTime.toISOString(),
-      seconds_spent: secondsSpent,
+      seconds_spent: getTimeRangeSeconds(values.startTime, values.endTime),
       description: values.description,
+      activity: values.activity,
       // Only include new_task_id if user explicitly selected a different task
       ...(mode === 'edit' && selectedReassignTaskId ? { new_task_id: selectedReassignTaskId } : {}),
     };
   };
 
   const onFinish = async (values: TimeLogFormValues) => {
-    const { startTime, endTime } = values;
-
-    if (inputMode === 'timeRange' && startTime && endTime && startTime.isAfter(endTime)) {
+    if (getTimeRangeSeconds(values.startTime, values.endTime) <= 0) {
       form.setFields([
         {
           name: 'endTime',
           errors: [
-            t('taskTimeLogTab.timeLogForm.endTimeAfterStartError', {
-              defaultValue: 'End time must be after start time',
+            t('taskTimeLogTab.timeLogForm.sameStartEndError', {
+              defaultValue: 'Start and end time cannot be the same',
             }),
           ],
         },
       ]);
       return;
-    }
-
-    if (inputMode === 'duration') {
-      const minutes = Number(values.minutes || 0);
-      const hours = Number(values.hours || 0);
-
-      if (minutes > 59) {
-        form.setFields([
-          {
-            name: 'minutes',
-            errors: [
-              t('taskTimeLogTab.timeLogForm.minutesRangeError', {
-                defaultValue: 'Minutes must be between 0 and 59',
-              }),
-            ],
-          },
-        ]);
-        return;
-      }
-
-      if (hours * 60 + minutes <= 0) {
-        form.setFields([
-          {
-            name: 'minutes',
-            errors: [
-              t('taskTimeLogTab.timeLogForm.durationGreaterThanZeroError', {
-                defaultValue: 'Duration must be greater than 0 minutes',
-              }),
-            ],
-          },
-        ]);
-        return;
-      }
     }
 
     if (!currentSession) return;
@@ -506,19 +358,10 @@ const TimeLogForm = ({
     }
   };
 
-  const isFormValid = () => {
-    if (!formValues.date) return false;
-
-    if (inputMode === 'timeRange') {
-      if (!formValues.startTime || !formValues.endTime) return false;
-      return !formValues.startTime.isAfter(formValues.endTime);
-    }
-
-    const hours = Number(formValues.hours || 0);
-    const minutes = Number(formValues.minutes || 0);
-    if (minutes < 0 || minutes > 59 || hours < 0) return false;
-    return hours * 60 + minutes > 0;
-  };
+  const isFormValid = () =>
+    Boolean(formValues.activity) &&
+    Boolean(formValues.date) &&
+    getTimeRangeSeconds(formValues.startTime, formValues.endTime) > 0;
 
   return (
     <Flex
@@ -552,161 +395,90 @@ const TimeLogForm = ({
         style={{ width: '100%', overflow: 'visible' }}
         layout="vertical"
         onFinish={onFinish}
-        onValuesChange={(changedValues, values) => {
-          // The first time the user enters any value in the hours field (including
-          // typing digit-by-digit), auto-clear the default 30-minute suggestion.
-          // We use a ref so this fires exactly once per form session regardless of
-          // whether the user types or uses the spinner arrows. Only clear if minutes
-          // is still at its untouched default — otherwise this would stomp a minutes
-          // value the user already entered themselves (e.g. entering "45" then "1"
-          // to mean 1h45m).
-          if (
-            'hours' in changedValues &&
-            !minutesAutoClearedRef.current &&
-            (values as TimeLogFormValues).minutes === 30
-          ) {
-            const incoming = Number(changedValues.hours);
-            if (!isNaN(incoming) && incoming > 0) {
-              minutesAutoClearedRef.current = true;
-              form.setFieldsValue({ minutes: 0 });
-              setFormValues({ ...(values as TimeLogFormValues), minutes: 0 });
-              return;
-            }
-          }
-          setFormValues(values as TimeLogFormValues);
-        }}
+        onValuesChange={(_changedValues, values) => setFormValues(values as TimeLogFormValues)}
       >
         <Form.Item
-          label={t('taskTimeLogTab.timeLogForm.inputMode', { defaultValue: 'Input Mode' })}
-          style={{ marginBlockEnd: 6 }}
+          name="activity"
+          label={t('taskTimeLogTab.timeLogForm.activity', { defaultValue: 'Activity' })}
+          rules={[
+            {
+              required: true,
+              message: t('taskTimeLogTab.timeLogForm.selectActivityError', {
+                defaultValue: 'Select an activity',
+              }),
+            },
+          ]}
         >
-          <Segmented
+          <TimeLogActivitySelect
             size="small"
-            value={inputMode}
-            onChange={value => handleModeChange(value as TimeLogInputMode)}
-            options={[
-              {
-                label: t('taskTimeLogTab.timeLogForm.durationMode', { defaultValue: 'Duration' }),
-                value: 'duration',
-              },
-              {
-                label: t('taskTimeLogTab.timeLogForm.timeRangeMode', { defaultValue: 'Time Range' }),
-                value: 'timeRange',
-              },
-            ]}
-            block
+            aria-label={t('taskTimeLogTab.timeLogForm.activity', { defaultValue: 'Activity' })}
           />
         </Form.Item>
 
-        {inputMode === 'duration' ? (
-          <Form.Item style={{ marginBlockEnd: 6 }}>
-            <Flex gap={8} wrap="wrap" style={{ width: '100%' }}>
-              <Form.Item
-                name="date"
-                label={t('taskTimeLogTab.timeLogForm.date')}
-                rules={[
-                  {
-                    required: true,
-                    message: t('taskTimeLogTab.timeLogForm.selectDateError'),
-                  },
-                ]}
-                style={{ flex: 1.4, minWidth: 170, marginBlockEnd: 0 }}
-              >
-                <DatePicker
-                  size="small"
-                  style={{ width: '100%' }}
-                  disabledDate={isDateDisabled}
-                />
-              </Form.Item>
+        <Form.Item
+          name="date"
+          label={t('taskTimeLogTab.timeLogForm.date')}
+          rules={[
+            {
+              required: true,
+              message: t('taskTimeLogTab.timeLogForm.selectDateError'),
+            },
+          ]}
+        >
+          <DatePicker
+            size="small"
+            style={{ width: '100%' }}
+            disabledDate={isDateDisabled}
+          />
+        </Form.Item>
 
-              <Form.Item
-                name="hours"
-                label={t('taskTimeLogTab.timeLogForm.hours', { defaultValue: 'Hours' })}
-                rules={[
-                  {
-                    type: 'number',
-                    min: 0,
-                    message: t('taskTimeLogTab.timeLogForm.hoursMinError', {
-                      defaultValue: 'Hours must be 0 or greater',
-                    }),
-                  },
-                ]}
-                style={{ flex: 1, minWidth: 120, marginBlockEnd: 0 }}
-              >
-                <InputNumber size="small" min={0} precision={0} style={{ width: '100%' }} />
-              </Form.Item>
-
-              <Form.Item
-                name="minutes"
-                label={t('taskTimeLogTab.timeLogForm.minutes', { defaultValue: 'Minutes' })}
-                rules={[
-                  {
-                    type: 'number',
-                    min: 0,
-                    max: 59,
-                    message: t('taskTimeLogTab.timeLogForm.minutesRangeError', {
-                      defaultValue: 'Minutes must be between 0 and 59',
-                    }),
-                  },
-                ]}
-                style={{ flex: 1, minWidth: 120, marginBlockEnd: 0 }}
-              >
-                <InputNumber size="small" min={0} max={59} precision={0} style={{ width: '100%' }} />
-              </Form.Item>
-            </Flex>
-          </Form.Item>
-        ) : (
-          <>
+        <Form.Item style={{ marginBlockEnd: 6 }}>
+          <Flex gap={8} wrap="wrap" style={{ width: '100%' }}>
             <Form.Item
-              name="date"
-              label={t('taskTimeLogTab.timeLogForm.date')}
+              name="startTime"
+              label={t('taskTimeLogTab.timeLogForm.startTime')}
               rules={[
                 {
                   required: true,
-                  message: t('taskTimeLogTab.timeLogForm.selectDateError'),
+                  message: t('taskTimeLogTab.timeLogForm.selectStartTimeError'),
                 },
               ]}
+              style={{ flex: 1, minWidth: 140, marginBlockEnd: 0 }}
             >
-              <DatePicker
+              <TimeTextInput
                 size="small"
                 style={{ width: '100%' }}
-                disabledDate={isDateDisabled}
+                aria-label={t('taskTimeLogTab.timeLogForm.startTime')}
+                onComplete={() => endTimeInputRef.current?.focus()}
               />
             </Form.Item>
 
-            <Form.Item style={{ marginBlockEnd: 6 }}>
-              <Flex gap={8} wrap="wrap" style={{ width: '100%' }}>
-                <Form.Item
-                  name="startTime"
-                  label={t('taskTimeLogTab.timeLogForm.startTime')}
-                  rules={[
-                    {
-                      required: true,
-                      message: t('taskTimeLogTab.timeLogForm.selectStartTimeError'),
-                    },
-                  ]}
-                  style={{ flex: 1, minWidth: 140, marginBlockEnd: 0 }}
-                >
-                  <TimePicker size="small" format="HH:mm" style={{ width: '100%' }} />
-                </Form.Item>
-
-                <Form.Item
-                  name="endTime"
-                  label={t('taskTimeLogTab.timeLogForm.endTime')}
-                  rules={[
-                    {
-                      required: true,
-                      message: t('taskTimeLogTab.timeLogForm.selectEndTimeError'),
-                    },
-                  ]}
-                  style={{ flex: 1, minWidth: 140, marginBlockEnd: 0 }}
-                >
-                  <TimePicker size="small" format="HH:mm" style={{ width: '100%' }} />
-                </Form.Item>
-              </Flex>
+            <Form.Item
+              name="endTime"
+              label={t('taskTimeLogTab.timeLogForm.endTime')}
+              rules={[
+                {
+                  required: true,
+                  message: t('taskTimeLogTab.timeLogForm.selectEndTimeError'),
+                },
+              ]}
+              style={{ flex: 1, minWidth: 140, marginBlockEnd: 0 }}
+            >
+              <TimeTextInput
+                ref={endTimeInputRef}
+                size="small"
+                style={{ width: '100%' }}
+                aria-label={t('taskTimeLogTab.timeLogForm.endTime')}
+              />
             </Form.Item>
-          </>
-        )}
+          </Flex>
+        </Form.Item>
+
+        <TimeRangeDurationHint
+          start={formValues.startTime}
+          end={formValues.endTime}
+          style={{ marginTop: -2, marginBottom: 8 }}
+        />
 
         {/* Reassign to different task — edit mode only */}
         {allowReassign && mode === 'edit' && (

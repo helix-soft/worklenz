@@ -6,6 +6,7 @@ export interface ITaskLogViewModel {
   minutes?: string;
   seconds?: number;
   description?: string;
+  activity?: string | null;
   created_at?: string;
   updated_at?: string;
   avatar_url?: string;

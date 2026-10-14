@@ -89,6 +89,8 @@ export interface IRecentTimeLog {
   created_at: string;
   due_date?: string | null;
   time_spent?: number;
+  description?: string | null;
+  activity?: string | null;
   status_name?: string;
   status_color?: string;
   status_color_dark?: string;

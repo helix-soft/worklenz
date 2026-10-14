@@ -186,7 +186,10 @@
       "moveToTaskTooltip": "Ricakto këtë regjistër kohe në një detyrë tjetër",
       "selectTask": "Zgjidh detyrën...",
       "backdateLimitError": "Regjistrimet e kohës nuk mund të datohen më shumë se {{days}} ditë prapa. Data më e hershme që mund të regjistroni është {{earliestDate}}.",
-      "saveError": "Regjistrimi i kohës nuk mund të ruhej. Ju lutemi provoni përsëri."
+      "saveError": "Regjistrimi i kohës nuk mund të ruhej. Ju lutemi provoni përsëri.",
+      "activity": "Aktiviteti",
+      "selectActivityError": "Zgjidhni një aktivitet",
+      "sameStartEndError": "Ora e fillimit dhe e mbarimit nuk mund të jenë të njëjta"
     },
     "rollupLoggedTooltip": "Shuma e kohës së regjistruar në nën-detyrat"
   },

@@ -184,7 +184,7 @@
     "emptySubtitle": "Erfassen Sie Ihren ersten Eintrag über die Schnellerfassung links.",
     "logTimeButton": "Zeit erfassen",
     "pageTitle": "Zeit erfassen",
-    "pageSubtitle": "Erfassen Sie Ihre abrechenbaren Stunden schnell",
+    "pageSubtitle": "Erfassen Sie die Zeit für Ihre Aufgaben.",
     "quickEntryTitle": "Schnellerfassung",
     "projectLabel": "Projekt",
     "projectPlaceholder": "Projekt auswählen…",
@@ -237,7 +237,34 @@
     "weekdayThu": "Do",
     "weekdayFri": "Fr",
     "weekdaySat": "Sa",
-    "weekdaySun": "So"
+    "weekdaySun": "So",
+    "week": {
+      "viewWeek": "Woche",
+      "previous": "Vorherige Woche",
+      "next": "Nächste Woche",
+      "thisWeek": "Diese Woche",
+      "total": "Wochensumme",
+      "overlap": "Überschneidung: {{duration}}",
+      "overlapHint": "Parallel erfasste Zeit. Erlaubt, aber prüfen Sie, ob es beabsichtigt war.",
+      "dayOverlap": "{{duration}} an diesem Tag parallel erfasst",
+      "blockOverlap": "Überschneidet sich mit einem anderen Eintrag",
+      "errorTitle": "Die Einträge dieser Woche konnten nicht geladen werden",
+      "retry": "Erneut versuchen",
+      "empty": "Diese Woche wurde noch nichts erfasst. Nutzen Sie die Schnellerfassung."
+    },
+    "rangeDuration": "Dauer: {{duration}}",
+    "activityLabel": "Tätigkeit",
+    "activities": {
+      "development": "Entwicklung",
+      "specification": "Spezifikation",
+      "management": "Management",
+      "testing": "Testen",
+      "support": "Support",
+      "pr": "PR",
+      "meeting": "Meeting"
+    },
+    "sameStartEnd": "Start- und Endzeit dürfen nicht gleich sein",
+    "rangeNextDay": "(endet am nächsten Tag)"
   },
   "expenses": {
     "emptyTitle": "Noch keine Ausgaben erfasst",

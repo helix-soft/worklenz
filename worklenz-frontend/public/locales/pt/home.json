@@ -184,7 +184,7 @@
     "emptySubtitle": "Registre sua primeira entrada usando o registro rápido à esquerda.",
     "logTimeButton": "Registrar tempo",
     "pageTitle": "Registrar tempo",
-    "pageSubtitle": "Registre suas horas faturáveis rapidamente",
+    "pageSubtitle": "Registre o tempo gasto nas suas tarefas.",
     "quickEntryTitle": "Entrada rápida",
     "projectLabel": "Projeto",
     "projectPlaceholder": "Selecionar projeto…",
@@ -237,7 +237,34 @@
     "weekdayThu": "Qui",
     "weekdayFri": "Sex",
     "weekdaySat": "Sáb",
-    "weekdaySun": "Dom"
+    "weekdaySun": "Dom",
+    "week": {
+      "viewWeek": "Semana",
+      "previous": "Semana anterior",
+      "next": "Próxima semana",
+      "thisWeek": "Esta semana",
+      "total": "Total da semana",
+      "overlap": "Sobreposição: {{duration}}",
+      "overlapHint": "Tempo registrado em paralelo. É permitido, mas verifique se foi intencional.",
+      "dayOverlap": "{{duration}} registrado em paralelo neste dia",
+      "blockOverlap": "Sobrepõe-se a outro registro",
+      "errorTitle": "Não foi possível carregar os registros desta semana",
+      "retry": "Tentar novamente",
+      "empty": "Nada registrado nesta semana ainda. Use o registro rápido para adicionar tempo."
+    },
+    "rangeDuration": "Duração: {{duration}}",
+    "activityLabel": "Atividade",
+    "activities": {
+      "development": "Desenvolvimento",
+      "specification": "Especificação",
+      "management": "Gestão",
+      "testing": "Testes",
+      "support": "Suporte",
+      "pr": "PR",
+      "meeting": "Reunião"
+    },
+    "sameStartEnd": "O horário de início e término não podem ser iguais",
+    "rangeNextDay": "(termina no dia seguinte)"
   },
   "expenses": {
     "emptyTitle": "Ainda não há despesas registradas",

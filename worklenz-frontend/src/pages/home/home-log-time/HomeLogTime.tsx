@@ -2,10 +2,9 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import {
   Select,
   DatePicker,
-  TimePicker,
+  InputRef,
   Segmented,
   Input,
-  InputNumber,
   Button,
   theme,
   notification,
@@ -25,9 +24,7 @@ import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useGetProjectsByTeamQuery } from '@/api/home-page/home-page.api.service';
 import {
   taskTimeLogsApiService,
-  IMySummary,
   IRecentTimeLog,
-  IWeeklyBreakdownDay,
   ITaskInProject,
 } from '@/api/tasks/task-time-logs.api.service';
 import { IProject } from '@/types/project/project.types';
@@ -54,6 +51,14 @@ import { ITaskListPriorityChangeResponse } from '@/types/tasks/task-list-priorit
 import { ITaskPriority } from '@/types/tasks/taskPriority.types';
 import { ITaskStatus } from '@/types/tasks/taskStatus.types';
 import { TruncatedColoredTag } from '@/components/common/truncated-colored-tag/TruncatedColoredTag';
+import { TimeTextInput } from '@/components/common/time-text-input/TimeTextInput';
+import { getTimeRangeSeconds } from '@/utils/time-text-input';
+import { DEFAULT_TIME_LOG_ACTIVITY, TimeLogActivity } from '@/shared/time-log-activities';
+import { TimeLogActivitySelect } from '@/components/time-entries/TimeLogActivitySelect';
+import { TimeRangeDurationHint } from '@/components/time-entries/TimeRangeDurationHint';
+import { MyWeekCalendar } from '@/components/time-entries/week-calendar/MyWeekCalendar';
+import { useMyWeekTimeLogs } from '@/components/time-entries/week-calendar/useMyWeekTimeLogs';
+import { getWeekStart, IWeekCalendarEntry } from '@/utils/week-calendar';
 import './home-log-time.css';
 
 const patchRecentLogsForTask = (
@@ -105,6 +110,25 @@ const resolvePriorityFields = (
   };
 };
 
+type LogView = 'week' | 'list';
+const LOG_VIEW_STORAGE_KEY = 'worklenz.logTime.view';
+
+const readStoredLogView = (): LogView => {
+  try {
+    return localStorage.getItem(LOG_VIEW_STORAGE_KEY) === 'list' ? 'list' : 'week';
+  } catch {
+    return 'week';
+  }
+};
+
+const storeLogView = (view: LogView) => {
+  try {
+    localStorage.setItem(LOG_VIEW_STORAGE_KEY, view);
+  } catch {
+    // Storage can be unavailable (private mode); the view just won't be remembered
+  }
+};
+
 const formatSeconds = (seconds: number): string => {
   const total = Math.max(0, Math.round(seconds || 0));
   const h = Math.floor(total / 3600);
@@ -127,21 +151,6 @@ const HomeLogTime: React.FC = () => {
     if (date.isSame(dayjs().subtract(1, 'day'), 'day')) return t('logTime.yesterday', { defaultValue: 'Yesterday' });
     return date.format('MMM D');
   };
-
-  const STAT_DEFS = useMemo(() => [
-    { key: 'today_total' as const, label: t('logTime.todayTotal', { defaultValue: 'Today Total' }), color: '#1677ff' },
-    { key: 'week_total' as const, label: t('logTime.weekTotal', { defaultValue: 'Week Total' }), color: '#1677ff' },
-  ], [t]);
-
-  const WEEKDAY_LABELS = useMemo(() => [
-    t('logTime.weekdayMon', { defaultValue: 'Mon' }),
-    t('logTime.weekdayTue', { defaultValue: 'Tue' }),
-    t('logTime.weekdayWed', { defaultValue: 'Wed' }),
-    t('logTime.weekdayThu', { defaultValue: 'Thu' }),
-    t('logTime.weekdayFri', { defaultValue: 'Fri' }),
-    t('logTime.weekdaySat', { defaultValue: 'Sat' }),
-    t('logTime.weekdaySun', { defaultValue: 'Sun' }),
-  ], [t]);
 
   type LogSortField = 'project_name' | 'task_name' | 'priority_name' | 'time_spent' | 'created_at' | null;
 
@@ -177,20 +186,22 @@ const HomeLogTime: React.FC = () => {
   const [addTaskOpen, setAddTaskOpen] = useState(false);
   const quickEntryRef = useRef<HTMLDivElement>(null);
 
-  const [inputMode, setInputMode] = useState<'Duration' | 'Time Range'>('Duration');
   const [date, setDate] = useState<Dayjs>(dayjs());
-  const [timeHours, setTimeHours] = useState<number>(0);
-  const [timeMinutes, setTimeMinutes] = useState<number>(30);
-  const minutesAutoClearedRef = useRef(false);
   const [startTime, setStartTime] = useState<Dayjs | null>(null);
   const [endTime, setEndTime] = useState<Dayjs | null>(null);
+  const endTimeInputRef = useRef<InputRef>(null);
+  const [activity, setActivity] = useState<TimeLogActivity>(DEFAULT_TIME_LOG_ACTIVITY);
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const [summary, setSummary] = useState<IMySummary | null>(null);
-  const [weekly, setWeekly] = useState<IWeeklyBreakdownDay[]>([]);
   const [recentLogs, setRecentLogs] = useState<IRecentTimeLog[]>([]);
   const [recentLogsLoading, setRecentLogsLoading] = useState(false);
+
+  // Week calendar (default) vs. Recently Logged list
+  const [logView, setLogView] = useState<LogView>(readStoredLogView);
+  const [weekStart, setWeekStart] = useState<Dayjs>(() => getWeekStart());
+  const [weekRefreshKey, setWeekRefreshKey] = useState(0);
+  const weekLogs = useMyWeekTimeLogs(weekStart, weekRefreshKey);
 
   // Recently Logged table — sort/filter/pagination state
   const [logSortField, setLogSortField] = useState<LogSortField>('created_at');
@@ -205,12 +216,6 @@ const HomeLogTime: React.FC = () => {
   const originalTaskNamesRef = useRef<Map<string, string>>(new Map());
 
   const refreshData = useCallback(() => {
-    taskTimeLogsApiService.getMySummary()
-      .then(res => { if (res.done) setSummary(res.body as IMySummary); })
-      .catch(() => {});
-    taskTimeLogsApiService.getMyWeeklyBreakdown()
-      .then(res => { if (res.done) setWeekly(res.body as IWeeklyBreakdownDay[]); })
-      .catch(() => setWeekly([]));
     setRecentLogsLoading(true);
     taskTimeLogsApiService.getRecentTimeLogs(100)
       .then(res => { if (res.done) setRecentLogs(res.body as IRecentTimeLog[]); })
@@ -289,6 +294,13 @@ const HomeLogTime: React.FC = () => {
   // Real-time task field updates: sync with Redux while the Task Drawer is open
   const selectedTaskId = useAppSelector(state => state.taskDrawerReducer.selectedTaskId);
   const showTaskDrawer = useAppSelector(state => state.taskDrawerReducer.showTaskDrawer);
+
+  // Logs can be edited or deleted in the task drawer — refresh the week once it closes.
+  const wasTaskDrawerOpenRef = useRef(false);
+  useEffect(() => {
+    if (wasTaskDrawerOpenRef.current && !showTaskDrawer) setWeekRefreshKey(key => key + 1);
+    wasTaskDrawerOpenRef.current = showTaskDrawer;
+  }, [showTaskDrawer]);
   const taskFormViewModel = useAppSelector(state => state.taskDrawerReducer.taskFormViewModel);
   const taskManagementEntities = useAppSelector(state => state.taskManagement.entities);
 
@@ -418,20 +430,12 @@ const HomeLogTime: React.FC = () => {
   const projectOptions = projects.map((p: IProject) => ({ value: p.id, label: p.name }));
   const taskOptions = tasks.map(t => ({ value: t.id, label: t.name }));
 
-  const loggedSeconds = useMemo(() => {
-    if (inputMode === 'Duration') {
-      return Math.max(0, timeHours) * 3600 + Math.max(0, Math.min(59, timeMinutes)) * 60;
-    }
-    if (!startTime || !endTime) return 0;
-    const diff = endTime.diff(startTime, 'second');
-    return diff > 0 ? diff : 0;
-  }, [inputMode, timeHours, timeMinutes, startTime, endTime]);
+  const loggedSeconds = useMemo(() => getTimeRangeSeconds(startTime, endTime), [startTime, endTime]);
 
   const isFormValid = useMemo(() => {
-    if (!selProjectId || !selTaskId || !date || loggedSeconds <= 0) return false;
-    if (inputMode === 'Time Range' && (!startTime || !endTime)) return false;
-    return true;
-  }, [selProjectId, selTaskId, date, loggedSeconds, inputMode, startTime, endTime]);
+    if (!selProjectId || !selTaskId || !activity || !date || !startTime || !endTime) return false;
+    return loggedSeconds > 0;
+  }, [selProjectId, selTaskId, activity, date, loggedSeconds, startTime, endTime]);
 
   const handleProjectChange = (projectId: string) => {
     setSelProjectId(projectId);
@@ -447,38 +451,27 @@ const HomeLogTime: React.FC = () => {
       // created_at, and the task-drawer edit form derives start/end from that.
       // Sending only the DatePicker value kept "now" (or midnight) and dropped
       // the Time Range start, so edit showed current time + same duration.
-      let formattedStart: string;
-      if (inputMode === 'Time Range' && startTime) {
-        formattedStart = dayjs(date)
-          .hour(startTime.hour())
-          .minute(startTime.minute())
-          .second(0)
-          .millisecond(0)
-          .toISOString();
-      } else {
-        const now = dayjs().second(0).millisecond(0);
-        formattedStart = dayjs(date)
-          .hour(now.hour())
-          .minute(now.minute())
-          .second(0)
-          .millisecond(0)
-          .toISOString();
-      }
+      if (!startTime) return;
+      const formattedStart = dayjs(date)
+        .hour(startTime.hour())
+        .minute(startTime.minute())
+        .second(0)
+        .millisecond(0)
+        .toISOString();
 
       await taskTimeLogsApiService.create({
         id: selTaskId,
         project_id: selProjectId,
         formatted_start: formattedStart,
         seconds_spent: loggedSeconds,
+        activity,
         description: notes || undefined,
       });
-      setTimeHours(0);
-      setTimeMinutes(30);
-      minutesAutoClearedRef.current = false;
       setStartTime(null);
       setEndTime(null);
       setNotes('');
       refreshData();
+      setWeekRefreshKey(key => key + 1);
     } catch {
       notification.error({ message: t('logTime.failedToLogTime', { defaultValue: 'Failed to log time' }) });
     } finally {
@@ -585,6 +578,19 @@ const HomeLogTime: React.FC = () => {
     },
     [dispatch, filteredSortedLogs]
   );
+
+  const handleOpenCalendarEntry = useCallback(
+    (entry: IWeekCalendarEntry) => {
+      const log = weekLogs.logs.find(l => l.id === entry.id);
+      if (log) handleOpenTask(log);
+    },
+    [weekLogs.logs, handleOpenTask]
+  );
+
+  const handleLogViewChange = (view: LogView) => {
+    setLogView(view);
+    storeLogView(view);
+  };
 
   const logColumns: TableProps<IRecentTimeLog>['columns'] = useMemo(
     () => [
@@ -708,11 +714,6 @@ const HomeLogTime: React.FC = () => {
     padding: 16,
   };
 
-  const weekMax = Math.max(
-    1,
-    ...weekly.map(d => (Number(d.billable) + Number(d.non_billable)) / 3600),
-  );
-
   return (
     <div style={{ padding: 24, height: '100%', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
       <div style={{ marginBottom: 20, flexShrink: 0 }}>
@@ -791,96 +792,52 @@ const HomeLogTime: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: 14 }}>
-            <label style={fldLbl}>{t('logTime.inputModeLabel', { defaultValue: 'Input Mode' })}</label>
-            <Segmented
-              block
-              value={inputMode}
-              onChange={v => setInputMode(v as 'Duration' | 'Time Range')}
-              options={[
-                { value: 'Duration', label: t('logTime.durationMode', { defaultValue: 'Duration' }) },
-                { value: 'Time Range', label: t('logTime.timeRangeMode', { defaultValue: 'Time Range' }) },
-              ]}
+            <label style={fldLbl} id="quick-entry-activity-label">
+              <span style={{ color: token.colorError }}>*</span> {t('logTime.activityLabel', { defaultValue: 'Activity' })}
+            </label>
+            <TimeLogActivitySelect
+              aria-labelledby="quick-entry-activity-label"
+              value={activity}
+              onChange={setActivity}
             />
           </div>
 
-          {inputMode === 'Duration' ? (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
-               <div style={{ flex: 1.4, minWidth: 160 }}>
-                 <label style={fldLbl}>{t('logTime.dateLabel', { defaultValue: 'Date' })}</label>
-                 <DatePicker
-                  style={{ width: '100%' }}
-                  value={date}
-                  onChange={d => d && setDate(d)}
-                  disabledDate={current => current && current.toDate() > new Date()}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: 72 }}>
-                 <label style={fldLbl}>{t('logTime.hoursLabel', { defaultValue: 'Hours' })}</label>
-                 <InputNumber
-                   min={0}
-                   precision={0}
-                   placeholder={t('logTime.hoursPlaceholder', { defaultValue: '0' })}
-                  value={timeHours}
-                  onChange={v => {
-                    const next = Math.max(0, Number(v) || 0);
-                    // Only auto-clear if minutes is still at its untouched default —
-                    // otherwise this would stomp a minutes value the user already
-                    // entered themselves (e.g. entering "45" then "1" to mean 1h45m).
-                    if (!minutesAutoClearedRef.current && next > 0 && timeMinutes === 30) {
-                      minutesAutoClearedRef.current = true;
-                      setTimeMinutes(0);
-                    }
-                    setTimeHours(next);
-                  }}
-                  style={{ width: '100%' }}
-                />
-              </div>
-              <div style={{ flex: 1, minWidth: 72 }}>
-                 <label style={fldLbl}>{t('logTime.minutesLabel', { defaultValue: 'Minutes' })}</label>
-                 <InputNumber
-                   min={0}
-                   max={59}
-                   precision={0}
-                   placeholder={t('logTime.minutesPlaceholder', { defaultValue: '0' })}
-                  value={timeMinutes}
-                  onChange={v => setTimeMinutes(Math.min(59, Math.max(0, Number(v) || 0)))}
-                  style={{ width: '100%' }}
-                />
-              </div>
+          <div style={{ marginBottom: 14 }}>
+            <label style={fldLbl}><span style={{ color: token.colorError }}>*</span> {t('logTime.dateLabel', { defaultValue: 'Date' })}</label>
+            <DatePicker
+              style={{ width: '100%' }}
+              value={date}
+              onChange={d => d && setDate(d)}
+              disabledDate={current => current && current.toDate() > new Date()}
+            />
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+            <div style={{ flex: 1, minWidth: 140 }}>
+              <label style={fldLbl}><span style={{ color: token.colorError }}>*</span> {t('logTime.requiredStartTime', { defaultValue: 'Start Time' })}</label>
+              <TimeTextInput
+                style={{ width: '100%' }}
+                aria-label={t('logTime.requiredStartTime', { defaultValue: 'Start Time' })}
+                value={startTime}
+                onChange={setStartTime}
+                onComplete={() => endTimeInputRef.current?.focus()}
+              />
             </div>
-          ) : (
-            <>
-              <div style={{ marginBottom: 14 }}>
-                <label style={fldLbl}><span style={{ color: token.colorError }}>*</span> {t('logTime.dateLabel', { defaultValue: 'Date' })}</label>
-                <DatePicker
-                  style={{ width: '100%' }}
-                  value={date}
-                  onChange={d => d && setDate(d)}
-                  disabledDate={current => current && current.toDate() > new Date()}
-                />
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
-                <div style={{ flex: 1, minWidth: 140 }}>
-                  <label style={fldLbl}><span style={{ color: token.colorError }}>*</span> {t('logTime.requiredStartTime', { defaultValue: 'Start Time' })}</label>
-                  <TimePicker
-                    style={{ width: '100%' }}
-                    format="HH:mm"
-                    value={startTime}
-                    onChange={setStartTime}
-                  />
-                </div>
-                <div style={{ flex: 1, minWidth: 140 }}>
-                  <label style={fldLbl}><span style={{ color: token.colorError }}>*</span> {t('logTime.requiredEndTime', { defaultValue: 'End Time' })}</label>
-                  <TimePicker
-                    style={{ width: '100%' }}
-                    format="HH:mm"
-                    value={endTime}
-                    onChange={setEndTime}
-                  />
-                </div>
-              </div>
-            </>
-          )}
+            <div style={{ flex: 1, minWidth: 140 }}>
+              <label style={fldLbl}><span style={{ color: token.colorError }}>*</span> {t('logTime.requiredEndTime', { defaultValue: 'End Time' })}</label>
+              <TimeTextInput
+                ref={endTimeInputRef}
+                style={{ width: '100%' }}
+                aria-label={t('logTime.requiredEndTime', { defaultValue: 'End Time' })}
+                value={endTime}
+                onChange={setEndTime}
+              />
+            </div>
+          </div>
+          <TimeRangeDurationHint
+            start={startTime}
+            end={endTime}
+            style={{ marginTop: -6, marginBottom: 14 }}
+          />
 
           <div style={{ marginBottom: 16 }}>
             <label style={fldLbl}>{t('logTime.workDescriptionLabel', { defaultValue: 'Description' })}</label>
@@ -903,55 +860,6 @@ const HomeLogTime: React.FC = () => {
 
         {/* Right column */}
         <div style={{ flex: '1 1 auto', minWidth: 0, display: 'flex', flexDirection: 'column', minHeight: 0, gap: 16 }}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: isDesktop ? '1fr 220px' : '1fr',
-              gap: 12,
-              alignItems: 'stretch',
-              flexShrink: 0,
-            }}
-          >
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: isDesktop ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(120px, 1fr))',
-                gap: 12,
-              }}
-            >
-              {STAT_DEFS.map(stat => (
-                <div key={stat.key} style={cardStyle}>
-                  <div style={{ fontSize: 11, color: token.colorTextSecondary, marginBottom: 4 }}>{stat.label}</div>
-                  <div style={{ fontSize: 20, fontWeight: 700, color: stat.color }}>
-                    {formatSeconds((summary?.[stat.key] as number) || 0)}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-             <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
-               <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>{t('logTime.thisWeek', { defaultValue: 'This Week' })}</div>
-              <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', flex: 1, paddingBottom: 4 }}>
-                 {weekly.length === 0 && (
-                    <div style={{ width: '100%', textAlign: 'center', fontSize: 11, opacity: 0.45 }}>{t('logTime.noDataYet', { defaultValue: 'No data yet' })}</div>
-                  )}
-                {weekly.map((d, i) => {
-                  const total = (Number(d.billable) + Number(d.non_billable)) / 3600;
-                  const totalPct = (total / weekMax) * 100;
-                  return (
-                    <div key={d.day} style={{ textAlign: 'center', flex: 1 }}>
-                      <div style={{ height: 80, background: token.colorFillTertiary, borderRadius: 4, position: 'relative', overflow: 'hidden', marginBottom: 4, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-                        <div style={{ width: '100%', height: `${totalPct}%`, background: token.colorPrimary }} />
-                      </div>
-                      <div style={{ fontSize: 9, opacity: 0.55 }}>{WEEKDAY_LABELS[i] || dayjs(d.day).format('ddd')}</div>
-                      <div style={{ fontSize: 10, fontWeight: 600 }}>{total.toFixed(1)}h</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
           {/* Recently Logged — fills the remaining vertical space down to the
               bottom of the screen; only the table body scrolls internally,
               same pattern as the Overview page's priority table. */}
@@ -968,15 +876,38 @@ const HomeLogTime: React.FC = () => {
               } as React.CSSProperties
             }
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, flexShrink: 0 }}>
-               <span style={{ fontSize: 13, fontWeight: 600 }}>{t('logTime.recentlyLogged', { defaultValue: 'Recently Logged' })}</span>
-               <span
-                 style={{ fontSize: 12, color: token.colorPrimary, cursor: 'pointer' }}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10, flexShrink: 0 }}>
+               <Segmented<LogView>
+                 size="small"
+                 value={logView}
+                 onChange={handleLogViewChange}
+                 options={[
+                   { value: 'week', label: t('logTime.week.viewWeek', { defaultValue: 'Week' }) },
+                   { value: 'list', label: t('logTime.recentlyLogged', { defaultValue: 'Recently Logged' }) },
+                 ]}
+               />
+               <Button
+                 type="link"
+                 size="small"
+                 style={{ fontSize: 12, padding: 0 }}
                  onClick={() => navigate('/worklenz/time-entries')}
                >
                   {t('logTime.viewAll', { defaultValue: 'View All' })}
-               </span>
+               </Button>
             </div>
+
+            {logView === 'week' ? (
+              <MyWeekCalendar
+                weekStart={weekStart}
+                onWeekStartChange={setWeekStart}
+                entries={weekLogs.entries}
+                isLoading={weekLogs.isLoading}
+                hasError={weekLogs.hasError}
+                onRetry={weekLogs.reload}
+                onOpenEntry={handleOpenCalendarEntry}
+              />
+            ) : (
+            <>
 
             <div
               className="recent-logs-scroll"
@@ -1038,6 +969,8 @@ const HomeLogTime: React.FC = () => {
                   size="small"
                 />
               </div>
+            )}
+            </>
             )}
           </div>
         </div>

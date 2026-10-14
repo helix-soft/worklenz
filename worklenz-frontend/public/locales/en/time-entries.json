@@ -79,5 +79,8 @@
     "week_total": "This Week Total",
     "week_billable": "Week Billable",
     "week_non_billable": "Week Non-Billable"
-  }
+  },
+  "activityLabel": "Activity",
+  "selectActivityError": "Select an activity",
+  "sameStartEndError": "Start and end time cannot be the same"
 }

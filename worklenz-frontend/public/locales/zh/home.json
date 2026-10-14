@@ -184,7 +184,7 @@
     "emptySubtitle": "使用左侧的快速记录添加您的第一条记录。",
     "logTimeButton": "记录时间",
     "pageTitle": "记录时间",
-    "pageSubtitle": "快速记录您的计费工时",
+    "pageSubtitle": "记录您在任务上花费的时间。",
     "quickEntryTitle": "快速录入",
     "projectLabel": "项目",
     "projectPlaceholder": "选择项目…",
@@ -237,7 +237,34 @@
     "weekdayThu": "周四",
     "weekdayFri": "周五",
     "weekdaySat": "周六",
-    "weekdaySun": "周日"
+    "weekdaySun": "周日",
+    "week": {
+      "viewWeek": "周",
+      "previous": "上一周",
+      "next": "下一周",
+      "thisWeek": "本周",
+      "total": "本周合计",
+      "overlap": "重叠：{{duration}}",
+      "overlapHint": "并行记录的工时。允许这样做，但请确认是有意为之。",
+      "dayOverlap": "当天有 {{duration}} 为并行记录",
+      "blockOverlap": "与另一条记录重叠",
+      "errorTitle": "无法加载本周的工时记录",
+      "retry": "重试",
+      "empty": "本周尚未记录工时。使用快速记录添加时间。"
+    },
+    "rangeDuration": "时长：{{duration}}",
+    "activityLabel": "活动类型",
+    "activities": {
+      "development": "开发",
+      "specification": "需求规格",
+      "management": "管理",
+      "testing": "测试",
+      "support": "支持",
+      "pr": "PR",
+      "meeting": "会议"
+    },
+    "sameStartEnd": "开始时间和结束时间不能相同",
+    "rangeNextDay": "（次日结束）"
   },
   "expenses": {
     "emptyTitle": "暂无费用记录",

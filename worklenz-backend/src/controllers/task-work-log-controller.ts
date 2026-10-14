@@ -42,16 +42,17 @@ export default class TaskWorklogController extends WorklenzControllerBase {
     req: IWorkLenzRequest,
     res: IWorkLenzResponse,
   ): Promise<IWorkLenzResponse> {
-    const { id, seconds_spent, description, created_at, formatted_start } =
+    const { id, seconds_spent, description, created_at, formatted_start, activity } =
       req.body;
-    const q = `INSERT INTO task_work_log (time_spent, description, task_id, user_id, created_at)
-               VALUES ($1, $2, $3, $4, $5);`;
+    const q = `INSERT INTO task_work_log (time_spent, description, task_id, user_id, created_at, activity)
+               VALUES ($1, $2, $3, $4, $5, $6);`;
     const params = [
       seconds_spent,
       description,
       id,
       req.user?.id,
       formatted_start,
+      activity || null,
     ];
     const result = await db.query(q, params);
     const [data] = result.rows;
@@ -102,6 +103,7 @@ export default class TaskWorklogController extends WorklenzControllerBase {
         --
         SELECT id,
                description,
+               activity,
                time_spent,
                created_at,
                user_id,
@@ -116,6 +118,7 @@ export default class TaskWorklogController extends WorklenzControllerBase {
       SELECT id,
              time_spent,
              description,
+             activity,
              created_at,
              user_id,
              logged_by_timer,
@@ -160,7 +163,7 @@ export default class TaskWorklogController extends WorklenzControllerBase {
     req: IWorkLenzRequest,
     res: IWorkLenzResponse,
   ): Promise<IWorkLenzResponse> {
-    const { seconds_spent, description, formatted_start, new_task_id } =
+    const { seconds_spent, description, formatted_start, new_task_id, activity } =
       req.body;
 
     // Fetch the old task_id before updating so we can notify both tasks via socket
@@ -178,7 +181,9 @@ export default class TaskWorklogController extends WorklenzControllerBase {
       SET time_spent  = $3,
           description = $4,
           created_at  = $5,
-          task_id = $6
+          task_id = $6,
+          -- Clients that don't send an activity keep the current one
+          activity = COALESCE($7, activity)
       WHERE id = $1
         AND user_id = $2
       RETURNING task_id;
@@ -190,6 +195,7 @@ export default class TaskWorklogController extends WorklenzControllerBase {
       description || null,
       formatted_start,
       targetTaskId,
+      activity || null,
     ];
     const result = await db.query(q, params);
     const [data] = result.rows;
@@ -821,6 +827,8 @@ export default class TaskWorklogController extends WorklenzControllerBase {
         twl.task_id,
         twl.created_at,
         twl.time_spent,
+        twl.description,
+        twl.activity,
         t1.name AS task_name,
         t1.billable,
         t1.end_date AS due_date,

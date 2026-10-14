@@ -3,11 +3,9 @@ import {
   Modal,
   Flex,
   Select,
-  Segmented,
   DatePicker,
-  TimePicker,
+  InputRef,
   Input,
-  InputNumber,
   Form,
   Button,
   Spin,
@@ -16,6 +14,11 @@ import {
   type Dayjs,
 } from '@/shared/antd-imports';
 import { useTranslation } from 'react-i18next';
+import { TimeTextInput } from '@/components/common/time-text-input/TimeTextInput';
+import { getTimeRangeSeconds } from '@/utils/time-text-input';
+import { DEFAULT_TIME_LOG_ACTIVITY, TimeLogActivity } from '@/shared/time-log-activities';
+import { TimeLogActivitySelect } from '@/components/time-entries/TimeLogActivitySelect';
+import { TimeRangeDurationHint } from '@/components/time-entries/TimeRangeDurationHint';
 import {
   taskTimeLogsApiService,
   IRecentProject,
@@ -32,12 +35,10 @@ interface LogTimeModalProps {
   onSuccess: () => void;
 }
 
-type TimeLogInputMode = 'duration' | 'timeRange';
-
 export const LogTimeModal: React.FC<LogTimeModalProps> = ({ open, onClose, onSuccess }) => {
   const { t } = useTranslation('time-entries');
   const [form] = Form.useForm();
-  const minutesAutoClearedRef = React.useRef(false);
+  const endTimeInputRef = React.useRef<InputRef>(null);
 
   const [recentProjects, setRecentProjects] = React.useState<IRecentProject[]>([]);
   const [projectSearchResults, setProjectSearchResults] = React.useState<IRecentProject[]>([]);
@@ -50,12 +51,10 @@ export const LogTimeModal: React.FC<LogTimeModalProps> = ({ open, onClose, onSuc
   const [taskLoading, setTaskLoading] = React.useState(false);
   const [selectedTaskId, setSelectedTaskId] = React.useState<string | null>(null);
 
-  const [inputMode, setInputMode] = React.useState<TimeLogInputMode>('duration');
   const [submitting, setSubmitting] = React.useState(false);
   const [formValues, setFormValues] = React.useState<{
     date?: Dayjs;
-    hours?: number;
-    minutes?: number;
+    activity?: TimeLogActivity;
     startTime?: Dayjs;
     endTime?: Dayjs;
   }>({});
@@ -65,11 +64,9 @@ export const LogTimeModal: React.FC<LogTimeModalProps> = ({ open, onClose, onSuc
 
   React.useEffect(() => {
     if (!open) return;
-    minutesAutoClearedRef.current = false;
     const initialValues = {
       date: dayjs(),
-      hours: 0,
-      minutes: 30,
+      activity: DEFAULT_TIME_LOG_ACTIVITY,
       startTime: dayjs().second(0).millisecond(0),
       endTime: dayjs().second(0).millisecond(0).add(30, 'minute'),
     };
@@ -81,7 +78,6 @@ export const LogTimeModal: React.FC<LogTimeModalProps> = ({ open, onClose, onSuc
     setTasks([]);
     setProjectSearchTerm('');
     setTaskSearchTerm('');
-    setInputMode('duration');
     taskTimeLogsApiService.getMyRecentProjects().then(res => {
       if (res.done) setRecentProjects(res.body as IRecentProject[]);
     });
@@ -153,14 +149,8 @@ export const LogTimeModal: React.FC<LogTimeModalProps> = ({ open, onClose, onSuc
   };
 
   const isFormValid = () => {
-    if (!selectedProject || !selectedTaskId || !formValues.date) return false;
-    if (inputMode === 'duration') {
-      const h = Math.max(0, Number(formValues.hours || 0));
-      const m = Math.max(0, Math.min(59, Number(formValues.minutes || 0)));
-      return h * 60 + m > 0;
-    }
-    if (!formValues.startTime || !formValues.endTime) return false;
-    return formValues.endTime.isAfter(formValues.startTime);
+    if (!selectedProject || !selectedTaskId || !formValues.activity || !formValues.date) return false;
+    return getTimeRangeSeconds(formValues.startTime, formValues.endTime) > 0;
   };
 
   const handleSubmit = async (values: any) => {
@@ -170,44 +160,25 @@ export const LogTimeModal: React.FC<LogTimeModalProps> = ({ open, onClose, onSuc
     }
 
     const date: Dayjs = values.date;
-    let secondsSpent = 0;
-    let formattedStart: Dayjs;
-
-    if (inputMode === 'duration') {
-      const hours = Math.max(0, Number(values.hours || 0));
-      const minutes = Math.max(0, Number(values.minutes || 0));
-      if (minutes > 59) {
-        form.setFields([{ name: 'minutes', errors: [t('minutesRangeError', { defaultValue: 'Minutes must be between 0 and 59' })] }]);
-        return;
-      }
-      secondsSpent = hours * 3600 + minutes * 60;
-      if (secondsSpent <= 0) {
-        form.setFields([{ name: 'hours', errors: [t('invalidTimeLoggedError', { defaultValue: 'Enter at least 1 minute' })] }]);
-        return;
-      }
-      const now = dayjs();
-      formattedStart = date.hour(now.hour()).minute(now.minute()).second(0).millisecond(0);
-    } else {
-      const startTime: Dayjs = values.startTime;
-      const endTime: Dayjs = values.endTime;
-      if (!startTime || !endTime || !endTime.isAfter(startTime)) {
-        form.setFields([
-          {
-            name: 'endTime',
-            errors: [t('endTimeAfterStartError', { defaultValue: 'End time must be after start time' })],
-          },
-        ]);
-        return;
-      }
-      secondsSpent = endTime.diff(startTime, 'second');
-      formattedStart = date.hour(startTime.hour()).minute(startTime.minute()).second(0).millisecond(0);
+    const startTime: Dayjs = values.startTime;
+    const secondsSpent = getTimeRangeSeconds(startTime, values.endTime);
+    if (!startTime || secondsSpent <= 0) {
+      form.setFields([
+        {
+          name: 'endTime',
+          errors: [t('sameStartEndError', { defaultValue: 'Start and end time cannot be the same' })],
+        },
+      ]);
+      return;
     }
+    const formattedStart = date.hour(startTime.hour()).minute(startTime.minute()).second(0).millisecond(0);
 
     const requestBody = {
       id: selectedTaskId,
       project_id: selectedProject.id,
       formatted_start: formattedStart.toISOString(),
       seconds_spent: secondsSpent,
+      activity: values.activity,
       description: values.description || '',
     };
 
@@ -236,21 +207,7 @@ export const LogTimeModal: React.FC<LogTimeModalProps> = ({ open, onClose, onSuc
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
-        onValuesChange={(changedValues, values) => {
-          // Only auto-clear if minutes is still at its untouched default — otherwise
-          // this would stomp a minutes value the user already entered themselves
-          // (e.g. entering "45" then "1" to mean 1h45m).
-          if ('hours' in changedValues && !minutesAutoClearedRef.current && values.minutes === 30) {
-            const incoming = Number(changedValues.hours);
-            if (!isNaN(incoming) && incoming > 0) {
-              minutesAutoClearedRef.current = true;
-              form.setFieldsValue({ minutes: 0 });
-              setFormValues({ ...values, minutes: 0 });
-              return;
-            }
-          }
-          setFormValues(values);
-        }}
+        onValuesChange={(_changedValues, values) => setFormValues(values)}
         requiredMark={false}
       >
         <Form.Item label={t('projectLabel', { defaultValue: 'Project' })} style={{ marginBottom: 16 }}>
@@ -289,85 +246,59 @@ export const LogTimeModal: React.FC<LogTimeModalProps> = ({ open, onClose, onSuc
           />
         </Form.Item>
 
-        <Form.Item label={t('inputModeLabel', { defaultValue: 'Input Mode' })} style={{ marginBottom: 16 }}>
-          <Segmented
-            block
-            value={inputMode}
-            onChange={value => setInputMode(value as TimeLogInputMode)}
-            options={[
-              { label: t('durationMode', { defaultValue: 'Duration' }), value: 'duration' },
-              { label: t('timeRangeMode', { defaultValue: 'Time Range' }), value: 'timeRange' },
-            ]}
+        <Form.Item
+          name="activity"
+          label={t('activityLabel', { defaultValue: 'Activity' })}
+          rules={[{ required: true, message: t('selectActivityError', { defaultValue: 'Select an activity' }) }]}
+          style={{ marginBottom: 16 }}
+        >
+          <TimeLogActivitySelect aria-label={t('activityLabel', { defaultValue: 'Activity' })} />
+        </Form.Item>
+
+        <Form.Item
+          name="date"
+          label={t('dateLabel', { defaultValue: 'Date' })}
+          rules={[{ required: true, message: t('selectDateError', { defaultValue: 'Select a date' }) }]}
+          style={{ marginBottom: 16 }}
+        >
+          <DatePicker
+            style={{ width: '100%' }}
+            disabledDate={current => current && current.toDate() > new Date()}
           />
         </Form.Item>
 
-        {inputMode === 'duration' ? (
-          <Flex gap={12} wrap="wrap" style={{ width: '100%' }}>
-            <Form.Item
-              name="date"
-              label={t('dateLabel', { defaultValue: 'Date' })}
-              rules={[{ required: true, message: t('selectDateError', { defaultValue: 'Select a date' }) }]}
-              style={{ flex: 1.4, minWidth: 160, marginBottom: 16 }}
-            >
-              <DatePicker
-                style={{ width: '100%' }}
-                disabledDate={current => current && current.toDate() > new Date()}
-              />
-            </Form.Item>
+        <Flex gap={12} style={{ width: '100%' }}>
+          <Form.Item
+            name="startTime"
+            label={t('startTimeLabel', { defaultValue: 'Start Time' })}
+            rules={[{ required: true, message: t('selectStartTimeError', { defaultValue: 'Select a start time' }) }]}
+            style={{ flex: 1, marginBottom: 16 }}
+          >
+            <TimeTextInput
+              style={{ width: '100%' }}
+              aria-label={t('startTimeLabel', { defaultValue: 'Start Time' })}
+              onComplete={() => endTimeInputRef.current?.focus()}
+            />
+          </Form.Item>
 
-            <Form.Item
-              name="hours"
-              label={t('hoursLabel', { defaultValue: 'Hours' })}
-              rules={[{ type: 'number', min: 0, message: t('hoursMinError', { defaultValue: 'Hours must be 0 or greater' }) }]}
-              style={{ flex: 1, minWidth: 80, marginBottom: 16 }}
-            >
-              <InputNumber min={0} precision={0} placeholder="0" style={{ width: '100%' }} />
-            </Form.Item>
-
-            <Form.Item
-              name="minutes"
-              label={t('minutesLabel', { defaultValue: 'Minutes' })}
-              rules={[{ type: 'number', min: 0, max: 59, message: t('minutesRangeError', { defaultValue: '0 – 59' }) }]}
-              style={{ flex: 1, minWidth: 80, marginBottom: 16 }}
-            >
-              <InputNumber min={0} max={59} precision={0} placeholder="0" style={{ width: '100%' }} />
-            </Form.Item>
-          </Flex>
-        ) : (
-          <>
-            <Form.Item
-              name="date"
-              label={t('dateLabel', { defaultValue: 'Date' })}
-              rules={[{ required: true, message: t('selectDateError', { defaultValue: 'Select a date' }) }]}
-              style={{ marginBottom: 16 }}
-            >
-              <DatePicker
-                style={{ width: '100%' }}
-                disabledDate={current => current && current.toDate() > new Date()}
-              />
-            </Form.Item>
-
-            <Flex gap={12} style={{ width: '100%' }}>
-              <Form.Item
-                name="startTime"
-                label={t('startTimeLabel', { defaultValue: 'Start Time' })}
-                rules={[{ required: true, message: t('selectStartTimeError', { defaultValue: 'Select a start time' }) }]}
-                style={{ flex: 1, marginBottom: 16 }}
-              >
-                <TimePicker format="HH:mm" style={{ width: '100%' }} />
-              </Form.Item>
-
-              <Form.Item
-                name="endTime"
-                label={t('endTimeLabel', { defaultValue: 'End Time' })}
-                rules={[{ required: true, message: t('selectEndTimeError', { defaultValue: 'Select an end time' }) }]}
-                style={{ flex: 1, marginBottom: 16 }}
-              >
-                <TimePicker format="HH:mm" style={{ width: '100%' }} />
-              </Form.Item>
-            </Flex>
-          </>
-        )}
+          <Form.Item
+            name="endTime"
+            label={t('endTimeLabel', { defaultValue: 'End Time' })}
+            rules={[{ required: true, message: t('selectEndTimeError', { defaultValue: 'Select an end time' }) }]}
+            style={{ flex: 1, marginBottom: 16 }}
+          >
+            <TimeTextInput
+              ref={endTimeInputRef}
+              style={{ width: '100%' }}
+              aria-label={t('endTimeLabel', { defaultValue: 'End Time' })}
+            />
+          </Form.Item>
+        </Flex>
+        <TimeRangeDurationHint
+          start={formValues.startTime}
+          end={formValues.endTime}
+          style={{ marginTop: -8, marginBottom: 16 }}
+        />
 
         <Form.Item
           name="description"

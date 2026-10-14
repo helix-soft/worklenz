@@ -186,7 +186,10 @@
       "moveToTaskTooltip": "Diesen Zeiteintrag einer anderen Aufgabe zuweisen",
       "selectTask": "Aufgabe auswählen...",
       "backdateLimitError": "Zeiterfassungen können nicht weiter als {{days}} Tage zurückdatiert werden. Das früheste mögliche Datum ist {{earliestDate}}.",
-      "saveError": "Die Zeiterfassung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+      "saveError": "Die Zeiterfassung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      "activity": "Tätigkeit",
+      "selectActivityError": "Wählen Sie eine Tätigkeit",
+      "sameStartEndError": "Start- und Endzeit dürfen nicht gleich sein"
     },
     "rollupLoggedTooltip": "Summe der angemeldeten Zeit für Unteraufgaben"
   },

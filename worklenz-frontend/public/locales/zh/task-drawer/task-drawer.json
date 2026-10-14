@@ -186,7 +186,10 @@
       "moveToTaskTooltip": "将此工时记录重新分配到其他任务",
       "selectTask": "选择任务...",
       "backdateLimitError": "工时记录的补录不能超过 {{days}} 天。可记录的最早日期为 {{earliestDate}}。",
-      "saveError": "无法保存工时记录，请重试。"
+      "saveError": "无法保存工时记录，请重试。",
+      "activity": "活动类型",
+      "selectActivityError": "请选择活动类型",
+      "sameStartEndError": "开始时间和结束时间不能相同"
     },
     "rollupLoggedTooltip": "子任务的登录时间总和"
   },

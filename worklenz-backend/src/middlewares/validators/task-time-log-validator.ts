@@ -4,12 +4,19 @@ import { IWorkLenzRequest } from "../../interfaces/worklenz-request";
 import { IWorkLenzResponse } from "../../interfaces/worklenz-response";
 import { ServerResponse } from "../../models/server-response";
 import { getBackdateViolation } from "../../shared/timelog-backdate-restriction";
+import { isTimeLogActivity } from "../../shared/time-log-activities";
 
 export default async function (req: IWorkLenzRequest, res: IWorkLenzResponse, next: NextFunction): Promise<IWorkLenzResponse | void> {
 
   const {id, seconds_spent, created_at, formatted_start} = req.body;
 
   if (!id || !seconds_spent || !formatted_start) return res.sendStatus(400);
+
+  // Optional — only forms that ask for it send an activity
+  const { activity } = req.body;
+  if (activity !== undefined && activity !== null && !isTimeLogActivity(activity)) {
+    return res.status(400).send(new ServerResponse(false, null, "Invalid activity"));
+  }
 
   // On PUT the route param carries the work log id, which lets the check exempt
   // edits that leave the log's date untouched.

@@ -184,7 +184,7 @@
     "emptySubtitle": "Regjistroni hyrjen tuaj të parë duke përdorur regjistrimin e shpejtë në të majtë.",
     "logTimeButton": "Regjistro kohën",
     "pageTitle": "Regjistro Kohë",
-    "pageSubtitle": "Gjurmo orët e tua të faturableshme shpejt",
+    "pageSubtitle": "Regjistroni kohën e shpenzuar në detyrat tuaja.",
     "quickEntryTitle": "Hyrja e Shpejtë",
     "projectLabel": "Projekti",
     "projectPlaceholder": "Zgjidh projektin…",
@@ -237,7 +237,34 @@
     "weekdayThu": "Enj",
     "weekdayFri": "Pre",
     "weekdaySat": "Sht",
-    "weekdaySun": "Die"
+    "weekdaySun": "Die",
+    "week": {
+      "viewWeek": "Java",
+      "previous": "Java e mëparshme",
+      "next": "Java e ardhshme",
+      "thisWeek": "Këtë javë",
+      "total": "Totali i javës",
+      "overlap": "Mbivendosje: {{duration}}",
+      "overlapHint": "Kohë e regjistruar paralelisht. Lejohet, por kontrolloni nëse ishte e qëllimshme.",
+      "dayOverlap": "{{duration}} të regjistruara paralelisht këtë ditë",
+      "blockOverlap": "Mbivendoset me një regjistrim tjetër",
+      "errorTitle": "Regjistrimet e kësaj jave nuk u ngarkuan",
+      "retry": "Provo përsëri",
+      "empty": "Ende asgjë e regjistruar këtë javë. Përdorni regjistrimin e shpejtë për të shtuar kohë."
+    },
+    "rangeDuration": "Kohëzgjatja: {{duration}}",
+    "activityLabel": "Aktiviteti",
+    "activities": {
+      "development": "Zhvillim",
+      "specification": "Specifikim",
+      "management": "Menaxhim",
+      "testing": "Testim",
+      "support": "Mbështetje",
+      "pr": "PR",
+      "meeting": "Takim"
+    },
+    "sameStartEnd": "Ora e fillimit dhe e mbarimit nuk mund të jenë të njëjta",
+    "rangeNextDay": "(përfundon ditën tjetër)"
   },
   "expenses": {
     "emptyTitle": "Ende pa shpenzime të regjistruara",
