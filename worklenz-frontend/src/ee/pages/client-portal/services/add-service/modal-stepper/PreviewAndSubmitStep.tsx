@@ -18,7 +18,6 @@ import { useTranslation } from 'react-i18next';
 import { TempServicesType } from '../../../../../types/client-portal/temp-client-portal.types';
 import { useCreateOrganizationServiceMutation } from '../../../../../api/client-portal/client-portal-api';
 import { useNavigate } from 'react-router-dom';
-import { getCurrencyLabel } from '@/shared/currencies';
 
 type PreviewAndSubmitStepProps = {
   setCurrent: (index: number) => void;
@@ -175,24 +174,10 @@ const PreviewAndSubmitStep = ({ setCurrent, service }: PreviewAndSubmitStepProps
               </div>
             )}
 
-            {(service.price || service.category) && (
+            {service.category && (
               <div style={{ marginBottom: 20 }}>
                 <Divider style={{ margin: '16px 0' }} />
                 <Flex gap={16} wrap>
-                  {service.price !== null && service.price !== undefined && (
-                    <div>
-                      <Typography.Text
-                        type="secondary"
-                        style={{ fontSize: 12, display: 'block', marginBottom: 4 }}
-                      >
-                         {t('priceLabel', { defaultValue: 'Price' })}
-                      </Typography.Text>
-                      <Typography.Text strong style={{ fontSize: 18, color: token.colorSuccess }}>
-                        {getCurrencyLabel(service.currency || 'usd').split(' - ')[0]}{' '}
-                        {service.price.toFixed(2)}
-                      </Typography.Text>
-                    </div>
-                  )}
                   {service.category && (
                     <div>
                       <Typography.Text

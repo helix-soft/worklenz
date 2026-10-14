@@ -238,8 +238,7 @@ interface CompactStatCardProps {
   value?: ReactNode;
   valueColor?: string;
   caption?: ReactNode;
-  /** Renders a two-value layout (divider between them) instead of a single value —
-   * mirrors HomeStatCards.tsx's Focus Time card (billable/non-billable split). */
+  /** Renders a two-value layout (divider between them) instead of a single value. */
   split?: CompactStatCardSplit;
 }
 

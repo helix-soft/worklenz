@@ -8,6 +8,5 @@ UI for features matching `worklenz-backend/src/ee/`:
 
 - `pages/client-portal/`, `pages/client-view/`, `components/client-portal/`, `layouts/` — client portal admin UI and the client-facing view
 - `pages/admin-center/billing/`, `components/admin-center/billing/` — billing, plans, upgrade flow (Paddle checkout)
-- `components/projects/project-finance/`, `components/projects/project-ratecard/`, `pages/settings/rate-card-settings/` — project finance and rate cards
 - `components/settings/integrations/slack/`, `components/projects/integrations/` — Slack integration
 - `components/LicenseExpiredModal/`, `pages/license-expired/` — the UI shown when an extended feature is accessed

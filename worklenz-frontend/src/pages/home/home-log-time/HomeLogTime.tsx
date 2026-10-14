@@ -130,11 +130,7 @@ const HomeLogTime: React.FC = () => {
 
   const STAT_DEFS = useMemo(() => [
     { key: 'today_total' as const, label: t('logTime.todayTotal', { defaultValue: 'Today Total' }), color: '#1677ff' },
-    { key: 'today_billable' as const, label: t('logTime.todayBillable', { defaultValue: 'Today Billable' }), color: '#52c41a' },
-    { key: 'today_non_billable' as const, label: t('logTime.todayNonBillable', { defaultValue: 'Today Non-Billable' }), color: '#ff4d4f' },
     { key: 'week_total' as const, label: t('logTime.weekTotal', { defaultValue: 'Week Total' }), color: '#1677ff' },
-    { key: 'week_billable' as const, label: t('logTime.weekBillable', { defaultValue: 'Week Billable' }), color: '#52c41a' },
-    { key: 'week_non_billable' as const, label: t('logTime.weekNonBillable', { defaultValue: 'Week Non-Billable' }), color: '#ff4d4f' },
   ], [t]);
 
   const WEEKDAY_LABELS = useMemo(() => [
@@ -204,7 +200,6 @@ const HomeLogTime: React.FC = () => {
   const [selectedLogProjectIds, setSelectedLogProjectIds] = useState<React.Key[]>([]);
   const [selectedLogStatusNames, setSelectedLogStatusNames] = useState<React.Key[]>([]);
   const [selectedLogPriorityNames, setSelectedLogPriorityNames] = useState<React.Key[]>([]);
-  const [selectedLogBillable, setSelectedLogBillable] = useState<React.Key[]>([]);
 
   // Store original task names to restore if drawer closes without saving
   const originalTaskNamesRef = useRef<Map<string, string>>(new Map());
@@ -513,11 +508,6 @@ const HomeLogTime: React.FC = () => {
     return Array.from(seen).map(name => ({ text: name, value: name }));
   }, [recentLogs]);
 
-  const logBillableFilterOptions = [
-    { text: t('logTime.yes', { defaultValue: 'Yes' }), value: 'yes' },
-    { text: t('logTime.no', { defaultValue: 'No' }), value: 'no' },
-  ];
-
   const handleLogSortClick = useCallback(
     (field: LogSortField) => {
       setLogCurrentPage(1);
@@ -551,9 +541,6 @@ const HomeLogTime: React.FC = () => {
     if (selectedLogPriorityNames.length) {
       logs = logs.filter(l => selectedLogPriorityNames.includes(l.priority_name || ''));
     }
-    if (selectedLogBillable.length) {
-      logs = logs.filter(l => selectedLogBillable.includes(l.billable ? 'yes' : 'no'));
-    }
     if (!logSortField) return logs;
 
     const dir = logSortOrder === 'asc' ? 1 : -1;
@@ -566,7 +553,7 @@ const HomeLogTime: React.FC = () => {
       const bv = (b[logSortField] || '').toString().toLowerCase();
       return av.localeCompare(bv) * dir;
     });
-  }, [recentLogs, logSortField, logSortOrder, selectedLogProjectIds, selectedLogStatusNames, selectedLogPriorityNames, selectedLogBillable]);
+  }, [recentLogs, logSortField, logSortOrder, selectedLogProjectIds, selectedLogStatusNames, selectedLogPriorityNames]);
 
   const handleOpenTask = useCallback(
     (record: IRecentTimeLog) => {
@@ -667,22 +654,6 @@ const HomeLogTime: React.FC = () => {
           ) : null,
       },
       {
-        key: 'billable',
-        title: t('logTime.billableColumn', { defaultValue: 'Billable' }),
-        width: '10%',
-        filters: logBillableFilterOptions,
-        filteredValue: selectedLogBillable,
-        onFilter: (value, record) => (record.billable ? 'yes' : 'no') === value,
-        render: (_, record) => (
-          <Tag
-            color={record.billable ? '#52c41a' : undefined}
-            style={{ margin: 0, fontSize: 11 }}
-          >
-            {record.billable ? t('logTime.yes', { defaultValue: 'Yes' }) : t('logTime.no', { defaultValue: 'No' })}
-          </Tag>
-        ),
-      },
-      {
         key: 'time',
         title: renderLogSortableTitle(t('logTime.timeColumn', { defaultValue: 'Time' }), 'time_spent'),
         width: '10%',
@@ -722,7 +693,6 @@ const HomeLogTime: React.FC = () => {
       selectedLogProjectIds,
       selectedLogStatusNames,
       selectedLogPriorityNames,
-      selectedLogBillable,
       themeMode,
       token,
       navigate,
@@ -945,7 +915,7 @@ const HomeLogTime: React.FC = () => {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: isDesktop ? 'repeat(3, 1fr)' : 'repeat(auto-fit, minmax(120px, 1fr))',
+                gridTemplateColumns: isDesktop ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(120px, 1fr))',
                 gap: 12,
               }}
             >
@@ -961,29 +931,17 @@ const HomeLogTime: React.FC = () => {
 
              <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>{t('logTime.thisWeek', { defaultValue: 'This Week' })}</div>
-               <div style={{ display: 'flex', gap: 10, marginBottom: 8, fontSize: 10 }}>
-                 <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                   <span style={{ width: 8, height: 8, borderRadius: 2, background: '#52c41a', display: 'inline-block' }} />{t('logTime.billableLegend', { defaultValue: 'Billable' })}
-                 </span>
-                 <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                   <span style={{ width: 8, height: 8, borderRadius: 2, background: '#ff7875', display: 'inline-block' }} />{t('logTime.nonBillableLegend', { defaultValue: 'Non-Billable' })}
-                 </span>
-               </div>
               <div style={{ display: 'flex', gap: 4, alignItems: 'flex-end', flex: 1, paddingBottom: 4 }}>
                  {weekly.length === 0 && (
                     <div style={{ width: '100%', textAlign: 'center', fontSize: 11, opacity: 0.45 }}>{t('logTime.noDataYet', { defaultValue: 'No data yet' })}</div>
                   )}
                 {weekly.map((d, i) => {
-                  const billHrs = Number(d.billable) / 3600;
-                  const nonHrs = Number(d.non_billable) / 3600;
-                  const total = billHrs + nonHrs;
-                  const billPct = (billHrs / weekMax) * 100;
-                  const nonPct = (nonHrs / weekMax) * 100;
+                  const total = (Number(d.billable) + Number(d.non_billable)) / 3600;
+                  const totalPct = (total / weekMax) * 100;
                   return (
                     <div key={d.day} style={{ textAlign: 'center', flex: 1 }}>
                       <div style={{ height: 80, background: token.colorFillTertiary, borderRadius: 4, position: 'relative', overflow: 'hidden', marginBottom: 4, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-                        <div style={{ width: '100%', height: `${nonPct}%`, background: '#ff7875' }} />
-                        <div style={{ width: '100%', height: `${billPct}%`, background: '#52c41a' }} />
+                        <div style={{ width: '100%', height: `${totalPct}%`, background: token.colorPrimary }} />
                       </div>
                       <div style={{ fontSize: 9, opacity: 0.55 }}>{WEEKDAY_LABELS[i] || dayjs(d.day).format('ddd')}</div>
                       <div style={{ fontSize: 10, fontWeight: 600 }}>{total.toFixed(1)}h</div>
@@ -1065,7 +1023,6 @@ const HomeLogTime: React.FC = () => {
                   setSelectedLogProjectIds((filters.project as React.Key[]) || []);
                   setSelectedLogStatusNames((filters.status as React.Key[]) || []);
                   setSelectedLogPriorityNames((filters.priority as React.Key[]) || []);
-                  setSelectedLogBillable((filters.billable as React.Key[]) || []);
                 }}
               />
             </div>

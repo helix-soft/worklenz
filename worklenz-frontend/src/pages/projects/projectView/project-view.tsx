@@ -20,8 +20,6 @@ import { useAppSelector } from '@/hooks/useAppSelector';
 import { useSocket } from '@/socket/socketContext';
 import { SocketEvents } from '@/shared/socket-events';
 import { toggleUpgradeModal } from '@/features/admin-center/admin-center.slice';
-import { hasBusinessFeatureAccess } from '@/ee/utils/subscription-utils';
-import { hasFinanceViewPermission } from '@/utils/finance-permissions';
 import { getProject, setProjectId, setProjectView } from '@/features/project/project.slice';
 import {
   fetchStatuses,
@@ -64,7 +62,6 @@ import { setProjectId as setDrawerProjectId, setProjectData } from '@/features/p
 import { openProjectSettingsModal } from '@/features/project/project-settings-modal.slice';
 import { useTimerInitialization } from '@/hooks/useTimerInitialization';
 import { useAuthService } from '@/hooks/useAuth';
-import { useMixpanelTracking } from '@/hooks/useMixpanelTracking';
 import useTaskCreationPermission from '@/hooks/useTaskCreationPermission';
 import { verifyAuthentication } from '@/features/auth/authSlice';
 import { setUser } from '@/features/user/userSlice';
@@ -110,7 +107,6 @@ const ProjectView = React.memo(() => {
   // Get auth service and current session
   const authService = useAuthService();
   const currentSession = useMemo(() => authService.getCurrentSession(), [authService]);
-  const { trackMixpanelEvent } = useMixpanelTracking();
   const { canCreateTask } = useTaskCreationPermission();
   const { socket } = useSocket();
 
@@ -574,28 +570,9 @@ const ProjectView = React.memo(() => {
       }
 
       // If tab is disabled, open upgrade modal instead of navigating
-      // (Finance is never disabled here — its business-plan gating is
-      // handled in-page by ProjectViewFinance's blurred preview.)
       if (tabItem?.disabled) {
         dispatch(toggleUpgradeModal());
         return;
-      }
-
-      // Track finance tab clicks
-      if (key === 'finance') {
-        const hasBusinessAccess = hasBusinessFeatureAccess(currentSession);
-        const hasFinanceAccess = hasFinanceViewPermission(currentSession, selectedProject);
-
-        trackMixpanelEvent('finance_tab_clicked', {
-          source: 'project_view_header',
-          project_id: projectId,
-          project_name: selectedProject?.name,
-          user_type: currentSession?.subscription_type?.toLowerCase(),
-          has_business_access: hasBusinessAccess,
-          has_finance_permission: hasFinanceAccess,
-          is_admin: currentSession?.is_admin || currentSession?.owner,
-          tab_disabled: tabItem?.disabled || false,
-        });
       }
 
       // The task drawer is rendered via a portal outside the Tabs tree, so it
@@ -629,7 +606,6 @@ const ProjectView = React.memo(() => {
       currentSession,
       selectedProject,
       projectId,
-      trackMixpanelEvent,
       canCreateTask,
       showTaskDrawer,
     ]
@@ -645,7 +621,7 @@ const ProjectView = React.memo(() => {
     const filteredTabItems = getFilteredTabItems(currentSession, selectedProject, canCreateTask);
 
     const menuItems = filteredTabItems.map(item => {
-      const premiumTabs = ['finance', 'project-insights-member-overview', 'roadmap', 'workload'];
+      const premiumTabs = ['project-insights-member-overview', 'roadmap', 'workload'];
       const isPremiumTab = premiumTabs.includes(item.key);
 
       return {

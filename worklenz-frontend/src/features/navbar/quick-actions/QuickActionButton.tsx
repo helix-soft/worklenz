@@ -4,7 +4,6 @@ import {
   UserOutlined,
   ProjectOutlined,
   CheckSquareOutlined,
-  DollarOutlined,
   ClockCircleOutlined,
   UserAddOutlined,
   UsergroupAddOutlined,
@@ -19,7 +18,6 @@ import { toggleInviteMemberDrawer } from '../../settings/member/memberSlice';
 import { toggleAddClientDrawer } from '@/ee/features/clients-portal/clients/clients-slice';
 import { evt_projects_create_click } from '@/shared/worklenz-analytics-events';
 import { LogTimeModal } from '@/components/time-entries/LogTimeModal';
-import { AddExpenseModal } from '@/components/expenses/AddExpenseModal';
 import { CreateProjectModal } from '@/components/projects/create-project-modal/create-project-modal';
 import HomeAddTaskModal from '@/pages/home/task-list/HomeAddTaskModal';
 import AddGuestModal from '@/components/common/add-guest/AddGuestModal';
@@ -61,7 +59,6 @@ const QuickActionButton: React.FC<QuickActionButtonProps> = ({
 
   const [open, setOpen] = useState(false);
   const [logTimeOpen, setLogTimeOpen] = useState(false);
-  const [expenseOpen, setExpenseOpen] = useState(false);
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [guestModalOpen, setGuestModalOpen] = useState(false);
@@ -85,7 +82,6 @@ const QuickActionButton: React.FC<QuickActionButtonProps> = ({
     { key: 'mark-time-off', label: t('quickActions.markTimeOff', { defaultValue: 'Mark Time Off' }), icon: <CalendarOutlined /> },
     { key: 'new-project',   label: t('quickActions.project', { defaultValue: 'New Project' }),     icon: <ProjectOutlined /> },
     { key: 'new-client',    label: t('quickActions.client', { defaultValue: 'New Client' }),      icon: <UserOutlined /> },
-    { key: 'add-expense',   label: t('quickActions.addExpense', { defaultValue: 'Add Expense' }), icon: <DollarOutlined /> },
     { key: 'add-guest',     label: t('quickActions.addGuest', { defaultValue: 'Add Guest' }), icon: <UsergroupAddOutlined /> },
   ], [t]);
 
@@ -118,9 +114,6 @@ const QuickActionButton: React.FC<QuickActionButtonProps> = ({
         break;
       case 'mark-time-off':
         setTimeOffOpen(true);
-        break;
-      case 'add-expense':
-        setExpenseOpen(true);
         break;
       case 'add-guest':
         setGuestModalOpen(true);
@@ -263,12 +256,6 @@ const QuickActionButton: React.FC<QuickActionButtonProps> = ({
       <LogTimeModal
         open={logTimeOpen}
         onClose={() => setLogTimeOpen(false)}
-        onSuccess={() => {}}
-      />
-
-      <AddExpenseModal
-        open={expenseOpen}
-        onClose={() => setExpenseOpen(false)}
         onSuccess={() => {}}
       />
 

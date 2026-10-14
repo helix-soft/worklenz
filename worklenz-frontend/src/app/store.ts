@@ -112,10 +112,6 @@ import { clientPortalApi } from '@/ee/api/client-portal/client-portal-api';
 // Schedule API
 import { scheduleApi } from '@/api/schedule/scheduleApi';
 
-import projectFinanceRateCardReducer from '@/ee/features/finance/project-finance-slice';
-import projectFinancesReducer from '@/ee/features/projects/finance/project-finance.slice';
-import financeReducer from '@/features/projects/finance/finance-slice';
-import financeOverviewReducer from '@/features/finance-overview/finance-overview.slice';
 
 // Seat Limit
 import seatLimitReducer from '@/features/seat-limit/seatLimitSlice';
@@ -230,11 +226,6 @@ const coreReducers = {
 
   //client view
   clientViewReducer: clientViewReducer,
-  // Finance
-  projectFinanceRateCardReducer: projectFinanceRateCardReducer,
-  projectFinancesReducer: projectFinancesReducer,
-  financeReducer: financeReducer,
-  financeOverviewReducer: financeOverviewReducer,
 
   // Seat Limit
   seatLimitReducer: seatLimitReducer,

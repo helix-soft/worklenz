@@ -828,7 +828,7 @@ const ClientPortalSettings = () => {
                 }
               >
                 <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-                  {t('companyDetailsDescription', { defaultValue: 'Update your company contact information displayed on invoices and the client portal.' })}
+                  {t('companyDetailsDescription', { defaultValue: 'These details will appear in the client portal' })}
                 </Typography.Text>
                 <Form layout="vertical">
                   <Row gutter={16}>
@@ -899,19 +899,6 @@ const ClientPortalSettings = () => {
                         />
                       </Form.Item>
                     </Col>
-                  </Row>
-                  <Row gutter={16}>
-                     <Col xs={24}>
-                       <Form.Item label={t('invoiceFooterLabel', { defaultValue: 'Invoice Footer Message' })}>
-                         <Input
-                           placeholder={t('invoiceFooterPlaceholder', { defaultValue: 'Optional footer message for invoices' })}
-                           value={companyDetails.invoice_footer_message}
-                           onChange={e =>
-                             handleCompanyDetailsChange('invoice_footer_message', e.target.value)
-                           }
-                         />
-                       </Form.Item>
-                     </Col>
                   </Row>
                 </Form>
               </Card>

@@ -1,6 +1,5 @@
 import { RouteObject } from 'react-router-dom';
-import { lazy, Suspense, useMemo } from 'react';
-import { createPortal } from 'react-dom';
+import { lazy, Suspense } from 'react';
 import Skeleton from 'antd/es/skeleton';
 import MainLayout from '@/layouts/MainLayout';
 import SimpleRailLayout from '@/layouts/SimpleRailLayout';
@@ -8,13 +7,9 @@ import settingsRoutes from './settings-routes';
 import adminCenterRoutes from './admin-center-routes';
 import { addonRoutes } from 'virtual:addons-registry';
 import { useAuthService } from '@/hooks/useAuth';
-import { hasBusinessFeatureAccess } from '@/ee/utils/subscription-utils';
-import FeatureUpgradePreview from '@/components/upgrade/FeatureUpgradePreview';
-import { useFinanceFeaturePreviews } from '@/components/upgrade/financeFeaturePreviews';
 import { Navigate, useLocation } from 'react-router-dom';
 import { SuspenseFallback } from '@/components/suspense-fallback/suspense-fallback';
 import NavSurfaceIndexRedirect from '@/features/navigation/NavSurfaceIndexRedirect';
-import { useNavPreferences } from '@/features/navigation/useNavPreferences';
 import ChunkErrorHandler from '@/utils/chunk-error-handler';
 import { isTeamLeadRole } from '@/types/roles/role.types';
 import PlannerScheduleView from '@/features/schedule/PlannerScheduleView';
@@ -125,63 +120,6 @@ const ComingSoonPage = lazy(
     'ComingSoonPage'
   )
 );
-const FinanceOverviewPage = lazy(
-  ChunkErrorHandler.wrapLazyImport(
-    () => import('@/pages/finance-overview/FinanceOverviewPage'),
-    'FinanceOverviewPage'
-  )
-);
-const FinanceExpensesPage = lazy(
-  ChunkErrorHandler.wrapLazyImport(
-    () => import('@/pages/finance-overview/FinanceExpensesPage'),
-    'FinanceExpensesPage'
-  )
-);
-const FinanceBudgetsPage = lazy(
-  ChunkErrorHandler.wrapLazyImport(
-    () => import('@/pages/finance-overview/FinanceBudgetsPage'),
-    'FinanceBudgetsPage'
-  )
-);
-const FinanceInvoicesPage = lazy(
-  ChunkErrorHandler.wrapLazyImport(
-    () => import('@/pages/finance-overview/FinanceInvoicesPage'),
-    'FinanceInvoicesPage'
-  )
-);
-const FinanceBillableTimePage = lazy(
-  ChunkErrorHandler.wrapLazyImport(
-    () => import('@/pages/finance-overview/FinanceBillableTimePage'),
-    'FinanceBillableTimePage'
-  )
-);
-const FinanceUtilizationPage = lazy(
-  ChunkErrorHandler.wrapLazyImport(
-    () => import('@/pages/finance-overview/FinanceUtilizationPage'),
-    'FinanceUtilizationPage'
-  )
-);
-const FinanceProfitabilityPage = lazy(
-  ChunkErrorHandler.wrapLazyImport(
-    () => import('@/pages/finance-overview/FinanceProfitabilityPage'),
-    'FinanceProfitabilityPage'
-  )
-);
-const FinanceForecastsPage = lazy(
-  ChunkErrorHandler.wrapLazyImport(
-    () => import('@/pages/finance-overview/FinanceForecastsPage'),
-    'FinanceForecastsPage'
-  )
-);
-// The Finance rail (unlike Home/Planner/Projects) doesn't mount a TaskDrawer
-// anywhere today — clicking a task's expand icon/name on Finance > Expenses
-// just set Redux state with nothing rendering it, so the drawer appeared to
-// not open at all (or only later, once the user navigated to a page that
-// does mount one). Mount it here, scoped to the Finance surface only.
-const TaskDrawer = lazy(
-  ChunkErrorHandler.wrapLazyImport(() => import('@/components/task-drawer/task-drawer'), 'TaskDrawer')
-);
-
 // Define AdminGuard component with defensive programming
 const AdminGuard = ({ children }: { children: React.ReactNode }) => {
   const authService = useAuthService();
@@ -244,50 +182,6 @@ const TeamLeadGuard = ({ children }: { children: React.ReactNode }) => {
     console.error('Error in TeamLeadGuard (main-routes):', error);
     return <>{children}</>;
   }
-};
-
-const FINANCE_BASE_PATH = '/worklenz/finance';
-
-// Finance is a business-plan feature. Rather than redirecting users without
-// access away entirely, the rail navigation stays visible and the content
-// pane shows a blurred preview of whichever page is active — reusing the
-// same per-page previews as the "not built yet" placeholders below — with an
-// upgrade prompt, matching how Planner gates Schedule/Timeline/Workload.
-const FinanceRailLayout = () => {
-  const authService = useAuthService();
-  const location = useLocation();
-  const hasBusinessAccess = hasBusinessFeatureAccess(authService.getCurrentSession());
-  const financePreviews = useFinanceFeaturePreviews();
-  const { resolved: financeNavResolved } = useNavPreferences('finance');
-
-  const activeKey = useMemo(() => {
-    const rest = location.pathname.startsWith(FINANCE_BASE_PATH)
-      ? location.pathname.slice(FINANCE_BASE_PATH.length).replace(/^\//, '')
-      : '';
-    return rest || financeNavResolved.activeDefaultKey;
-  }, [location.pathname, financeNavResolved.activeDefaultKey]);
-
-  const lockedPreview = financePreviews[activeKey];
-
-  return (
-    <>
-      <SimpleRailLayout
-        surfaceKey="finance"
-        contentOverride={
-          hasBusinessAccess ? undefined : (
-            <FeatureUpgradePreview key={activeKey} {...(lockedPreview ?? financePreviews.generic)} />
-          )
-        }
-      />
-      {createPortal(
-        <Suspense fallback={null}>
-          <TaskDrawer />
-        </Suspense>,
-        document.body,
-        'finance-task-drawer'
-      )}
-    </>
-  );
 };
 
 const WorklenzIndexRedirect = () => {
@@ -475,7 +369,7 @@ const mainRoutes: RouteObject[] = [
         path: 'team-lead-reports',
         element: <SimpleRailLayout surfaceKey="team-lead-reports" />,
         children: [
-          // Mirror the projects/finance surfaces: the bare path redirects to the
+          // Mirror the projects surface: the bare path redirects to the
           // user's resolved default rail item, and every rail item is a real
           // named route so SimpleRailLayout.handleSelect never lands on 404.
           { index: true, element: <NavSurfaceIndexRedirect surfaceKey="team-lead-reports" /> },
@@ -566,81 +460,6 @@ const mainRoutes: RouteObject[] = [
             <LicenseExpiredPage />
           </Suspense>
         ),
-      },
-      {
-        path: 'finance',
-        element: (
-          <AdminGuard>
-            <FinanceRailLayout />
-          </AdminGuard>
-        ),
-        children: [
-          { index: true, element: <NavSurfaceIndexRedirect surfaceKey="finance" /> },
-          {
-            path: 'overview',
-            element: (
-              <Suspense fallback={<SuspenseFallback />}>
-                <FinanceOverviewPage />
-              </Suspense>
-            ),
-          },
-          {
-            path: 'profitability',
-            element: (
-              <Suspense fallback={<SuspenseFallback />}>
-                <FinanceProfitabilityPage />
-              </Suspense>
-            ),
-          },
-          {
-            path: 'budgets',
-            element: (
-              <Suspense fallback={<SuspenseFallback />}>
-                <FinanceBudgetsPage />
-              </Suspense>
-            ),
-          },
-          {
-            path: 'invoices',
-            element: (
-              <Suspense fallback={<SuspenseFallback />}>
-                <FinanceInvoicesPage />
-              </Suspense>
-            ),
-          },
-          {
-            path: 'expenses',
-            element: (
-              <Suspense fallback={<SuspenseFallback />}>
-                <FinanceExpensesPage />
-              </Suspense>
-            ),
-          },
-          {
-            path: 'billable-time',
-            element: (
-              <Suspense fallback={<SuspenseFallback />}>
-                <FinanceBillableTimePage />
-              </Suspense>
-            ),
-          },
-          {
-            path: 'utilization',
-            element: (
-              <Suspense fallback={<SuspenseFallback />}>
-                <FinanceUtilizationPage />
-              </Suspense>
-            ),
-          },
-          {
-            path: 'forecasts',
-            element: (
-              <Suspense fallback={<SuspenseFallback />}>
-                <FinanceForecastsPage />
-              </Suspense>
-            ),
-          },
-        ],
       },
       ...settingsRoutes,
       ...adminCenterRoutes,

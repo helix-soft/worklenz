@@ -46,12 +46,6 @@ export const navRoutes: NavRoutesType[] = [
     selfHostedExcluded: true,
   },
   {
-    name: 'finance',
-    path: '/worklenz/finance',
-    adminOnly: true,
-    freePlanFeature: false,
-  },
-  {
     name: 'reporting',
     // Bare surface root — resolves to whichever item is pinned as default
     // (or 'overview' if nothing is pinned) via the reporting index route.

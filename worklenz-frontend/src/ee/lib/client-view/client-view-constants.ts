@@ -2,7 +2,6 @@ import {
   AppstoreOutlined,
   CommentOutlined,
   DashboardOutlined,
-  FileOutlined,
   GroupOutlined,
   SettingOutlined,
   UnorderedListOutlined,
@@ -12,7 +11,6 @@ import ClientViewServices from '../../pages/client-view/services/client-view-ser
 import ClientViewRequests from '../../pages/client-view/requests/client-view-requests';
 import ClientViewChats from '../../pages/client-view/chat/client-view-chats';
 import ClientViewProjects from '../../pages/client-view/projects/client-view-projects';
-import ClientViewInvoices from '../../pages/client-view/invoices/client-view-invoices';
 import ClientViewSettings from '../../pages/client-view/settings/client-view-settings';
 
 // type of a menu item in client view sidebar
@@ -54,13 +52,6 @@ export const clientViewItems: clientViewMenuItems[] = [
     endpoint: 'chats',
     icon: React.createElement(CommentOutlined),
     element: React.createElement(ClientViewChats),
-  },
-  {
-    key: 'invoices',
-    name: 'invoices',
-    endpoint: 'invoices',
-    icon: React.createElement(FileOutlined),
-    element: React.createElement(ClientViewInvoices),
   },
   {
     key: 'requests',

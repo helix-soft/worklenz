@@ -16,7 +16,6 @@ import {
 import {
   BellOutlined,
   CheckOutlined,
-  ExclamationCircleOutlined,
   InfoCircleOutlined,
   CheckCircleOutlined,
 } from '@ant-design/icons';
@@ -85,8 +84,6 @@ const NotificationCenter: React.FC = () => {
     switch (type) {
       case 'request_update':
         return <InfoCircleOutlined style={{ color: '#1890ff' }} />;
-      case 'invoice_created':
-        return <ExclamationCircleOutlined style={{ color: '#faad14' }} />;
       case 'project_update':
         return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
       case 'message':
@@ -126,11 +123,6 @@ const NotificationCenter: React.FC = () => {
       case 'request_update':
         if (notification.referenceId) {
           window.location.href = `/requests/${notification.referenceId}`;
-        }
-        break;
-      case 'invoice_created':
-        if (notification.referenceId) {
-          window.location.href = `/invoices/${notification.referenceId}`;
         }
         break;
       case 'project_update':

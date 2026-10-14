@@ -37,25 +37,6 @@ const ServiceDetailsPage: React.FC = () => {
     return null;
   };
 
-  // Format price with currency
-  const formatPrice = (price: number, currency: string): string => {
-    try {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: currency,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }).format(price);
-    } catch {
-      return `${currency} ${price}`;
-    }
-  };
-
-  // Check if price should be displayed
-  const shouldShowPrice = (): boolean => {
-    return service?.price !== null && service?.price !== undefined && service.price > 0;
-  };
-
   if (isLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 300 }}>
@@ -159,15 +140,6 @@ const ServiceDetailsPage: React.FC = () => {
               {t('services.details')}
             </Title>
             <Descriptions column={1} size="small" colon={false}>
-              <Descriptions.Item label={<Text type="secondary">{t('services.priceLabel')}</Text>}>
-                {shouldShowPrice() ? (
-                  <Tag color="blue" style={{ margin: 0 }}>
-                    {formatPrice(service.price!, service.currency || 'USD')}
-                  </Tag>
-                ) : (
-                  <Tag style={{ margin: 0 }}>{t('services.contactForPrice')}</Tag>
-                )}
-              </Descriptions.Item>
               {service.category && (
                 <Descriptions.Item label={<Text type="secondary">{t('services.categoryLabel')}</Text>}>
                   <Text>{service.category}</Text>

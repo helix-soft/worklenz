@@ -13,11 +13,7 @@ const formatSeconds = (seconds: number): string => {
 
 const STAT_DEFS: { key: keyof IMySummary; label: string; color: string }[] = [
   { key: 'today_total', label: 'Today Total', color: '#1677ff' },
-  { key: 'today_billable', label: 'Today Billable', color: '#52c41a' },
-  { key: 'today_non_billable', label: 'Today Non-Billable', color: '#ff4d4f' },
   { key: 'week_total', label: 'This Week Total', color: '#1677ff' },
-  { key: 'week_billable', label: 'Week Billable', color: '#52c41a' },
-  { key: 'week_non_billable', label: 'Week Non-Billable', color: '#ff4d4f' },
 ];
 
 interface TimeEntriesSummaryBarProps {

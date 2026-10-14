@@ -1,7 +1,6 @@
 import React, { ReactNode, Suspense } from 'react';
 import { InlineSuspenseFallback } from '@/components/suspense-fallback/suspense-fallback';
 import i18n from '@/i18n';
-import { hasFinanceViewPermission } from '@/utils/finance-permissions';
 import { isFreeUser } from '@/ee/utils/subscription-utils';
 import { isUserGuest } from './project-view-guest';
 import { ILocalSession } from '@/types/auth/local-session.types';
@@ -10,7 +9,6 @@ import { IProjectViewModel } from '@/types/project/projectViewModel.types';
 // Import core components synchronously to avoid suspense in main tabs
 import ProjectViewEnhancedBoard from '@/pages/projects/projectView/enhancedBoard/project-view-enhanced-board';
 import TaskListV2 from '@/components/task-list-v2/TaskListV2';
-import ProjectViewFinance from '@/pages/projects/projectView/finance/ProjectViewFinance';
 
 // Lazy load less critical components
 const ProjectViewInsights = React.lazy(
@@ -152,13 +150,6 @@ export const tabItems: TabItems[] = [
     label: getTabLabel('workload'),
     element: React.createElement('div'), // Placeholder, actual element set in getFilteredTabItems
   },
-  {
-    index: 8,
-    key: 'finance',
-    defaultLabel: 'Finance',
-    label: getTabLabel('finance'),
-    element: React.createElement('div'), // Placeholder, actual element set in getFilteredTabItems
-  },
 ];
 
 // Function to update tab labels when language changes
@@ -190,9 +181,6 @@ export const updateTabLabels = () => {
         case 'workload':
           item.label = getTabLabel('workload');
           break;
-        case 'finance':
-          item.label = getTabLabel('finance');
-          break;
       }
     });
   } catch (error) {
@@ -204,7 +192,7 @@ export const updateTabLabels = () => {
  * Get restricted views for guests
  * Guests cannot access editing-oriented project views
  */
-const GUEST_RESTRICTED_VIEWS = ['project-insights-member-overview', 'finance', 'updates', 'all-attachments'];
+const GUEST_RESTRICTED_VIEWS = ['project-insights-member-overview', 'updates', 'all-attachments'];
 
 // Function to get filtered tab items based on user permissions
 export const getFilteredTabItems = (
@@ -212,7 +200,6 @@ export const getFilteredTabItems = (
   currentProject?: IProjectViewModel | null,
   canCreateTask?: boolean
 ): TabItems[] => {
-  const hasFinancePermission = hasFinanceViewPermission(currentSession, currentProject);
   const isFree = isFreeUser(currentSession);
   const isGuest = isUserGuest(currentProject);
 
@@ -226,25 +213,6 @@ export const getFilteredTabItems = (
       // Guests can view Roadmap but cannot edit tasks there.
       if (item.key === 'roadmap' && canCreateTask === false && !isGuest) {
         return null;
-      }
-
-      // Handle finance tab specially
-      if (item.key === 'finance') {
-        // If user has no finance permission, hide the tab entirely
-        if (!hasFinancePermission) {
-          return null;
-        }
-        // Business-plan gating is handled inside ProjectViewFinance itself
-        // (blurred preview + upgrade prompt), so the tab is never disabled —
-        // it always navigates normally, same as the top-nav Finance section.
-        return {
-          ...item,
-          element: React.createElement(
-            Suspense,
-            { fallback: React.createElement(InlineSuspenseFallback) },
-            React.createElement(ProjectViewFinance)
-          ),
-        };
       }
 
       // Disable insights, roadmap, and workload tabs for free users

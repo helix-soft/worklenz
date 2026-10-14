@@ -1,8 +1,6 @@
 import ClientViewLayout from '@/ee/layouts/client-view-layout';
 import ClientViewDashboard from '@/ee/pages/client-view/dashboard/client-view-dashboard';
 import ClientViewChats from '@/ee/pages/client-view/chat/client-view-chats';
-import ClientViewInvoices from '@/ee/pages/client-view/invoices/client-view-invoices';
-import ClientViewInvoiceDetails from '@/ee/pages/client-view/invoices/invoice-details/client-view-invoice-details';
 import ClientViewProjects from '@/ee/pages/client-view/projects/client-view-projects';
 import ClientViewProjectDetails from '@/ee/pages/client-view/projects/project-details/client-view-project-details';
 import ClientViewRequests from '@/ee/pages/client-view/requests/client-view-requests';
@@ -45,14 +43,6 @@ const clientViewRoutes: RouteObject[] = [
       {
         path: 'chats',
         element: <ClientViewChats />,
-      },
-      {
-        path: 'invoices',
-        element: <ClientViewInvoices />,
-      },
-      {
-        path: 'invoices/:id',
-        element: <ClientViewInvoiceDetails />,
       },
       {
         path: 'requests',

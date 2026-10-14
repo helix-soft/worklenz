@@ -1,8 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect, Suspense, lazy } from 'react';
 import {
   Input,
-  InputNumber,
-  Select,
   Button,
   message,
   Card,
@@ -25,7 +23,6 @@ import { useTranslation } from 'react-i18next';
 import { RcFile } from 'antd/es/upload';
 import { getBase64 } from '@/utils/file-utils';
 const RichTextEditor = lazy(() => import('@/components/shared/RichTextEditor'));
-import { CURRENCY_OPTIONS } from '@/shared/currencies';
 
 interface ServiceDetailsStepProps {
   setCurrent: (step: number) => void;
@@ -237,7 +234,7 @@ const ServiceDetailsStep: React.FC<ServiceDetailsStepProps> = ({
                 <Card
                   title={
                     <Flex align="center" gap={8}>
-                      <span>{t('step3CardTitle', { defaultValue: 'Pricing & Category' })}</span>
+                      <span>{t('categoryCardTitle', { defaultValue: 'Category' })}</span>
                       <Typography.Text
                         type="secondary"
                         style={{ fontWeight: 'normal', fontSize: 12 }}
@@ -251,40 +248,11 @@ const ServiceDetailsStep: React.FC<ServiceDetailsStepProps> = ({
               >
                 <div style={{ marginBottom: 16 }}>
                   <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
-                    {t('pricingCategoryHint', { defaultValue: 'Optionally set a price and category for this service.' })}
+                    {t('categoryHint', { defaultValue: 'Categorize your service to help clients find it.' })}
                   </Typography.Text>
 
                   <Row gutter={[16, 16]}>
-                    <Col span={12}>
-                      <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>
-                        {t('priceLabel', { defaultValue: 'Price' })}
-                      </Typography.Text>
-                      <InputNumber
-                        style={{ width: '100%' }}
-                        min={0}
-                        precision={2}
-                        placeholder={t('pricePlaceholder', { defaultValue: '0.00' })}
-                        value={service.price}
-                        onChange={value => setService({ ...service, price: value })}
-                      />
-                    </Col>
-                    <Col span={12}>
-                      <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>
-                        {t('currencyLabel', { defaultValue: 'Currency' })}
-                      </Typography.Text>
-                      <Select
-                        style={{ width: '100%' }}
-                        placeholder={t('currencyPlaceholder', { defaultValue: 'Select currency' })}
-                        value={service.currency || 'usd'}
-                        onChange={value => setService({ ...service, currency: value })}
-                        options={CURRENCY_OPTIONS}
-                        showSearch
-                        filterOption={(input, option) =>
-                          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                      />
-                    </Col>
-                    <Col span={12}>
+                    <Col xs={24} md={12}>
                       <Typography.Text strong style={{ display: 'block', marginBottom: 8 }}>
                         {t('categoryLabel', { defaultValue: 'Category' })}
                       </Typography.Text>
@@ -295,12 +263,6 @@ const ServiceDetailsStep: React.FC<ServiceDetailsStepProps> = ({
                         value={service.category || ''}
                         onChange={e => setService({ ...service, category: e.target.value })}
                       />
-                      <Typography.Text
-                        type="secondary"
-                        style={{ fontSize: 12, display: 'block', marginTop: 4 }}
-                      >
-                         💡 {t('categoryHint', { defaultValue: 'Categorize your service to help clients find it.' })}
-                      </Typography.Text>
                     </Col>
                   </Row>
                 </div>

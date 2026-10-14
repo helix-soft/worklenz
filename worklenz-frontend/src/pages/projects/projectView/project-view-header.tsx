@@ -124,7 +124,6 @@ const ProjectViewHeader = memo(() => {
             break;
           case 'workload':
           case 'roadmap':
-          case 'finance':
           case 'project-insights-member-overview':
           case 'all-attachments':
           case 'members':

@@ -82,7 +82,6 @@ import {
   InfoCircleOutlined,
   ProfileOutlined,
   SettingOutlined,
-  DollarOutlined,
   TagsOutlined,
   FlagOutlined,
   TableOutlined,
@@ -93,8 +92,6 @@ import {
 } from '@/shared/antd-imports';
 import { toggleUpgradeModal } from '@/features/admin-center/admin-center.slice';
 import { ensureCsrfToken, refreshCsrfToken } from '@/api/api-client';
-import { CURRENCY_OPTIONS } from '@/shared/currencies';
-import { projectFinanceApiService } from '@/ee/api/project-finance-ratecard/project-finance.api.service';
 
 export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
   const dispatch = useAppDispatch();
@@ -214,7 +211,6 @@ export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
     isProjectManager,
     isTeamLead
   );
-  const canManageBudgetSettings = hasBusinessAccess && (isProjectManager || isOwnerorAdmin);
 
   // Effects
   useEffect(() => {
@@ -256,8 +252,6 @@ export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
           phase_assignees_enabled: project.phase_assignees_enabled || false,
           restrict_tasks_to_assignee: project.restrict_tasks_to_assignee || false,
           auto_assign_subtask_phase: project.auto_assign_subtask_phase || false,
-          budget: project.budget ?? 0,
-          currency: project.currency || 'USD',
         };
 
         const projectManager =
@@ -294,11 +288,7 @@ export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
       const currentValues = form.getFieldsValue();
       const isFormPristine = !form.isFieldsTouched(true);
       if (isFormPristine && !currentValues.color_code) {
-        form.setFieldsValue({
-          ...defaultFormValues,
-          budget: 0,
-          currency: 'USD',
-        });
+        form.setFieldsValue(defaultFormValues);
       }
       setSelectedProjectManager(null);
 
@@ -536,21 +526,6 @@ export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
       if (response?.data?.done) {
         if (response.data.body) {
           dispatch(mergeProject(response.data.body));
-        }
-
-        if (editMode && projectId && hasBusinessAccess) {
-          const selectedBudget = Number(values.budget ?? 0);
-          const selectedCurrency = (values.currency || 'USD').toUpperCase();
-          const currentBudget = Number(project?.budget ?? 0);
-          const currentCurrency = (project?.currency || 'USD').toUpperCase();
-
-          if (selectedBudget !== currentBudget) {
-            await projectFinanceApiService.updateProjectBudget(projectId, selectedBudget);
-          }
-
-          if (selectedCurrency !== currentCurrency) {
-            await projectFinanceApiService.updateProjectCurrency(projectId, selectedCurrency);
-          }
         }
 
         if (!editMode) {
@@ -1164,108 +1139,6 @@ export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
             },
           ]
         : []),
-      {
-        key: 'budget',
-        icon: <DollarOutlined />,
-        label: t('budgetSettingsTab', { defaultValue: 'Budget Settings' }),
-        children: (
-          <SettingsCard
-            title={t('budgetSettingsTab', { defaultValue: 'Budget Settings' })}
-          >
-            {!hasBusinessAccess && (
-              <Alert
-                type="info"
-                showIcon
-                style={{ marginBottom: 16 }}
-                message={t('budgetBusinessPlanTitle', { defaultValue: 'Business Plan Required' })}
-                description={
-                  <Flex justify="space-between" align="center" gap={12} wrap="wrap">
-                    <Typography.Text>
-                      {t('budgetBusinessPlanDescription', {
-                        defaultValue:
-                          'Project budget settings are available on Business and Enterprise plans.',
-                      })}
-                    </Typography.Text>
-                    <Button
-                      type="primary"
-                      icon={<CrownOutlined />}
-                      onClick={handleUpgradeClick}
-                      aria-label={tCommon('upgrade-plan')}
-                    >
-                      {tCommon('upgrade-plan')}
-                    </Button>
-                  </Flex>
-                }
-              />
-            )}
-
-            {!editMode && (
-              <Alert
-                type="warning"
-                showIcon
-                style={{ marginBottom: 16 }}
-                message={t('budgetCreateFirstTitle', { defaultValue: 'Create Project First' })}
-                description={t('budgetCreateFirstDescription', {
-                  defaultValue:
-                    'Save the project first, then return to configure budget and currency settings.',
-                })}
-              />
-            )}
-
-            <Form.Item
-              name="budget"
-              label={t('budgetAmountLabel', { defaultValue: 'Project Budget' })}
-              rules={[
-                {
-                  validator: (_, value) => {
-                    if (value === undefined || value === null || Number(value) >= 0) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(
-                      new Error(
-                        t('budgetValidationMessage', {
-                          defaultValue: 'Budget must be 0 or greater',
-                        })
-                      )
-                    );
-                  },
-                },
-              ]}
-            >
-              <Input
-                type="number"
-                min={0}
-                step="0.01"
-                disabled={!canManageBudgetSettings || !editMode}
-                placeholder={t('budgetAmountPlaceholder', { defaultValue: 'Enter project budget' })}
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="currency"
-              label={t('budgetCurrencyLabel', { defaultValue: 'Currency' })}
-              rules={[
-                {
-                  required: false,
-                  message: t('budgetCurrencyRequired', { defaultValue: 'Please select a currency' }),
-                },
-              ]}
-            >
-              <Select
-                showSearch
-                options={CURRENCY_OPTIONS}
-                disabled={!canManageBudgetSettings || !editMode}
-                placeholder={t('budgetCurrencyPlaceholder', { defaultValue: 'Select currency' })}
-                filterOption={(input, option) =>
-                  String(option?.label || '')
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-              />
-            </Form.Item>
-          </SettingsCard>
-        ),
-      },
     ];
 
     items.push(
@@ -1368,7 +1241,6 @@ export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
     handleStartDateChange,
     handleEndDateChange,
     hasBusinessAccess,
-    canManageBudgetSettings,
     projectId,
     isDeletingProject,
     isProjectManager,
@@ -1505,16 +1377,13 @@ export const ProjectSettingsModal = ({ onClose }: { onClose: () => void }) => {
               <div style={{ display: activeItem.key === 'privacy' ? 'block' : 'none' }}>
                 {sectionItems.find(item => item.key === 'privacy')?.children}
               </div>
-              <div style={{ display: activeItem.key === 'budget' ? 'block' : 'none' }}>
-                {sectionItems.find(item => item.key === 'budget')?.children}
-              </div>
               {/* Phases must stay inside Form so auto_assign_subtask_phase is submitted on Update */}
               <div style={{ display: activeItem.key === 'phases' ? 'block' : 'none' }}>
                 {sectionItems.find(item => item.key === 'phases')?.children}
               </div>
             </Form>
 
-            {!['general', 'advanced', 'privacy', 'budget', 'phases'].includes(activeItem.key) &&
+            {!['general', 'advanced', 'privacy', 'phases'].includes(activeItem.key) &&
               activeItem.children}
 
             {editMode && (

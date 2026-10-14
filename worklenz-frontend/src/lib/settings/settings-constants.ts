@@ -1,4 +1,3 @@
-import RateCardSettings from '@/ee/pages/settings/rate-card-settings/RateCardSettings';
 import {
   AppstoreOutlined,
   BankOutlined,
@@ -16,11 +15,10 @@ import {
   UserSwitchOutlined,
   BulbOutlined,
   DeleteOutlined,
-  DollarCircleOutlined,
   ApiOutlined,
   UsergroupAddOutlined,
 } from '@/shared/antd-imports';
-import { MobileOutlined, SwapOutlined } from '@ant-design/icons';
+import { MobileOutlined } from '@ant-design/icons';
 import React, { ReactNode, lazy } from 'react';
 import { ILocalSession } from '@/types/auth/local-session.types';
 import { hasBusinessFeatureAccess } from '@/ee/utils/subscription-utils';
@@ -66,9 +64,6 @@ const MobileAppSettings = lazy(
 );
 const ConfigurationSettings = lazy(
   () => import('@/pages/settings/configuration/configuration-settings')
-);
-const OrganizationCurrencySettings = lazy(
-  () => import('@/pages/settings/organization-currency/organization-currency-settings')
 );
 
 // type of menu item in settings sidebar
@@ -269,29 +264,6 @@ export const settingsItems: SettingMenuItem[] = [
     groupDefaultValue: 'Workspace Setup',
     icon: React.createElement(TeamOutlined),
     element: React.createElement(TeamHierarchy),
-    adminOnly: true,
-  },
-  {
-    key: 'ratecard',
-    name: 'ratecard',
-    defaultValue: 'Rate Card',
-    endpoint: 'ratecard',
-    groupKey: 'financial-billing',
-    groupDefaultValue: 'Financial & Billing',
-    icon: React.createElement(DollarCircleOutlined),
-    element: React.createElement(RateCardSettings),
-    businessPlanRequired: true,
-    adminOnly: true,
-  },
-  {
-    key: 'organization-currency',
-    name: 'organization-currency',
-    defaultValue: 'Currency',
-    endpoint: 'organization-currency',
-    groupKey: 'financial-billing',
-    groupDefaultValue: 'Financial & Billing',
-    icon: React.createElement(SwapOutlined),
-    element: React.createElement(OrganizationCurrencySettings),
     adminOnly: true,
   },
   {

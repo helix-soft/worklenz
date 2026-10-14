@@ -1,7 +1,7 @@
 {
   "title": "Portal-Einstellungen",
   "companyDetailsTitle": "Firmendetails",
-  "companyDetailsDescription": "Diese Details erscheinen auf Ihren Rechnungen",
+  "companyDetailsDescription": "Diese Details werden im Kundenportal angezeigt",
   "companyNameLabel": "Firmenname",
   "companyNamePlaceholder": "Geben Sie Ihren Firmennamen ein",
   "addressLine1Label": "Adresszeile 1",

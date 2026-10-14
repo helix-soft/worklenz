@@ -210,5 +210,6 @@
   "step4CardTitle": "4. {{title}}",
   "step5CardTitle": "5. 服务描述",
   "continueButton": "继续 →",
-  "questionsCountText": "{{count}} 个问题"
+  "questionsCountText": "{{count}} 个问题",
+  "categoryCardTitle": "类别"
 }

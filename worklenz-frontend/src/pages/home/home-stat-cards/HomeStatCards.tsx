@@ -22,8 +22,6 @@ interface StatCard {
   label: string;
   value: number | string;
   color?: string;
-  /** Renders two values side by side within the tile instead of one (e.g. billable/non-billable). */
-  split?: { leftLabel: string; leftValue: string; rightLabel: string; rightValue: string };
   /** Shown in a tooltip behind the info icon next to the card's label. */
   tooltip: string;
 }
@@ -47,18 +45,10 @@ const HomeStatCards: React.FC<HomeStatCardsProps> = ({ period }) => {
   const overdueCount = stats?.overdue ?? 0;
   const completedCount = period === 'today' ? (stats?.completed_today ?? 0) : (stats?.completed_week ?? 0);
 
-  const billableSeconds = timeSummaryData?.body?.billable_seconds ?? 0;
-  const nonBillableSeconds = timeSummaryData?.body?.non_billable_seconds ?? 0;
-
-  const billableStr = billableSeconds > 0 ? formatSecondsAsHM(billableSeconds) : '0h';
-  const nonBillableStr = nonBillableSeconds > 0 ? formatSecondsAsHM(nonBillableSeconds) : '0h';
-
-  const focusTimeSplit = {
-    leftLabel: t('statCards.billable', { defaultValue: 'Billable' }),
-    leftValue: billableStr,
-    rightLabel: t('statCards.nonBillable', { defaultValue: 'Non-Billable' }),
-    rightValue: nonBillableStr,
-  };
+  const loggedSeconds =
+    (timeSummaryData?.body?.billable_seconds ?? 0) +
+    (timeSummaryData?.body?.non_billable_seconds ?? 0);
+  const focusTimeStr = loggedSeconds > 0 ? formatSecondsAsHM(loggedSeconds) : '0h';
 
   const periodWord = period === 'today' ? 'today' : 'this week';
   const tasksTooltip = t('statCards.tasksTooltip', { periodWord, defaultValue: 'Total tasks assigned for {{periodWord}}.' });
@@ -72,13 +62,13 @@ const HomeStatCards: React.FC<HomeStatCardsProps> = ({ period }) => {
           { label: t('statCards.tasksToday', { defaultValue: "Today's Tasks" }),         value: tasksCount,     color: undefined,     tooltip: tasksTooltip },
           { label: t('statCards.overdue', { defaultValue: 'Overdue' }),             value: overdueCount,   color: '#ff4d4f',     tooltip: overdueTooltip },
           { label: t('statCards.completedToday', { defaultValue: 'Completed Today' }),     value: completedCount, color: '#52c41a',     tooltip: completedTooltip },
-          { label: t("statCards.todaysFocusTime", { defaultValue: "Today's Focus Time" }),  value: '',             split: focusTimeSplit, tooltip: focusTimeTooltip },
+          { label: t("statCards.todaysFocusTime", { defaultValue: "Today's Focus Time" }),  value: focusTimeStr,   color: undefined,     tooltip: focusTimeTooltip },
         ]
       : [
           { label: t('statCards.tasksThisWeek', { defaultValue: "This Week's Tasks" }),     value: tasksCount,     color: undefined,     tooltip: tasksTooltip },
           { label: t('statCards.overdue', { defaultValue: 'Overdue' }),             value: overdueCount,   color: '#ff4d4f',     tooltip: overdueTooltip },
           { label: t('statCards.completedThisWeek', { defaultValue: 'Completed This Week' }), value: completedCount, color: '#52c41a',     tooltip: completedTooltip },
-          { label: t("statCards.weeksFocusTime", { defaultValue: "This Week's Focus Time" }),   value: '',             split: focusTimeSplit, tooltip: focusTimeTooltip },
+          { label: t("statCards.weeksFocusTime", { defaultValue: "This Week's Focus Time" }),   value: focusTimeStr,   color: undefined,     tooltip: focusTimeTooltip },
         ];
 
   return (
@@ -126,31 +116,9 @@ const HomeStatCards: React.FC<HomeStatCardsProps> = ({ period }) => {
               <InfoCircleOutlined style={{ fontSize: 11, cursor: 'help' }} />
             </Tooltip>
           </div>
-          {card.split ? (
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8 }}>
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.2, color: '#1677ff' }}>
-                  {card.split.leftValue}
-                </div>
-                <div style={{ fontSize: 11, color: token.colorTextSecondary, marginTop: 2 }}>
-                  {card.split.leftLabel}
-                </div>
-              </div>
-              <div style={{ width: 1, alignSelf: 'stretch', background: token.colorBorderSecondary }} />
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 18, fontWeight: 700, lineHeight: 1.2, color: token.colorText }}>
-                  {card.split.rightValue}
-                </div>
-                <div style={{ fontSize: 11, color: token.colorTextSecondary, marginTop: 2 }}>
-                  {card.split.rightLabel}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.2, color: card.color ?? token.colorText }}>
-              {card.value}
-            </div>
-          )}
+          <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1.2, color: card.color ?? token.colorText }}>
+            {card.value}
+          </div>
         </div>
       ))}
     </div>

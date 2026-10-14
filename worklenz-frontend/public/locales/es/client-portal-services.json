@@ -210,5 +210,6 @@
   "step4CardTitle": "4. {{title}}",
   "step5CardTitle": "5. Descripción del Servicio",
   "continueButton": "Continuar →",
-  "questionsCountText": "{{count}} pregunta(s)"
+  "questionsCountText": "{{count}} pregunta(s)",
+  "categoryCardTitle": "Categoría"
 }

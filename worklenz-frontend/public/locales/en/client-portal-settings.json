@@ -1,7 +1,7 @@
 {
   "title": "Portal Settings",
   "companyDetailsTitle": "Company Details",
-  "companyDetailsDescription": "These details will appear on your invoices",
+  "companyDetailsDescription": "These details will appear in the client portal",
   "companyNameLabel": "Company Name",
   "companyNamePlaceholder": "Enter your company name",
   "addressLine1Label": "Address Line 1",

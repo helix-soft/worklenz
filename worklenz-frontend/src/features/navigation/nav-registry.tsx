@@ -19,14 +19,9 @@ import {
   SyncOutlined,
 } from '@/shared/antd-imports';
 import {
-  FileDoneOutlined,
   ControlOutlined,
   FolderOutlined,
   BlockOutlined,
-  RiseOutlined,
-  PieChartOutlined,
-  FileTextOutlined,
-  CompassOutlined,
   TagOutlined,
 } from '@ant-design/icons';
 import type { NavSurface, SurfaceKey } from './nav-registry.types';
@@ -219,11 +214,6 @@ export const CLIENT_PORTAL_NAV_SURFACE: NavSurface = {
               (chat: TempChatsType) => chat.status === 'unread'
             ).length,
         },
-        {
-          key: 'invoices',
-          label: { i18nNs: 'client-portal-common', i18nKey: 'invoices', defaultValue: 'Invoices' },
-          icon: <FileDoneOutlined />,
-        },
         // No real feature behind this yet — visually tagged "Soon" (matches
         // the design reference) but, unlike other `soon` items, still
         // navigates to its Coming Soon route (see client-portal-routes.tsx)
@@ -317,70 +307,6 @@ export const PROJECTS_RAIL_SUB_ROUTES: ReadonlySet<string> = new Set(
   PROJECTS_NAV_SURFACE.groups.flatMap(group => group.items.map(item => item.key))
 );
 
-// ─── Finance ────────────────────────────────────────────────────────────────
-// Overview and Expenses already shipped; the remaining rail items are the
-// portfolio report pages (Profitability, Budgets, Invoices, Billable Time,
-// Utilization, Forecasts). Labels use a dedicated 'finance-sidebar' namespace
-// (public/locales/*/finance-sidebar.json).
-export const FINANCE_NAV_SURFACE: NavSurface = {
-  key: 'finance',
-  defaultItemKey: 'overview',
-  groups: [
-    {
-      key: '',
-      items: [
-        {
-          key: 'overview',
-          label: { i18nNs: 'finance-sidebar', i18nKey: 'overview', defaultValue: 'Overview' },
-          icon: <AppstoreOutlined />,
-        },
-        {
-          key: 'profitability',
-          label: { i18nNs: 'finance-sidebar', i18nKey: 'profitability', defaultValue: 'Profitability' },
-          icon: <RiseOutlined />,
-        },
-        {
-          key: 'budgets',
-          label: { i18nNs: 'finance-sidebar', i18nKey: 'budgets', defaultValue: 'Budgets' },
-          icon: <PieChartOutlined />,
-        },
-        {
-          key: 'invoices',
-          label: { i18nNs: 'finance-sidebar', i18nKey: 'invoices', defaultValue: 'Invoices' },
-          icon: <FileTextOutlined />,
-        },
-        {
-          key: 'expenses',
-          label: { i18nNs: 'finance-sidebar', i18nKey: 'expenses', defaultValue: 'Expenses' },
-          icon: <FileOutlined />,
-        },
-        {
-          key: 'billable-time',
-          label: { i18nNs: 'finance-sidebar', i18nKey: 'billableTime', defaultValue: 'Billable Time' },
-          icon: <ClockCircleOutlined />,
-        },
-        {
-          key: 'utilization',
-          label: { i18nNs: 'finance-sidebar', i18nKey: 'utilization', defaultValue: 'Utilization' },
-          icon: <DashboardOutlined />,
-        },
-        {
-          key: 'forecasts',
-          label: { i18nNs: 'finance-sidebar', i18nKey: 'forecasts', defaultValue: 'Forecasts' },
-          icon: <CompassOutlined />,
-        },
-      ],
-    },
-  ],
-};
-
-// Mirrors PROJECTS_RAIL_SUB_ROUTES above — every Finance rail sub-route so
-// MainLayout/AppShellLayout can detect Finance's own SimpleRailLayout
-// sub-routes the same way.
-export const FINANCE_RAIL_SUB_ROUTES: ReadonlySet<string> = new Set(
-  FINANCE_NAV_SURFACE.groups.flatMap(group => group.items.map(item => item.key))
-);
-
 // ─── Team Lead Reports ──────────────────────────────────────────────────────
 export const TEAM_LEAD_REPORTS_NAV_SURFACE: NavSurface = {
   key: 'team-lead-reports',
@@ -412,5 +338,4 @@ export const NAV_REGISTRY: Record<SurfaceKey, NavSurface> = {
   'client-portal': CLIENT_PORTAL_NAV_SURFACE,
   projects: PROJECTS_NAV_SURFACE,
   'team-lead-reports': TEAM_LEAD_REPORTS_NAV_SURFACE,
-  finance: FINANCE_NAV_SURFACE,
 };

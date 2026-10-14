@@ -40,7 +40,7 @@ const SimpleRailLayout: React.FC<SimpleRailLayoutProps> = memo(({ surfaceKey, co
   const { surface, resolved, pin, unpin, isPinned, reorder, toggleCollapsed } =
     useNavPreferences(surfaceKey);
 
-  // Surfaces mounted here (Projects, Team Lead Reports, Finance, ...) mix
+  // Surfaces mounted here (Projects, Team Lead Reports, ...) mix
   // plain-string labels with i18n-descriptor ones — derive whichever
   // namespaces this particular surface actually uses so `t()` below can
   // resolve them, instead of hardcoding one namespace for every surface.

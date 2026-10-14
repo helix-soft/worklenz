@@ -4,7 +4,6 @@ import ClientsPreviewMockup from './mockups/ClientsPreviewMockup';
 import ClientPortalRequestsPreviewMockup from './mockups/ClientPortalRequestsPreviewMockup';
 import ClientPortalServicesPreviewMockup from './mockups/ClientPortalServicesPreviewMockup';
 import ClientPortalChatsPreviewMockup from './mockups/ClientPortalChatsPreviewMockup';
-import ClientPortalInvoicesPreviewMockup from './mockups/ClientPortalInvoicesPreviewMockup';
 import ClientPortalSettingsPreviewMockup from './mockups/ClientPortalSettingsPreviewMockup';
 import TicketingPreviewMockup from './mockups/TicketingPreviewMockup';
 
@@ -21,7 +20,6 @@ const NAMESPACES = [
   'client-portal-requests',
   'client-portal-services',
   'client-portal-chats',
-  'client-portal-invoices',
   'client-portal-settings',
 ];
 
@@ -73,15 +71,6 @@ export const useClientPortalFeaturePreviews = (): Record<string, ClientPortalFea
       }),
       features: t('cards.clientPortal.chats.features', { ns: 'upgrade-preview', returnObjects: true, defaultValue: [] }) as string[],
       mockup: <ClientPortalChatsPreviewMockup />,
-    },
-    invoices: {
-      title: t('title', { ns: 'client-portal-invoices', defaultValue: 'Invoices' }),
-      description: t('cards.clientPortal.invoices.description', {
-        ns: 'upgrade-preview',
-        defaultValue: 'Create, send, and track client invoices without leaving Worklenz.',
-      }),
-      features: t('cards.clientPortal.invoices.features', { ns: 'upgrade-preview', returnObjects: true, defaultValue: [] }) as string[],
-      mockup: <ClientPortalInvoicesPreviewMockup />,
     },
     ticketing: {
       title: t('cards.clientPortal.ticketing.title', { ns: 'upgrade-preview', defaultValue: 'Ticketing' }),

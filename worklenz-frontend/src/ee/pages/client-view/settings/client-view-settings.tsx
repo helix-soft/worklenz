@@ -107,14 +107,6 @@ const ClientViewSettings = () => {
             <Switch />
           </Form.Item>
 
-          <Form.Item
-            name="invoice_notifications"
-            label={t('invoiceNotifications')}
-            valuePropName="checked"
-          >
-            <Switch />
-          </Form.Item>
-
           <Form.Item name="request_updates" label={t('requestUpdates')} valuePropName="checked">
             <Switch />
           </Form.Item>

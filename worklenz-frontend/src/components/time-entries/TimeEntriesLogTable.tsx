@@ -198,19 +198,6 @@ export const TimeEntriesLogTable: React.FC<TimeEntriesLogTableProps> = ({
           ) : null,
       },
       {
-        key: 'billable',
-        title: t('colBillable', { defaultValue: 'Billable' }),
-        width: '10%',
-        render: (_, record) => (
-          <Tag
-            color={record.billable ? '#52c41a' : undefined}
-            style={{ margin: 0, fontSize: 11 }}
-          >
-            {record.billable ? t('billableYes', { defaultValue: 'Yes' }) : t('billableNo', { defaultValue: 'No' })}
-          </Tag>
-        ),
-      },
-      {
         key: 'time',
         title: renderSortableTitle(t('colTimeLogged', { defaultValue: 'Time' }), 'time_spent'),
         width: '12%',

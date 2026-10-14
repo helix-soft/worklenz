@@ -10,7 +10,7 @@ import { ImportProgressNotifier } from '@/components/imports/ImportProgressNotif
 import { TaskExportProgressNotifier } from '@/components/projects/task-export/TaskExportProgressNotifier';
 import { AppSumoPopup } from '@/components/appsumo-popup/AppSumoPopup';
 import { NAV_RAIL_BG_DARK, NAV_RAIL_BG_LIGHT } from '@/components/nav-rail/nav-rail-constants';
-import { PROJECTS_RAIL_SUB_ROUTES, FINANCE_RAIL_SUB_ROUTES } from '@/features/navigation/nav-registry';
+import { PROJECTS_RAIL_SUB_ROUTES } from '@/features/navigation/nav-registry';
 import { shouldShowAppSumoPromo } from '@/ee/utils/subscription-utils';
 
 // Single shared header for every authenticated section (main app, reporting,
@@ -40,15 +40,6 @@ const AppShellLayout = memo(() => {
     return PROJECTS_RAIL_SUB_ROUTES.has(segment);
   }, [location.pathname]);
 
-  // Same idea as isProjectsSubRoute above, for Finance's own SimpleRailLayout
-  // sub-routes (Profitability, Budgets, Invoices, ...).
-  const isFinanceSubRoute = useMemo(() => {
-    const prefix = '/worklenz/finance/';
-    if (!location.pathname.startsWith(prefix)) return false;
-    const segment = location.pathname.slice(prefix.length).split('/')[0];
-    return FINANCE_RAIL_SUB_ROUTES.has(segment);
-  }, [location.pathname]);
-
   // Every section below mounts its own left rail directly below the header,
   // styled to share its background — the header must match that color
   // exactly so the two read as one unified panel rather than two adjacent
@@ -65,11 +56,8 @@ const AppShellLayout = memo(() => {
       location.pathname === '/worklenz/projects' ||
       (location.pathname.endsWith('/projects') && !location.pathname.includes('/admin-center/')) ||
       isProjectsSubRoute ||
-      location.pathname.includes('/worklenz/team-lead-reports') ||
-      location.pathname === '/worklenz/finance' ||
-      location.pathname.endsWith('/finance') ||
-      isFinanceSubRoute,
-    [location.pathname, isProjectsSubRoute, isFinanceSubRoute]
+      location.pathname.includes('/worklenz/team-lead-reports'),
+    [location.pathname, isProjectsSubRoute]
   );
   const railPanelBg = themeMode === 'dark' ? NAV_RAIL_BG_DARK : NAV_RAIL_BG_LIGHT;
 

@@ -12,8 +12,6 @@ import {
 import {
   FileTextOutlined,
   ProjectOutlined,
-  FileDoneOutlined,
-  CheckCircleOutlined,
   ClockCircleOutlined,
   DollarOutlined,
   RightOutlined
@@ -264,54 +262,6 @@ const DashboardPage: React.FC = () => {
         </Col>
       </Row>
 
-      {/* Invoices Card */}
-      <Card
-        title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <FileDoneOutlined style={{ color: '#13c2c2' }} />
-            <span>{t('dashboard.invoicesOverview')}</span>
-          </div>
-        }
-        extra={
-          <Button type="link" size="small" onClick={() => navigate('/invoices')}>
-            {t('dashboard.viewAll')} <RightOutlined />
-          </Button>
-        }
-        styles={{ body: { padding: 20 } }}
-      >
-        <Row gutter={24}>
-          <Col xs={24} sm={8} style={{ textAlign: 'center', marginBottom: 16 }}>
-            <div style={{ fontSize: 32, fontWeight: 600, color: token.colorText }}>
-              {stats.totalInvoices}
-            </div>
-            <Text type="secondary">{t('dashboard.totalInvoices')}</Text>
-          </Col>
-          <Col xs={24} sm={8} style={{ textAlign: 'center', marginBottom: 16 }}>
-            <div style={{ fontSize: 32, fontWeight: 600, color: stats.unpaidInvoices > 0 ? '#ff4d4f' : token.colorText }}>
-              {stats.unpaidInvoices}
-            </div>
-            <Text type="secondary">{t('dashboard.unpaidInvoices')}</Text>
-          </Col>
-          <Col xs={24} sm={8} style={{ textAlign: 'center', marginBottom: 16 }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              padding: '8px 16px',
-              background: stats.unpaidAmount > 0 ? '#fff2f0' : '#f6ffed',
-              borderRadius: 8,
-            }}>
-              <CheckCircleOutlined style={{ color: stats.unpaidAmount > 0 ? '#ff4d4f' : '#52c41a' }} />
-              <Text strong style={{ fontSize: 20, color: stats.unpaidAmount > 0 ? '#ff4d4f' : '#52c41a' }}>
-                ${stats.unpaidAmount.toFixed(2)}
-              </Text>
-            </div>
-            <div style={{ marginTop: 8 }}>
-              <Text type="secondary">{t('dashboard.amountDue')}</Text>
-            </div>
-          </Col>
-        </Row>
-      </Card>
     </div>
   );
 };

@@ -64,25 +64,6 @@ const ClientPortalSettings = lazy(
     'ClientPortalSettings'
   )
 );
-const ClientPortalInvoices = lazy(
-  ChunkErrorHandler.wrapLazyImport(
-    () => import('@/ee/pages/client-portal/invoices/client-portal-invoices'),
-    'ClientPortalInvoices'
-  )
-);
-const ClientPortalInvoiceDetails = lazy(
-  ChunkErrorHandler.wrapLazyImport(
-    () => import('@/ee/pages/client-portal/invoices/invoice-details/client-portal-invoice-details'),
-    'ClientPortalInvoiceDetails'
-  )
-);
-const InvoiceBuilder = lazy(
-  ChunkErrorHandler.wrapLazyImport(
-    () => import('@/ee/pages/client-portal/invoices/invoice-builder/invoice-builder'),
-    'InvoiceBuilder'
-  )
-);
-
 const clientPortalRoutes: RouteObject[] = [
   {
     path: 'worklenz/client-portal',
@@ -156,46 +137,6 @@ const clientPortalRoutes: RouteObject[] = [
             fallback={<Spin size="large" style={{ display: 'block', margin: '50px auto' }} />}
           >
             <ClientPortalChats />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'invoices',
-        element: (
-          <Suspense
-            fallback={<Spin size="large" style={{ display: 'block', margin: '50px auto' }} />}
-          >
-            <ClientPortalInvoices />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'invoices/create',
-        element: (
-          <Suspense
-            fallback={<Spin size="large" style={{ display: 'block', margin: '50px auto' }} />}
-          >
-            <InvoiceBuilder />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'invoices/:invoiceId/edit',
-        element: (
-          <Suspense
-            fallback={<Spin size="large" style={{ display: 'block', margin: '50px auto' }} />}
-          >
-            <InvoiceBuilder />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'invoices/:invoiceId',
-        element: (
-          <Suspense
-            fallback={<Spin size="large" style={{ display: 'block', margin: '50px auto' }} />}
-          >
-            <ClientPortalInvoiceDetails />
           </Suspense>
         ),
       },

@@ -3,14 +3,8 @@
    viewports so the tiles never get too cramped to read. */
 .time-entries-stat-cards {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-}
-
-@media (max-width: 1200px) {
-  .time-entries-stat-cards {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 @media (max-width: 576px) {

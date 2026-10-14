@@ -4,7 +4,6 @@ import {
   AppstoreOutlined,
   FileTextOutlined,
   ProjectOutlined,
-  FileDoneOutlined,
   MessageOutlined,
   SettingOutlined,
 } from '@/shared/antd-imports';
@@ -40,12 +39,6 @@ export const clientPortalItems: ClientPortalMenuItems[] = [
     name: 'navigation.projects',
     icon: React.createElement(ProjectOutlined),
     endpoint: 'projects',
-  },
-  {
-    key: 'invoices',
-    name: 'navigation.invoices',
-    icon: React.createElement(FileDoneOutlined),
-    endpoint: 'invoices',
   },
   {
     key: 'chats',

@@ -8,7 +8,6 @@ import {
   UserOutlined,
   BankOutlined,
   ProjectOutlined,
-  DollarOutlined,
   MoonOutlined,
   SunOutlined,
   theme,
@@ -45,7 +44,6 @@ const SETTINGS_QUICK_LINKS: SettingsQuickLink[] = [
   { label: 'Profile Settings', icon: <UserOutlined />, to: '/worklenz/settings/profile' },
   { label: 'Workspace Settings', icon: <BankOutlined />, to: '/worklenz/settings/teams' },
   { label: 'Project Settings', icon: <ProjectOutlined />, to: '/worklenz/settings/categories' },
-  { label: 'Finance Settings', icon: <DollarOutlined />, to: '/worklenz/settings/ratecard' },
   { label: 'General Settings', icon: <ToolOutlined />, to: '/worklenz/settings/configuration' },
 ];
 

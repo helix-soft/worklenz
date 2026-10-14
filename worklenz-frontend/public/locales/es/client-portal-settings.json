@@ -1,7 +1,7 @@
 {
   "title": "Configuración del Portal",
   "companyDetailsTitle": "Detalles de la Empresa",
-  "companyDetailsDescription": "Estos detalles aparecerán en sus facturas",
+  "companyDetailsDescription": "Estos detalles aparecerán en el portal de clientes",
   "companyNameLabel": "Nombre de la Empresa",
   "companyNamePlaceholder": "Ingrese el nombre de su empresa",
   "addressLine1Label": "Dirección Línea 1",

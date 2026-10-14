@@ -9,8 +9,7 @@ export type SurfaceKey =
   | 'reporting'
   | 'client-portal'
   | 'projects'
-  | 'team-lead-reports'
-  | 'finance';
+  | 'team-lead-reports';
 
 // Home/Planner use plain strings; Reporting/Client Portal resolve labels via
 // useTranslation(ns) — the union lets one registry serve both without forcing

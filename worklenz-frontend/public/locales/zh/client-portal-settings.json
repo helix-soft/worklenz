@@ -1,7 +1,7 @@
 {
   "title": "门户设置",
   "companyDetailsTitle": "公司详情",
-  "companyDetailsDescription": "这些详情将显示在您的发票上",
+  "companyDetailsDescription": "这些详情将显示在客户门户中",
   "companyNameLabel": "公司名称",
   "companyNamePlaceholder": "输入您的公司名称",
   "addressLine1Label": "地址行1",
