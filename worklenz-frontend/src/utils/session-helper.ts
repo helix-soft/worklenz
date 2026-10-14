@@ -12,7 +12,11 @@ export function setSession(user: ILocalSession): void {
 
 export function getUserSession(): ILocalSession | null {
   try {
-    return JSON.parse(atob(<string>storage.getItem(WORKLENZ_SESSION_ID)));
+    // Inverse of setSession: base64 -> UTF-8 bytes -> string. Plain atob() alone
+    // would yield Latin-1 and mangle non-ASCII characters (e.g. "ó" -> "Ã³").
+    const binary = atob(<string>storage.getItem(WORKLENZ_SESSION_ID));
+    const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
   } catch (e) {
     return null;
   }

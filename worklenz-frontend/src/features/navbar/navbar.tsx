@@ -11,11 +11,9 @@ import NavbarLogo from './NavbarLogo';
 import NotificationButton from '../../components/navbar/notifications/notifications-drawer/notification/notification-button';
 import ProfileButton from './user-profile/ProfileButton';
 import SwitchTeamButton from './switch-team/SwitchTeamButton';
-import UpgradePlanButton from './upgrade-plan/UpgradePlanButton';
 import NotificationDrawer from '../../components/navbar/notifications/notifications-drawer/notification/notfication-drawer';
 import AddClientDrawer from '@/ee/components/client-portal/AddClientDrawer';
 import UpgradePromptModal from '@/components/upgrade/UpgradePromptModal';
-import { TrialDaysBadge } from './trial-badge/TrialDaysBadge';
 
 import { useResponsive } from '@/hooks/useResponsive';
 import { getJSONFromLocalStorage } from '@/utils/localStorageFunctions';
@@ -65,7 +63,6 @@ const Navbar = () => {
 
   const { setIdentity } = useMixpanelTracking();
   const [navRoutesList, setNavRoutesList] = useState<NavRoutesType[]>(navRoutes);
-  const showUpgradeTypes = useMemo(() => [ISUBSCRIPTION_TYPE.TRIAL], []);
   const organization = useAppSelector((state: RootState) => state.adminCenterReducer.organization);
   const currentProject = useAppSelector(selectCurrentProject);
   const guestProjectStateRef = useRef<{ projectId: string | null; isGuest: boolean }>({
@@ -327,11 +324,6 @@ const Navbar = () => {
               {isDesktop && (
                 <Flex>
                   <Flex gap={12} align="center">
-                    <TrialDaysBadge />
-                    {isOwnerOrAdmin &&
-                      showUpgradeTypes.includes(
-                        currentSession?.subscription_type as ISUBSCRIPTION_TYPE
-                      ) && <UpgradePlanButton showModal redirectToBilling={false} />}
                     <ConnectionStatusIndicator />
                     <Flex align="center" gap={6}>
                       <WhatsNewTag />
@@ -352,7 +344,6 @@ const Navbar = () => {
               )}
               {isTablet && !isDesktop && (
                 <Flex gap={12} align="center">
-                  <TrialDaysBadge />
                   <SwitchTeamButton />
                   <NotificationButton />
                   <ProfileButton isOwnerOrAdmin={isOwnerOrAdmin} />
@@ -361,7 +352,6 @@ const Navbar = () => {
               )}
               {isMobile && (
                 <Flex gap={12} align="center">
-                  <TrialDaysBadge />
                   <NotificationButton />
                   <ProfileButton isOwnerOrAdmin={isOwnerOrAdmin} />
                   <MobileMenuButton routes={filteredRoutes} isFreePlan={isFreePlan} />

@@ -17,8 +17,6 @@ import { ToolOutlined, MobileOutlined, ReadOutlined, MailOutlined, MessageOutlin
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAuthService } from '@/hooks/useAuth';
-import { ISUBSCRIPTION_TYPE } from '@/shared/constants';
-import { toggleUpgradeModal } from '@/features/admin-center/admin-center.slice';
 import { toggleTheme } from '@/features/theme/themeSlice';
 import { useNavigate } from 'react-router-dom';
 import MobileAppModal from '@/components/mobile-app/MobileAppModal';
@@ -132,15 +130,6 @@ const PlannerLeftSidebar: React.FC<PlannerLeftSidebarProps> = ({ activeView, onV
     [t]
   );
 
-  const isTrial = currentSession?.subscription_type === ISUBSCRIPTION_TYPE.TRIAL;
-
-  const trialDaysLeft = React.useMemo(() => {
-    if (!isTrial) return null;
-    const expiry = currentSession?.valid_till_date || (currentSession as any)?.trial_expire_date;
-    if (!expiry) return null;
-    const diff = Math.ceil((new Date(expiry).getTime() - Date.now()) / 86400000);
-    return diff > 0 ? diff : 0;
-  }, [isTrial, currentSession]);
 
   return (
     <div
@@ -182,75 +171,6 @@ const PlannerLeftSidebar: React.FC<PlannerLeftSidebarProps> = ({ activeView, onV
           gap: 4,
         }}
       >
-        {/* Trial badge */}
-        {isTrial && trialDaysLeft !== null && (
-          <Tooltip
-            title={t('trialDaysLeft', { count: trialDaysLeft, defaultValue: '{{count}} days left in your trial' })}
-            placement="right"
-            {...tooltipProps}
-          >
-            <button
-              onClick={() => dispatch(toggleUpgradeModal())}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 48,
-                padding: '4px 2px',
-                background: 'transparent',
-                cursor: 'pointer',
-                border: 'none',
-                gap: 0,
-              }}
-            >
-              <span style={{ fontSize: 9, fontWeight: 400, lineHeight: 1.4, color: '#fa541c', textAlign: 'center' }}>
-                {trialDaysLeft} Days
-              </span>
-              <span style={{ fontSize: 9, fontWeight: 400, lineHeight: 1.4, color: '#fa541c', textAlign: 'center' }}>
-                Trial
-              </span>
-            </button>
-          </Tooltip>
-        )}
-
-        {/* Upgrade button */}
-        {isTrial && (
-          <Tooltip title={t('upgradeToPro', { defaultValue: 'Upgrade to Pro' })} placement="right" {...tooltipProps}>
-            <button
-              onClick={() => dispatch(toggleUpgradeModal())}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 2,
-                width: '100%',
-                padding: '8px 4px',
-                borderRadius: 7,
-                cursor: 'pointer',
-                border: 'none',
-                background: 'linear-gradient(135deg,#ff4d4f,#ff7875)',
-                color: '#fff',
-                fontSize: 9,
-                fontWeight: 700,
-                letterSpacing: 0.2,
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg,#cf1322,#ff4d4f)';
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(255,77,79,.4)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'linear-gradient(135deg,#ff4d4f,#ff7875)';
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
-              }}
-            >
-              <span style={{ fontSize: 16, lineHeight: 1 }}>⚡</span>
-              UPGRADE
-            </button>
-          </Tooltip>
-        )}
-
         {/* Settings, Mobile App, and Help buttons — commented out for now,
             not removed, so they're easy to restore later.
         <Popover
