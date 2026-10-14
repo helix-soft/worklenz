@@ -1,327 +1,236 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Button,
-  Card,
-  Flex,
-  Select,
-  Table,
-  Typography,
-  Input,
   Dropdown,
-  Space,
-  Checkbox,
+  Flex,
+  Result,
+  Segmented,
+  Tooltip,
+  DownOutlined,
+  ReloadOutlined,
 } from '@/shared/antd-imports';
-import { DownOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import dayjs from 'dayjs';
-import { useAppSelector } from '@/hooks/useAppSelector';
-import { reportingExportApiService } from '@/api/reporting/reporting-export.api.service';
-import { teamMembersApiService } from '@/api/team-members/teamMembers.api.service';
-import { reportingApiService } from '@/api/reporting/reporting.api.service';
-import TimeWiseFilter from '@/components/reporting/time-wise-filter';
 import CustomPageHeader from '@/components/reporting/common/CustomPageHeader';
+import { TimeLogsDateRangePicker } from '@/components/reporting/time-reports/time-logs/TimeLogsDateRangePicker';
+import {
+  EMPTY_TIME_LOGS_FILTERS,
+  ITimeLogsFilterState,
+  TimeLogsFilterBar,
+} from '@/components/reporting/time-reports/time-logs/TimeLogsFilterBar';
+import { TimeLogsSummary } from '@/components/reporting/time-reports/time-logs/TimeLogsSummary';
+import { TimeLogsDetailedTable } from '@/components/reporting/time-reports/time-logs/TimeLogsDetailedTable';
+import { reportingApiService } from '@/api/reporting/reporting.api.service';
+import { reportingExportApiService } from '@/api/reporting/reporting-export.api.service';
+import { useDocumentTitle } from '@/hooks/useDoumentTItle';
+import {
+  IBillableFilter,
+  ITimeLogEntry,
+  ITimeLogsFilterOptions,
+  ITimeLogsFlatRequest,
+} from '@/types/reporting/time-logs-report.types';
+import { flattenTimeLogGroups, getPresetRange, TimeLogsDateRange } from '@/utils/time-logs-report';
 import logger from '@/utils/errorLogger';
 
-interface LogRow {
-  key: string;
-  date: string;
-  member: string;
-  project: string;
-  task: string;
-  description?: string;
-  duration: string;
-}
+type TimeLogsView = 'summary' | 'detailed';
 
 const TimeLogsPage: React.FC = () => {
   const { t } = useTranslation('time-report');
+  useDocumentTitle(t('timeLogsReport.pageTitle', { defaultValue: 'Time Logs' }));
 
-  // Global context
-  const team = useAppSelector(state => (state as any).auth?.team);
-  const reporting = useAppSelector(state => state.reportingReducer);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const view: TimeLogsView = searchParams.get('view') === 'detailed' ? 'detailed' : 'summary';
 
-  // Local state
-  const [members, setMembers] = useState<{ id: string; name: string }[]>([]);
-  const [selectedMemberId, setSelectedMemberId] = useState<string | undefined>();
-  const [loading, setLoading] = useState(false);
-  const [logs, setLogs] = useState<LogRow[]>([]);
-  const [search, setSearch] = useState<string>('');
-  const [pageSize, setPageSize] = useState(20);
-  const [billableFilter, setBillableFilter] = useState<{ billable: boolean; nonBillable: boolean }>(
-    { billable: true, nonBillable: true }
-  );
+  const [range, setRange] = useState<TimeLogsDateRange>(() => getPresetRange('thisWeek'));
+  const [filters, setFilters] = useState<ITimeLogsFilterState>(EMPTY_TIME_LOGS_FILTERS);
+  const debouncedDescription = useDebouncedValue(filters.description.trim(), SEARCH_DEBOUNCE_MS);
 
-  // Columns
-  const columns = useMemo(
-    () => [
-      {
-        title: t('Date'),
-        dataIndex: 'date',
-        key: 'date',
-        width: 160,
-        render: (value: string) => dayjs(value).format('MMM DD, YYYY'),
-      },
-      { title: t('Member'), dataIndex: 'member', key: 'member', width: 200 },
-      { title: t('Project'), dataIndex: 'project', key: 'project', width: 220 },
-      { title: t('Task'), dataIndex: 'task', key: 'task', width: 260 },
-      { title: t('Description'), dataIndex: 'description', key: 'description' },
-      {
-        title: t('Duration'),
-        dataIndex: 'duration',
-        key: 'duration',
-        width: 140,
-        align: 'right' as const,
-      },
-    ],
-    [t]
-  );
+  const [filterOptions, setFilterOptions] = useState<ITimeLogsFilterOptions>(EMPTY_OPTIONS);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(false);
 
-  // Fetch members for filter (admin/owner friendly)
+  const [entries, setEntries] = useState<ITimeLogEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const latestRequestId = useRef(0);
+
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await teamMembersApiService.getAll();
-        if (res.done && Array.isArray(res.body)) {
-          const mapped = res.body.map(m => ({ id: m.id as string, name: m.name as string }));
-          setMembers(mapped);
-        }
-      } catch (error) {
-        logger.error('Error fetching team members', error);
-      }
-    })();
+    let isActive = true;
+    setIsLoadingOptions(true);
+    reportingApiService
+      .getTimelogsFilterOptions()
+      .then(res => {
+        if (isActive && res.done && res.body) setFilterOptions(res.body);
+      })
+      .catch(error => logger.error('Error fetching time log filter options', error))
+      .finally(() => isActive && setIsLoadingOptions(false));
+    return () => {
+      isActive = false;
+    };
   }, []);
 
-  // Fetch logs
-  const fetchLogs = async () => {
-    const dr = reporting.dateRange;
-    if (!dr || dr.length !== 2) return;
-    setLoading(true);
-    try {
-      const startDate = dayjs(dr[0]).format('YYYY-MM-DD');
-      const endDate = dayjs(dr[1]).format('YYYY-MM-DD');
+  const request: ITimeLogsFlatRequest = useMemo(
+    () => ({
+      date_range: [range[0].format('YYYY-MM-DD'), range[1].format('YYYY-MM-DD')],
+      team_member_ids: filters.memberIds,
+      project_ids: filters.projectIds,
+      client_ids: filters.clientIds,
+      billable: toBillableFilter(filters.billable),
+      search: debouncedDescription || undefined,
+    }),
+    [
+      range,
+      filters.memberIds,
+      filters.projectIds,
+      filters.clientIds,
+      filters.billable,
+      debouncedDescription,
+    ]
+  );
 
-      // If a member is selected, fetch member-specific; otherwise fetch flat logs
-      if (selectedMemberId) {
-        // Use the same flat endpoint with member filter for consistency with the no-member case
-        const body = {
-          team_member_id: selectedMemberId,
-          team_id: team?.id || null,
-          duration: null,
-          date_range: [startDate, endDate],
-          billable: billableFilter,
-          archived: false,
-          search: search || undefined,
-        } as any;
-        const res = await reportingApiService.getTimelogsFlat(body);
-        if (res.done && Array.isArray(res.body)) {
-          const rows: LogRow[] = res.body.flatMap(group =>
-            group.logs.map((l: any, idx: number) => ({
-              key: `${group.log_day}-${idx}`,
-              date: group.log_day,
-              member: (l as any).user_name,
-              project: l.project_name,
-              task: l.task_name,
-              description: l.description || '',
-              duration: l.time_spent_string,
-            }))
-          );
-          setLogs(rows);
-        } else {
-          setLogs([]);
-        }
-      } else {
-        const body = {
-          team_member_id: null,
-          team_id: team?.id || null,
-          duration: null,
-          date_range: [startDate, endDate],
-          billable: billableFilter,
-          archived: false,
-          search: search || undefined,
-        } as any;
-        const res = await reportingApiService.getTimelogsFlat(body);
-        if (res.done && Array.isArray(res.body)) {
-          const rows: LogRow[] = res.body.flatMap(group =>
-            group.logs.map((l: any, idx: number) => ({
-              key: `${group.log_day}-${idx}`,
-              date: group.log_day,
-              member: (l as any).user_name,
-              project: l.project_name,
-              task: l.task_name,
-              description: l.description || '',
-              duration: l.time_spent_string,
-            }))
-          );
-          setLogs(rows);
-        } else {
-          setLogs([]);
-        }
-      }
+  const fetchLogs = useCallback(async () => {
+    const requestId = ++latestRequestId.current;
+    setIsLoading(true);
+    setHasError(false);
+    try {
+      const res = await reportingApiService.getTimelogsFlat(request);
+      if (requestId !== latestRequestId.current) return;
+      if (!res.done) throw new Error(res.message || 'Failed to fetch time logs');
+      setEntries(flattenTimeLogGroups(res.body || []));
     } catch (error) {
+      if (requestId !== latestRequestId.current) return;
       logger.error('Error fetching time logs', error);
-      setLogs([]);
+      setEntries([]);
+      setHasError(true);
     } finally {
-      setLoading(false);
+      if (requestId === latestRequestId.current) setIsLoading(false);
     }
-  };
+  }, [request]);
 
   useEffect(() => {
     fetchLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    selectedMemberId,
-    reporting.dateRange?.[0],
-    reporting.dateRange?.[1],
-    billableFilter.billable,
-    billableFilter.nonBillable,
-    search,
-  ]);
+  }, [fetchLogs]);
 
-  const onExportExcel = () => {
-    if (!reporting.dateRange || reporting.dateRange.length !== 2) return;
-    const startDate = dayjs(reporting.dateRange[0]).format('YYYY-MM-DD');
-    const endDate = dayjs(reporting.dateRange[1]).format('YYYY-MM-DD');
-
-    reportingExportApiService.exportTimelogsFlatExcel({
-      team_member_id: selectedMemberId || undefined,
-      duration: undefined,
-      date_range: [startDate, endDate],
-      billable: billableFilter,
-      search: search || undefined,
-    });
+  const handleViewChange = (value: TimeLogsView) => {
+    const next = new URLSearchParams(searchParams);
+    if (value === 'summary') next.delete('view');
+    else next.set('view', value);
+    setSearchParams(next, { replace: true });
   };
 
-  const onExportCSV = () => {
-    if (!reporting.dateRange || reporting.dateRange.length !== 2) return;
-    const startDate = dayjs(reporting.dateRange[0]).format('YYYY-MM-DD');
-    const endDate = dayjs(reporting.dateRange[1]).format('YYYY-MM-DD');
-
-    reportingExportApiService.exportTimelogsFlatCSV({
-      team_member_id: selectedMemberId || undefined,
-      duration: undefined,
-      date_range: [startDate, endDate],
-      billable: billableFilter,
-      search: search || undefined,
-    });
+  const handleExport = (type: 'excel' | 'csv') => {
+    const params = {
+      date_range: request.date_range,
+      billable: request.billable,
+      team_member_ids: request.team_member_ids,
+      project_ids: request.project_ids,
+      client_ids: request.client_ids,
+      search: request.search,
+    };
+    if (type === 'excel') reportingExportApiService.exportTimelogsFlatExcel(params);
+    else reportingExportApiService.exportTimelogsFlatCSV(params);
   };
 
-  const filteredLogs = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    if (!term) return logs;
-    return logs.filter(
-      l =>
-        l.project.toLowerCase().includes(term) ||
-        l.task.toLowerCase().includes(term) ||
-        (l.description || '').toLowerCase().includes(term) ||
-        l.member.toLowerCase().includes(term)
-    );
-  }, [logs, search]);
-
-  const exportMenu = {
-    items: [
-      { key: 'excel', label: t('Export Excel') },
-      { key: 'csv', label: t('Export CSV') },
-    ],
-    onClick: ({ key }: any) => {
-      if (key === 'excel') onExportExcel();
-      if (key === 'csv') onExportCSV();
-    },
-  } as any;
-
-  const secondaryFiltersMenu = {
-    items: [
-      {
-        key: 'filters',
-        label: (
-          <div style={{ padding: '8px 4px', minWidth: 200 }}>
-            <Typography.Text
-              type="secondary"
-              style={{
-                fontSize: 11,
-                fontWeight: 500,
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                display: 'block',
-                marginBottom: 12,
-              }}
-            >
-              {t('Task Type')}
-            </Typography.Text>
-            <Space direction="vertical" size={8} style={{ width: '100%' }}>
-              <Checkbox
-                checked={billableFilter.billable}
-                onChange={e => setBillableFilter(prev => ({ ...prev, billable: e.target.checked }))}
-                style={{ width: '100%' }}
-              >
-                <span style={{ fontSize: 14 }}>{t('Billable')}</span>
-              </Checkbox>
-              <Checkbox
-                checked={billableFilter.nonBillable}
-                onChange={e =>
-                  setBillableFilter(prev => ({ ...prev, nonBillable: e.target.checked }))
-                }
-                style={{ width: '100%' }}
-              >
-                <span style={{ fontSize: 14 }}>{t('Non-billable')}</span>
-              </Checkbox>
-            </Space>
-          </div>
-        ),
-      },
-    ],
-  } as any;
+  const refreshLabel = t('timeLogsReport.refresh', { defaultValue: 'Refresh' });
 
   return (
-    <Flex vertical>
+    <Flex vertical gap={16}>
       <CustomPageHeader
-        title={t('Time Logs')}
-        style={{ padding: 0, marginBottom: 16 }}
-        children={
-          <Space wrap style={{ rowGap: 8 }}>
-            <TimeWiseFilter />
-            <Select
-              placeholder={t('Select member')}
-              style={{ width: 220, maxWidth: '100%' }}
-              allowClear
-              value={selectedMemberId}
-              onChange={setSelectedMemberId}
-              options={members.map(m => ({ label: m.name, value: m.id }))}
+        title={t('timeLogsReport.pageTitle', { defaultValue: 'Time Logs' })}
+        style={{ padding: 0 }}
+      >
+        <Flex wrap gap={8} align="center" style={{ maxWidth: '100%' }}>
+          <Segmented<TimeLogsView>
+            value={view}
+            onChange={handleViewChange}
+            options={[
+              {
+                value: 'summary',
+                label: t('timeLogsReport.views.summary', { defaultValue: 'Summary' }),
+              },
+              {
+                value: 'detailed',
+                label: t('timeLogsReport.views.detailed', { defaultValue: 'Detailed' }),
+              },
+            ]}
+          />
+          <TimeLogsDateRangePicker value={range} onChange={setRange} />
+          <Tooltip title={refreshLabel}>
+            <Button
+              icon={<ReloadOutlined />}
+              aria-label={refreshLabel}
+              loading={isLoading}
+              onClick={fetchLogs}
             />
-            <Input.Search
-              placeholder={t('Search logs')}
-              allowClear
-              style={{ width: 220, maxWidth: '100%' }}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-            <Dropdown menu={secondaryFiltersMenu} trigger={['click']}>
-              <Button>{t('Filters')}</Button>
-            </Dropdown>
-            <Button onClick={fetchLogs}>{t('Refresh')}</Button>
-            <Dropdown menu={exportMenu}>
-              <Button type="primary" icon={<DownOutlined />} iconPosition="end">
-                {t('export')}
-              </Button>
-            </Dropdown>
-          </Space>
-        }
+          </Tooltip>
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'excel',
+                  label: t('timeLogsReport.exportExcel', { defaultValue: 'Export Excel' }),
+                },
+                {
+                  key: 'csv',
+                  label: t('timeLogsReport.exportCsv', { defaultValue: 'Export CSV' }),
+                },
+              ],
+              onClick: ({ key }) => handleExport(key as 'excel' | 'csv'),
+            }}
+          >
+            <Button type="primary" icon={<DownOutlined />} iconPosition="end">
+              {t('timeLogsReport.export', { defaultValue: 'Export' })}
+            </Button>
+          </Dropdown>
+        </Flex>
+      </CustomPageHeader>
+
+      <TimeLogsFilterBar
+        options={filterOptions}
+        isLoadingOptions={isLoadingOptions}
+        filters={filters}
+        onChange={setFilters}
       />
 
-      <Card style={{ borderRadius: '4px' }} styles={{ body: { padding: 0 } }}>
-        <Table
-          size="small"
-          loading={loading}
-          dataSource={filteredLogs}
-          columns={columns}
-          scroll={{ x: 'max-content' }}
-          locale={{ emptyText: t('noData') }}
-          pagination={{ pageSize,
-                        showSizeChanger: true,
-                        pageSizeOptions: ['20', '50', '100'],
-                        onShowSizeChange: (_current, size) => setPageSize(size), }}
+      {hasError ? (
+        <Result
+          status="error"
+          title={t('timeLogsReport.errorTitle', { defaultValue: "Couldn't load time logs" })}
+          subTitle={t('timeLogsReport.errorHint', {
+            defaultValue: 'Check your connection and try again.',
+          })}
+          extra={
+            <Button type="primary" onClick={fetchLogs}>
+              {t('timeLogsReport.retry', { defaultValue: 'Try again' })}
+            </Button>
+          }
         />
-      </Card>
+      ) : view === 'summary' ? (
+        <TimeLogsSummary entries={entries} range={range} isLoading={isLoading} />
+      ) : (
+        <TimeLogsDetailedTable entries={entries} isLoading={isLoading} />
+      )}
     </Flex>
   );
 };
 
 export default TimeLogsPage;
+
+// Helpers
+const useDebouncedValue = <T,>(value: T, delayMs: number): T => {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebounced(value), delayMs);
+    return () => clearTimeout(timeout);
+  }, [value, delayMs]);
+  return debounced;
+};
+
+const toBillableFilter = (value: ITimeLogsFilterState['billable']): IBillableFilter => ({
+  billable: value !== 'nonBillable',
+  nonBillable: value !== 'billable',
+});
+
+// Static content
+const SEARCH_DEBOUNCE_MS = 300;
+
+const EMPTY_OPTIONS: ITimeLogsFilterOptions = { projects: [], clients: [], members: [] };

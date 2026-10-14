@@ -238,6 +238,7 @@ const ProjectTimeSheetChart = forwardRef<ProjectTimeSheetChartRef>((_, ref) => {
     dateRange,
     billable,
     archived,
+    noCategory,
     loadingTeams,
     loadingProjects,
     loadingCategories,

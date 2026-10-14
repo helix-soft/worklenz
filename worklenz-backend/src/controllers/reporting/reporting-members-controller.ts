@@ -20,13 +20,45 @@ interface TimelogFlatExportRow {
   description: string | null;
 }
 
+interface TimelogFlatRow extends TimelogFlatExportRow {
+  id: string;
+  created_at: string;
+  user_id: string;
+  user_avatar_url: string | null;
+  team_member_id: string | null;
+  project_id: string;
+  project_color: string | null;
+  client_id: string | null;
+  client_name: string | null;
+  task_id: string;
+  billable: boolean | null;
+}
+
 interface ParsedTimelogExportQueryParams {
   teamMemberId?: string;
   duration?: string;
   dateRange?: string;
   billable?: string;
   search?: string;
+  teamMemberIds?: string;
+  projectIds?: string;
+  clientIds?: string;
 }
+
+/** Filters shared by the flat time log list and its CSV/Excel exports. */
+interface TimelogFlatFilters {
+  teamMemberIds: string[];
+  projectIds: string[];
+  /** Client ids; may contain NO_CLIENT_FILTER_ID to include projects without a client. */
+  clientIds: string[];
+  duration?: string;
+  dateRange: string[];
+  billable: { billable: boolean; nonBillable: boolean };
+  search?: string;
+}
+
+const NO_CLIENT_FILTER_ID = "__no_client__";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default class ReportingMembersController extends ReportingControllerBaseWithTimezone {
   private static readonly TIME_LOG_EXPORT_SHEET_NAME = "Time Logs";
@@ -1571,102 +1603,40 @@ export default class ReportingMembersController extends ReportingControllerBaseW
 
   @HandleExceptions()
   public static async getTimelogsFlat(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
-    const { team_member_id, duration, date_range, billable, search } = req.body || {};
+    const { team_member_id, team_member_ids, project_ids, client_ids, duration, date_range, billable, search } = req.body || {};
 
-    // Get the team_id from request user
-    const teamId = req.user?.team_id;
-
-    // Get user timezone and date clauses
-    const userTimezone = await this.getUserTimezone(req.user?.id as string);
-    
-    // Build params array with timezone first, then date range values
-    const params: any[] = [userTimezone];
-    let paramIndex = 2;
-    
-    // Add date range parameters and build duration clause
-    let durationClause = '';
-    if (date_range && date_range.length === 2) {
-      const startDate = moment(date_range[0]).format('YYYY-MM-DD HH:mm:ss');
-      const endDate = moment(date_range[1]).add(1, 'day').format('YYYY-MM-DD HH:mm:ss');
-      durationClause = `AND twl.created_at >= $${paramIndex}::TIMESTAMP AND twl.created_at < $${paramIndex + 1}::TIMESTAMP`;
-      params.push(startDate, endDate);
-      paramIndex += 2;
-    } else {
-      // Use default duration logic if no date_range provided
-      const rawDurationClause = this.getDateRangeClauseWithTimezone(duration || DATE_RANGES.LAST_WEEK, date_range, userTimezone);
-      // This method returns hardcoded $1, $2 - we need to extract the logic or handle it differently
-      // For now, use a simpler approach for common cases
-      if (!duration || duration === DATE_RANGES.LAST_WEEK) {
-        durationClause = `AND twl.created_at >= (CURRENT_DATE - INTERVAL '1 week')::TIMESTAMP`;
-      } else if (duration === DATE_RANGES.YESTERDAY) {
-        durationClause = `AND twl.created_at >= (CURRENT_DATE - INTERVAL '1 day')::TIMESTAMP AND twl.created_at < CURRENT_DATE::TIMESTAMP`;
-      } else if (duration === DATE_RANGES.LAST_MONTH) {
-        durationClause = `AND twl.created_at >= (CURRENT_DATE - INTERVAL '1 month')::TIMESTAMP`;
-      } else if (duration === DATE_RANGES.LAST_QUARTER) {
-        durationClause = `AND twl.created_at >= (CURRENT_DATE - INTERVAL '3 months')::TIMESTAMP`;
-      }
-    }
-
-    const billableQuery = this.buildBillableQuery(billable || { billable: true, nonBillable: true }, "t");
-
-    // Team filter - only show logs from current team if team_id is available
-    let teamFilter = '';
-
-    if (teamId) {
-      teamFilter = `AND p.team_id = $${paramIndex}`;
-      params.push(teamId);
-      paramIndex++;
-    }
-
-    // Optional member filter
-    const memberFilter = team_member_id ? `AND u.id = (SELECT user_id FROM team_members WHERE id = $${paramIndex})` : '';
-    if (team_member_id) {
-      params.push(team_member_id);
-      paramIndex++;
-    }
-
-    // Optional search filter (task, project, member, description)
-    const searchFilter = search ? `AND (
-      LOWER(t.name) LIKE LOWER($${paramIndex}) OR
-      LOWER(p.name) LIKE LOWER($${paramIndex}) OR
-      LOWER(u.name) LIKE LOWER($${paramIndex}) OR
-      LOWER(COALESCE(twl.description, '')) LIKE LOWER($${paramIndex})
-    )` : '';
-    if (search) {
-      params.push(`%${search}%`);
-    }
-
-    const q = `
-      SELECT
-        (twl.created_at AT TIME ZONE 'UTC' AT TIME ZONE $1)::DATE AS log_day,
-        u.name AS user_name,
-        p.name AS project_name,
-        t.name AS task_name,
-        twl.time_spent,
-        twl.description
-      FROM task_work_log twl
-      JOIN tasks t ON t.id = twl.task_id
-      JOIN projects p ON p.id = t.project_id
-      JOIN users u ON u.id = twl.user_id
-      WHERE 1=1
-        ${teamFilter}
-        ${memberFilter}
-        ${durationClause}
-        ${billableQuery}
-        ${searchFilter}
-      ORDER BY log_day DESC, user_name ASC`;
-
-    const rows = await db.query(q, params);
+    const rows = await this.queryTimelogsFlat(req, {
+      teamMemberIds: [...this.toIdList(team_member_ids), ...this.toIdList(team_member_id)],
+      projectIds: this.toIdList(project_ids),
+      clientIds: this.toIdList(client_ids, [NO_CLIENT_FILTER_ID]),
+      duration,
+      dateRange: Array.isArray(date_range) ? date_range : [],
+      billable: billable || { billable: true, nonBillable: true },
+      search,
+    });
 
     // Group rows by day
     const groups: any[] = [];
     const byDay: Record<string, any[]> = {};
-    for (const r of rows.rows) {
-      if (!byDay[r.log_day]) byDay[r.log_day] = [];
-      byDay[r.log_day].push({
+    for (const r of rows) {
+      const day = moment(r.log_day).format("YYYY-MM-DD");
+      if (!byDay[day]) byDay[day] = [];
+      byDay[day].push({
+        id: r.id,
+        created_at: r.created_at,
+        user_id: r.user_id,
         user_name: r.user_name,
+        user_avatar_url: r.user_avatar_url,
+        team_member_id: r.team_member_id,
+        project_id: r.project_id,
         project_name: r.project_name,
+        project_color: r.project_color,
+        client_id: r.client_id,
+        client_name: r.client_name,
+        task_id: r.task_id,
         task_name: r.task_name,
+        billable: r.billable,
+        time_spent: Number(r.time_spent || 0),
         time_spent_string: this.secondsToReadable(r.time_spent || 0),
         description: r.description || null,
       });
@@ -1678,12 +1648,49 @@ export default class ReportingMembersController extends ReportingControllerBaseW
     return res.status(200).send(new ServerResponse(true, groups));
   }
 
+  /**
+   * Options for the time log report filters, scoped to the current team.
+   */
+  @HandleExceptions()
+  public static async getTimelogsFilterOptions(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<IWorkLenzResponse> {
+    const teamId = this.getCurrentTeamId(req);
+    if (!teamId) {
+      return res.status(200).send(new ServerResponse(true, { projects: [], clients: [], members: [] }));
+    }
+
+    const [projects, clients, members] = await Promise.all([
+      db.query(
+        `SELECT p.id, p.name, p.color_code, p.client_id, c.name AS client_name
+         FROM projects p
+                LEFT JOIN clients c ON c.id = p.client_id
+         WHERE p.team_id = $1
+         ORDER BY p.name`,
+        [teamId]
+      ),
+      db.query(`SELECT id, name FROM clients WHERE team_id = $1 ORDER BY name`, [teamId]),
+      db.query(
+        `SELECT tm.id, u.name, u.avatar_url
+         FROM team_members tm
+                JOIN users u ON u.id = tm.user_id
+         WHERE tm.team_id = $1
+         ORDER BY u.name`,
+        [teamId]
+      ),
+    ]);
+
+    return res.status(200).send(new ServerResponse(true, {
+      projects: projects.rows,
+      clients: clients.rows,
+      members: members.rows,
+    }));
+  }
+
   @HandleExceptions()
   public static async exportTimelogsFlatCSV(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<void> {
-    const { teamMemberId, duration, dateRange, billable, search } = this.parseTimelogExportQueryParams(req);
+    const exportParams = this.parseTimelogExportQueryParams(req);
 
     // Get data using shared helper method
-    const rows = await this.getTimelogsFlatData(req, teamMemberId, duration, dateRange, billable, search);
+    const rows = await this.getTimelogsFlatData(req, exportParams);
 
     // Prepare CSV data
     const fileName = this.getTimelogExportFileName("csv");
@@ -1695,7 +1702,7 @@ export default class ReportingMembersController extends ReportingControllerBaseW
     csvRows.push("Date,Member,Project,Task,Description,Duration (Minutes)");
 
     // Add data rows
-    for (const row of rows.rows as TimelogFlatExportRow[]) {
+    for (const row of rows) {
       const csvRecord = this.mapTimelogExportRow(row);
       csvRows.push(
         `"${this.escapeCsvValue(csvRecord.date)}","${this.escapeCsvValue(csvRecord.member)}","${this.escapeCsvValue(csvRecord.project)}","${this.escapeCsvValue(csvRecord.task)}","${this.escapeCsvValue(csvRecord.description)}","${csvRecord.durationMinutes}"`
@@ -1727,10 +1734,13 @@ export default class ReportingMembersController extends ReportingControllerBaseW
   }
 
   private static parseTimelogExportQueryParams(req: IWorkLenzRequest): ParsedTimelogExportQueryParams {
-    const { team_member_id, duration, date_range, billable, search } = req.query;
+    const { team_member_id, team_member_ids, project_ids, client_ids, duration, date_range, billable, search } = req.query;
 
     return {
       teamMemberId: this.convertQueryParam(team_member_id),
+      teamMemberIds: this.convertQueryParam(team_member_ids),
+      projectIds: this.convertQueryParam(project_ids),
+      clientIds: this.convertQueryParam(client_ids),
       duration: this.convertQueryParam(duration),
       dateRange: this.convertQueryParam(date_range),
       billable: this.convertQueryParam(billable),
@@ -1776,111 +1786,146 @@ export default class ReportingMembersController extends ReportingControllerBaseW
   }
 
   /**
-   * Shared helper method to fetch timelogs data for both CSV and Excel exports
+   * Normalizes an id or list of ids (array or comma-separated string) and keeps only valid UUIDs
+   * plus any explicitly allowed sentinel values.
    */
-  private static async getTimelogsFlatData(req: IWorkLenzRequest, team_member_id?: string, duration?: string, date_range?: string, billable?: string, search?: string): Promise<any> {
-    // Get the team_id from request user
+  private static toIdList(value: unknown, allowed: string[] = []): string[] {
+    const raw = Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [];
+    return raw
+      .map(v => String(v).trim())
+      .filter(v => UUID_PATTERN.test(v) || allowed.includes(v));
+  }
+
+  /**
+   * Shared query behind the flat time log list and its CSV/Excel exports.
+   */
+  private static async queryTimelogsFlat(req: IWorkLenzRequest, filters: TimelogFlatFilters): Promise<TimelogFlatRow[]> {
     const teamId = req.user?.team_id;
-
-    let dateRange: string[] = [];
-    if (typeof date_range === "string") {
-      dateRange = date_range.split(",");
-    }
-
-    // Get user timezone
     const userTimezone = await this.getUserTimezone(req.user?.id as string);
-    
-    // Build params array with timezone first, then date range values
+
+    // $1 is always the user's timezone
     const params: any[] = [userTimezone];
-    let paramIndex = 2;
-    
-    // Add date range parameters and build duration clause
-    let durationClause = '';
-    if (dateRange && dateRange.length === 2) {
-      const startDate = moment(dateRange[0]).format('YYYY-MM-DD HH:mm:ss');
-      const endDate = moment(dateRange[1]).add(1, 'day').format('YYYY-MM-DD HH:mm:ss');
-      durationClause = `AND twl.created_at >= $${paramIndex}::TIMESTAMP AND twl.created_at < $${paramIndex + 1}::TIMESTAMP`;
-      params.push(startDate, endDate);
-      paramIndex += 2;
-    } else {
-      // Use default duration logic if no date_range provided
-      if (!duration || duration === DATE_RANGES.LAST_WEEK) {
-        durationClause = `AND twl.created_at >= (CURRENT_DATE - INTERVAL '1 week')::TIMESTAMP`;
-      } else if (duration === DATE_RANGES.YESTERDAY) {
-        durationClause = `AND twl.created_at >= (CURRENT_DATE - INTERVAL '1 day')::TIMESTAMP AND twl.created_at < CURRENT_DATE::TIMESTAMP`;
-      } else if (duration === DATE_RANGES.LAST_MONTH) {
-        durationClause = `AND twl.created_at >= (CURRENT_DATE - INTERVAL '1 month')::TIMESTAMP`;
-      } else if (duration === DATE_RANGES.LAST_QUARTER) {
-        durationClause = `AND twl.created_at >= (CURRENT_DATE - INTERVAL '3 months')::TIMESTAMP`;
-      }
+    const nextParam = (value: any) => {
+      params.push(value);
+      return `$${params.length}`;
+    };
+    const inClause = (values: string[]) => values.map(v => `${nextParam(v)}::UUID`).join(", ");
+
+    const conditions: string[] = [];
+
+    const { dateRange, duration } = filters;
+    if (dateRange.length === 2) {
+      const startDate = moment(dateRange[0]).format("YYYY-MM-DD HH:mm:ss");
+      const endDate = moment(dateRange[1]).add(1, "day").format("YYYY-MM-DD HH:mm:ss");
+      conditions.push(`twl.created_at >= ${nextParam(startDate)}::TIMESTAMP AND twl.created_at < ${nextParam(endDate)}::TIMESTAMP`);
+    } else if (!duration || duration === DATE_RANGES.LAST_WEEK) {
+      conditions.push(`twl.created_at >= (CURRENT_DATE - INTERVAL '1 week')::TIMESTAMP`);
+    } else if (duration === DATE_RANGES.YESTERDAY) {
+      conditions.push(`twl.created_at >= (CURRENT_DATE - INTERVAL '1 day')::TIMESTAMP AND twl.created_at < CURRENT_DATE::TIMESTAMP`);
+    } else if (duration === DATE_RANGES.LAST_MONTH) {
+      conditions.push(`twl.created_at >= (CURRENT_DATE - INTERVAL '1 month')::TIMESTAMP`);
+    } else if (duration === DATE_RANGES.LAST_QUARTER) {
+      conditions.push(`twl.created_at >= (CURRENT_DATE - INTERVAL '3 months')::TIMESTAMP`);
     }
 
-    // Parse billable filter
-    let billableFilter = { billable: true, nonBillable: true };
-    if (typeof billable === "string") {
-      try {
-        billableFilter = JSON.parse(billable);
-      } catch (e) {
-        // Use default
-      }
-    }
-    const billableQuery = this.buildBillableQuery(billableFilter, "t");
+    // Only show logs from the current team
+    if (teamId) conditions.push(`p.team_id = ${nextParam(teamId)}`);
 
-    // Team filter - only show logs from current team if team_id is available
-    let teamFilter = '';
-    if (teamId) {
-      teamFilter = `AND p.team_id = $${paramIndex}`;
-      params.push(teamId);
-      paramIndex++;
+    if (filters.teamMemberIds.length) {
+      conditions.push(`u.id IN (SELECT user_id FROM team_members WHERE id IN (${inClause(filters.teamMemberIds)}))`);
     }
 
-    // Optional member filter
-    const memberFilter = team_member_id ? `AND u.id = (SELECT user_id FROM team_members WHERE id = $${paramIndex})` : '';
-    if (team_member_id) {
-      params.push(team_member_id);
-      paramIndex++;
+    if (filters.projectIds.length) {
+      conditions.push(`p.id IN (${inClause(filters.projectIds)})`);
     }
 
-    // Optional search filter
-    const searchFilter = search ? `AND (
-      LOWER(t.name) LIKE LOWER($${paramIndex}) OR
-      LOWER(p.name) LIKE LOWER($${paramIndex}) OR
-      LOWER(u.name) LIKE LOWER($${paramIndex}) OR
-      LOWER(COALESCE(twl.description, '')) LIKE LOWER($${paramIndex})
-    )` : '';
-    if (search) {
-      params.push(`%${search}%`);
+    if (filters.clientIds.length) {
+      const includeNoClient = filters.clientIds.includes(NO_CLIENT_FILTER_ID);
+      const clientIds = filters.clientIds.filter(id => id !== NO_CLIENT_FILTER_ID);
+      const clientConditions: string[] = [];
+      if (clientIds.length) clientConditions.push(`p.client_id IN (${inClause(clientIds)})`);
+      if (includeNoClient) clientConditions.push(`p.client_id IS NULL`);
+      conditions.push(`(${clientConditions.join(" OR ")})`);
     }
+
+    // Optional search filter (task, project, member, description)
+    if (filters.search) {
+      const searchParam = nextParam(`%${filters.search}%`);
+      conditions.push(`(
+        LOWER(t.name) LIKE LOWER(${searchParam}) OR
+        LOWER(p.name) LIKE LOWER(${searchParam}) OR
+        LOWER(u.name) LIKE LOWER(${searchParam}) OR
+        LOWER(COALESCE(twl.description, '')) LIKE LOWER(${searchParam})
+      )`);
+    }
+
+    const billableQuery = this.buildBillableQuery(filters.billable, "t");
 
     const q = `
       SELECT
+        twl.id,
+        twl.created_at,
         (twl.created_at AT TIME ZONE 'UTC' AT TIME ZONE $1)::DATE AS log_day,
+        u.id AS user_id,
         u.name AS user_name,
+        u.avatar_url AS user_avatar_url,
+        tm.id AS team_member_id,
+        p.id AS project_id,
         p.name AS project_name,
+        p.color_code AS project_color,
+        c.id AS client_id,
+        c.name AS client_name,
+        t.id AS task_id,
         t.name AS task_name,
+        t.billable,
         twl.time_spent,
         twl.description
       FROM task_work_log twl
       JOIN tasks t ON t.id = twl.task_id
       JOIN projects p ON p.id = t.project_id
       JOIN users u ON u.id = twl.user_id
+      LEFT JOIN team_members tm ON tm.user_id = u.id AND tm.team_id = p.team_id
+      LEFT JOIN clients c ON c.id = p.client_id
       WHERE 1=1
-        ${teamFilter}
-        ${memberFilter}
-        ${durationClause}
+        ${conditions.map(c => `AND ${c}`).join("\n        ")}
         ${billableQuery}
-        ${searchFilter}
-      ORDER BY log_day DESC, user_name ASC`;
+      ORDER BY log_day DESC, user_name ASC, twl.created_at DESC`;
 
-    return await db.query(q, params);
+    const result = await db.query(q, params);
+    return result.rows;
+  }
+
+  /**
+   * Shared helper method to fetch timelogs data for both CSV and Excel exports
+   */
+  private static async getTimelogsFlatData(req: IWorkLenzRequest, params: ParsedTimelogExportQueryParams): Promise<TimelogFlatRow[]> {
+    // Parse billable filter
+    let billableFilter = { billable: true, nonBillable: true };
+    if (typeof params.billable === "string") {
+      try {
+        billableFilter = JSON.parse(params.billable);
+      } catch (e) {
+        // Use default
+      }
+    }
+
+    return this.queryTimelogsFlat(req, {
+      teamMemberIds: [...this.toIdList(params.teamMemberIds), ...this.toIdList(params.teamMemberId)],
+      projectIds: this.toIdList(params.projectIds),
+      clientIds: this.toIdList(params.clientIds, [NO_CLIENT_FILTER_ID]),
+      duration: params.duration,
+      dateRange: typeof params.dateRange === "string" ? params.dateRange.split(",") : [],
+      billable: billableFilter,
+      search: params.search,
+    });
   }
 
   @HandleExceptions()
   public static async exportTimelogsFlatExcel(req: IWorkLenzRequest, res: IWorkLenzResponse): Promise<void> {
-    const { teamMemberId, duration, dateRange, billable, search } = this.parseTimelogExportQueryParams(req);
+    const exportParams = this.parseTimelogExportQueryParams(req);
 
     // Get data using shared helper method
-    const rows = await this.getTimelogsFlatData(req, teamMemberId, duration, dateRange, billable, search);
+    const rows = await this.getTimelogsFlatData(req, exportParams);
 
     // Create Excel workbook
     const workbook = new Excel.Workbook();
@@ -1905,7 +1950,7 @@ export default class ReportingMembersController extends ReportingControllerBaseW
     };
 
     // Add data rows
-    for (const row of rows.rows as TimelogFlatExportRow[]) {
+    for (const row of rows) {
       const exportRow = this.mapTimelogExportRow(row);
       worksheet.addRow({
         date: exportRow.date ? moment(exportRow.date).format("MMM DD, YYYY") : "",

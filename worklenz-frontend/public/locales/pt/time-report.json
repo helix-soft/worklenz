@@ -132,6 +132,76 @@
   "unknown": "Desconhecido",
   "totalLogged": "Total registado",
   "varianceUnder": "(abaixo)",
-  "varianceOver": "(acima)"
+  "varianceOver": "(acima)",
 
+  "timeLogsReport": {
+    "pageTitle": "Registros de tempo",
+    "views": {
+      "summary": "Resumo",
+      "detailed": "Detalhado"
+    },
+    "dateRange": "Intervalo de datas",
+    "previousPeriod": "Período anterior",
+    "nextPeriod": "Próximo período",
+    "presets": {
+      "today": "Hoje",
+      "yesterday": "Ontem",
+      "thisWeek": "Esta semana",
+      "lastWeek": "Semana passada",
+      "thisMonth": "Este mês",
+      "lastMonth": "Mês passado",
+      "thisYear": "Este ano"
+    },
+    "filters": {
+      "members": "Equipe",
+      "clients": "Cliente",
+      "projects": "Projeto",
+      "billable": "Status de faturamento",
+      "allBillable": "Faturável e não faturável",
+      "billableOnly": "Faturável",
+      "nonBillableOnly": "Não faturável",
+      "description": "Pesquisar descrição, tarefa, projeto...",
+      "clear": "Limpar filtros"
+    },
+    "total": "Total",
+    "groupBy": "Agrupar por",
+    "thenBy": "Depois por",
+    "groupByOptions": {
+      "none": "(Nenhum)",
+      "project": "Projeto",
+      "client": "Cliente",
+      "member": "Membro",
+      "task": "Tarefa",
+      "date": "Data",
+      "description": "Descrição"
+    },
+    "columns": {
+      "title": "Título",
+      "duration": "Duração",
+      "share": "Proporção",
+      "date": "Data",
+      "description": "Descrição",
+      "project": "Projeto",
+      "member": "Membro",
+      "billable": "Faturável"
+    },
+    "noClient": "Sem cliente",
+    "noDescription": "(sem descrição)",
+    "unknown": "(desconhecido)",
+    "other": "Outros",
+    "weekOf": "Semana de {{date}}",
+    "entryCount_one": "{{count}} registro",
+    "entryCount_other": "{{count}} registros",
+    "empty": "Nenhum tempo registrado neste período",
+    "emptyHint": "Tente outro intervalo de datas ou limpe os filtros.",
+    "errorTitle": "Não foi possível carregar os registros de tempo",
+    "errorHint": "Verifique sua conexão e tente novamente.",
+    "retry": "Tentar novamente",
+    "refresh": "Atualizar",
+    "export": "Exportar",
+    "exportExcel": "Exportar Excel",
+    "exportCsv": "Exportar CSV",
+    "barChartLabel": "Tempo registrado por período",
+    "donutChartLabel": "Proporção do tempo registrado por grupo"
+  }
 }

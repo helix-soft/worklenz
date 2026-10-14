@@ -380,7 +380,7 @@ export default class ReportingAllocationController extends ReportingControllerBa
     const teams = (req.body.teams || []) as string[]; // ids
     const projects = (req.body.projects || []) as string[];
     const categories = (req.body.categories || []) as string[];
-    const noCategory = req.body.noCategory || true;
+    const noCategory = req.body.noCategory ?? true;
     const billable = req.body.billable;
 
     // Early return if no teams or projects

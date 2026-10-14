@@ -192,57 +192,51 @@ export const reportingExportApiService = {
     window.location.href = `${rootUrl}/project-member-tasks/export${params}`;
   },
 
-  exportTimelogsFlatCSV(body: {
-    team_member_id?: string;
-    duration?: string;
-    date_range: string[];
-    billable: { billable: boolean; nonBillable: boolean };
-    search?: string;
-  }) {
-    // Build query string manually to avoid issues with undefined values
-    const queryParts: string[] = [];
-
-    queryParts.push(`date_range=${body.date_range.join(',')}`);
-    queryParts.push(`billable=${encodeURIComponent(JSON.stringify(body.billable))}`);
-
-    if (body.team_member_id) {
-      queryParts.push(`team_member_id=${body.team_member_id}`);
-    }
-    if (body.duration) {
-      queryParts.push(`duration=${body.duration}`);
-    }
-    if (body.search) {
-      queryParts.push(`search=${encodeURIComponent(body.search)}`);
-    }
-
-    const queryString = '?' + queryParts.join('&');
-    window.location.href = `${rootUrl}/timelogs-flat/export-csv${queryString}`;
+  exportTimelogsFlatCSV(body: ITimelogsFlatExportParams) {
+    window.location.href = `${rootUrl}/timelogs-flat/export-csv${buildTimelogsFlatExportQuery(body)}`;
   },
 
-  exportTimelogsFlatExcel(body: {
-    team_member_id?: string;
-    duration?: string;
-    date_range: string[];
-    billable: { billable: boolean; nonBillable: boolean };
-    search?: string;
-  }) {
-    // Build query string manually to avoid issues with undefined values
-    const queryParts: string[] = [];
-
-    queryParts.push(`date_range=${body.date_range.join(',')}`);
-    queryParts.push(`billable=${encodeURIComponent(JSON.stringify(body.billable))}`);
-
-    if (body.team_member_id) {
-      queryParts.push(`team_member_id=${body.team_member_id}`);
-    }
-    if (body.duration) {
-      queryParts.push(`duration=${body.duration}`);
-    }
-    if (body.search) {
-      queryParts.push(`search=${encodeURIComponent(body.search)}`);
-    }
-
-    const queryString = '?' + queryParts.join('&');
-    window.location.href = `${rootUrl}/timelogs-flat/export-excel${queryString}`;
+  exportTimelogsFlatExcel(body: ITimelogsFlatExportParams) {
+    window.location.href = `${rootUrl}/timelogs-flat/export-excel${buildTimelogsFlatExportQuery(body)}`;
   },
+};
+
+interface ITimelogsFlatExportParams {
+  team_member_id?: string;
+  team_member_ids?: string[];
+  project_ids?: string[];
+  client_ids?: string[];
+  duration?: string;
+  date_range: string[];
+  billable: { billable: boolean; nonBillable: boolean };
+  search?: string;
+}
+
+// Build query string manually to avoid issues with undefined values
+const buildTimelogsFlatExportQuery = (body: ITimelogsFlatExportParams): string => {
+  const queryParts: string[] = [];
+
+  queryParts.push(`date_range=${body.date_range.join(',')}`);
+  queryParts.push(`billable=${encodeURIComponent(JSON.stringify(body.billable))}`);
+
+  if (body.team_member_id) {
+    queryParts.push(`team_member_id=${body.team_member_id}`);
+  }
+  if (body.team_member_ids?.length) {
+    queryParts.push(`team_member_ids=${body.team_member_ids.join(',')}`);
+  }
+  if (body.project_ids?.length) {
+    queryParts.push(`project_ids=${body.project_ids.join(',')}`);
+  }
+  if (body.client_ids?.length) {
+    queryParts.push(`client_ids=${encodeURIComponent(body.client_ids.join(','))}`);
+  }
+  if (body.duration) {
+    queryParts.push(`duration=${body.duration}`);
+  }
+  if (body.search) {
+    queryParts.push(`search=${encodeURIComponent(body.search)}`);
+  }
+
+  return '?' + queryParts.join('&');
 };

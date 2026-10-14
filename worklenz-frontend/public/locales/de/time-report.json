@@ -132,6 +132,76 @@
   "unknown": "Unbekannt",
   "totalLogged": "Gesamt protokolliert",
   "varianceUnder": "(unter)",
-  "varianceOver": "(über)"
+  "varianceOver": "(über)",
 
+  "timeLogsReport": {
+    "pageTitle": "Zeitprotokolle",
+    "views": {
+      "summary": "Übersicht",
+      "detailed": "Detailliert"
+    },
+    "dateRange": "Zeitraum",
+    "previousPeriod": "Vorheriger Zeitraum",
+    "nextPeriod": "Nächster Zeitraum",
+    "presets": {
+      "today": "Heute",
+      "yesterday": "Gestern",
+      "thisWeek": "Diese Woche",
+      "lastWeek": "Letzte Woche",
+      "thisMonth": "Dieser Monat",
+      "lastMonth": "Letzter Monat",
+      "thisYear": "Dieses Jahr"
+    },
+    "filters": {
+      "members": "Team",
+      "clients": "Kunde",
+      "projects": "Projekt",
+      "billable": "Abrechnungsstatus",
+      "allBillable": "Abrechenbar & nicht abrechenbar",
+      "billableOnly": "Abrechenbar",
+      "nonBillableOnly": "Nicht abrechenbar",
+      "description": "Beschreibung, Aufgabe, Projekt suchen...",
+      "clear": "Filter zurücksetzen"
+    },
+    "total": "Gesamt",
+    "groupBy": "Gruppieren nach",
+    "thenBy": "Dann nach",
+    "groupByOptions": {
+      "none": "(Keine)",
+      "project": "Projekt",
+      "client": "Kunde",
+      "member": "Mitglied",
+      "task": "Aufgabe",
+      "date": "Datum",
+      "description": "Beschreibung"
+    },
+    "columns": {
+      "title": "Titel",
+      "duration": "Dauer",
+      "share": "Anteil",
+      "date": "Datum",
+      "description": "Beschreibung",
+      "project": "Projekt",
+      "member": "Mitglied",
+      "billable": "Abrechenbar"
+    },
+    "noClient": "Ohne Kunde",
+    "noDescription": "(keine Beschreibung)",
+    "unknown": "(unbekannt)",
+    "other": "Sonstige",
+    "weekOf": "Woche vom {{date}}",
+    "entryCount_one": "{{count}} Eintrag",
+    "entryCount_other": "{{count}} Einträge",
+    "empty": "In diesem Zeitraum wurde keine Zeit erfasst",
+    "emptyHint": "Wählen Sie einen anderen Zeitraum oder setzen Sie die Filter zurück.",
+    "errorTitle": "Zeitprotokolle konnten nicht geladen werden",
+    "errorHint": "Prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "retry": "Erneut versuchen",
+    "refresh": "Aktualisieren",
+    "export": "Exportieren",
+    "exportExcel": "Excel exportieren",
+    "exportCsv": "CSV exportieren",
+    "barChartLabel": "Erfasste Zeit pro Zeitraum",
+    "donutChartLabel": "Anteil der erfassten Zeit nach Gruppe"
+  }
 }

@@ -57,7 +57,7 @@ const initialState: ITimeReportsOverviewState = {
   loadingPractices: false,
 
   categories: [],
-  noCategory: false,
+  noCategory: true,
   loadingCategories: false,
 
   projects: [],

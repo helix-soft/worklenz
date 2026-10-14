@@ -19,6 +19,11 @@ import {
 } from '@/types/reporting/reporting.types';
 import { IReportingInfo } from '@/types/reporting/reporting.types';
 import {
+  ITimeLogsFilterOptions,
+  ITimeLogsFlatGroup,
+  ITimeLogsFlatRequest,
+} from '@/types/reporting/time-logs-report.types';
+import {
   IMemberProjectsResonse,
   IMemberTaskStatGroupResonse,
   IRPTMemberProject,
@@ -282,10 +287,16 @@ export const reportingApiService = {
   },
 
   getTimelogsFlat: async (
-    body: any | null = null
-  ): Promise<IServerResponse<ISingleMemberLogs[]>> => {
+    body: ITimeLogsFlatRequest
+  ): Promise<IServerResponse<ITimeLogsFlatGroup[]>> => {
     const url = `${rootUrl}/members/timelogs-flat`;
-    const response = await apiClient.post<IServerResponse<ISingleMemberLogs[]>>(url, body);
+    const response = await apiClient.post<IServerResponse<ITimeLogsFlatGroup[]>>(url, body);
+    return response.data;
+  },
+
+  getTimelogsFilterOptions: async (): Promise<IServerResponse<ITimeLogsFilterOptions>> => {
+    const url = `${rootUrl}/members/timelogs-filters`;
+    const response = await apiClient.get<IServerResponse<ITimeLogsFilterOptions>>(url);
     return response.data;
   },
 

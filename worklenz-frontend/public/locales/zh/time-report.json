@@ -134,6 +134,76 @@
   "unknown": "未知",
   "totalLogged": "总记录",
   "varianceUnder": "（不足）",
-  "varianceOver": "（超出）"
+  "varianceOver": "（超出）",
 
+  "timeLogsReport": {
+    "pageTitle": "工时记录",
+    "views": {
+      "summary": "汇总",
+      "detailed": "明细"
+    },
+    "dateRange": "日期范围",
+    "previousPeriod": "上一周期",
+    "nextPeriod": "下一周期",
+    "presets": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "thisWeek": "本周",
+      "lastWeek": "上周",
+      "thisMonth": "本月",
+      "lastMonth": "上月",
+      "thisYear": "今年"
+    },
+    "filters": {
+      "members": "团队",
+      "clients": "客户",
+      "projects": "项目",
+      "billable": "计费状态",
+      "allBillable": "计费和非计费",
+      "billableOnly": "计费",
+      "nonBillableOnly": "非计费",
+      "description": "搜索描述、任务、项目...",
+      "clear": "清除筛选"
+    },
+    "total": "合计",
+    "groupBy": "分组依据",
+    "thenBy": "然后按",
+    "groupByOptions": {
+      "none": "（无）",
+      "project": "项目",
+      "client": "客户",
+      "member": "成员",
+      "task": "任务",
+      "date": "日期",
+      "description": "描述"
+    },
+    "columns": {
+      "title": "标题",
+      "duration": "时长",
+      "share": "占比",
+      "date": "日期",
+      "description": "描述",
+      "project": "项目",
+      "member": "成员",
+      "billable": "计费"
+    },
+    "noClient": "无客户",
+    "noDescription": "（无描述）",
+    "unknown": "（未知）",
+    "other": "其他",
+    "weekOf": "{{date}} 当周",
+    "entryCount_one": "{{count}} 条记录",
+    "entryCount_other": "{{count}} 条记录",
+    "empty": "此期间没有记录工时",
+    "emptyHint": "请尝试其他日期范围或清除筛选条件。",
+    "errorTitle": "无法加载工时记录",
+    "errorHint": "请检查网络连接后重试。",
+    "retry": "重试",
+    "refresh": "刷新",
+    "export": "导出",
+    "exportExcel": "导出 Excel",
+    "exportCsv": "导出 CSV",
+    "barChartLabel": "各周期记录的工时",
+    "donutChartLabel": "按分组的工时占比"
+  }
 }

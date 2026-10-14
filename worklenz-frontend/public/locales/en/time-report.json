@@ -132,6 +132,76 @@
   "unknown": "Unknown",
   "totalLogged": "Total Logged",
   "varianceUnder": "(under)",
-  "varianceOver": "(over)"
+  "varianceOver": "(over)",
 
+  "timeLogsReport": {
+    "pageTitle": "Time Logs",
+    "views": {
+      "summary": "Summary",
+      "detailed": "Detailed"
+    },
+    "dateRange": "Date range",
+    "previousPeriod": "Previous period",
+    "nextPeriod": "Next period",
+    "presets": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "thisWeek": "This week",
+      "lastWeek": "Last week",
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "thisYear": "This year"
+    },
+    "filters": {
+      "members": "Team",
+      "clients": "Client",
+      "projects": "Project",
+      "billable": "Billable status",
+      "allBillable": "Billable & non-billable",
+      "billableOnly": "Billable",
+      "nonBillableOnly": "Non-billable",
+      "description": "Search description, task, project...",
+      "clear": "Clear filters"
+    },
+    "total": "Total",
+    "groupBy": "Group by",
+    "thenBy": "Then by",
+    "groupByOptions": {
+      "none": "(None)",
+      "project": "Project",
+      "client": "Client",
+      "member": "Member",
+      "task": "Task",
+      "date": "Date",
+      "description": "Description"
+    },
+    "columns": {
+      "title": "Title",
+      "duration": "Duration",
+      "share": "Share",
+      "date": "Date",
+      "description": "Description",
+      "project": "Project",
+      "member": "Member",
+      "billable": "Billable"
+    },
+    "noClient": "Without client",
+    "noDescription": "(no description)",
+    "unknown": "(unknown)",
+    "other": "Other",
+    "weekOf": "Week of {{date}}",
+    "entryCount_one": "{{count}} entry",
+    "entryCount_other": "{{count}} entries",
+    "empty": "No time logged in this period",
+    "emptyHint": "Try another date range or clear the filters.",
+    "errorTitle": "Couldn't load time logs",
+    "errorHint": "Check your connection and try again.",
+    "retry": "Try again",
+    "refresh": "Refresh",
+    "export": "Export",
+    "exportExcel": "Export Excel",
+    "exportCsv": "Export CSV",
+    "barChartLabel": "Logged time per period",
+    "donutChartLabel": "Share of logged time by group"
+  }
 }

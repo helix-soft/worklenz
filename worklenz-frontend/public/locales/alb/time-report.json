@@ -132,6 +132,76 @@
   "unknown": "E panjohur",
   "totalLogged": "Totali i regjistruar",
   "varianceUnder": "(nën)",
-  "varianceOver": "(mbi)"
+  "varianceOver": "(mbi)",
 
+  "timeLogsReport": {
+    "pageTitle": "Regjistrimet e kohës",
+    "views": {
+      "summary": "Përmbledhje",
+      "detailed": "Të detajuara"
+    },
+    "dateRange": "Periudha",
+    "previousPeriod": "Periudha e mëparshme",
+    "nextPeriod": "Periudha e ardhshme",
+    "presets": {
+      "today": "Sot",
+      "yesterday": "Dje",
+      "thisWeek": "Këtë javë",
+      "lastWeek": "Javën e kaluar",
+      "thisMonth": "Këtë muaj",
+      "lastMonth": "Muajin e kaluar",
+      "thisYear": "Këtë vit"
+    },
+    "filters": {
+      "members": "Ekipi",
+      "clients": "Klienti",
+      "projects": "Projekti",
+      "billable": "Statusi i faturimit",
+      "allBillable": "Të faturueshme dhe jo të faturueshme",
+      "billableOnly": "E faturueshme",
+      "nonBillableOnly": "Jo e faturueshme",
+      "description": "Kërko përshkrim, detyrë, projekt...",
+      "clear": "Pastro filtrat"
+    },
+    "total": "Totali",
+    "groupBy": "Grupo sipas",
+    "thenBy": "Pastaj sipas",
+    "groupByOptions": {
+      "none": "(Asnjë)",
+      "project": "Projekti",
+      "client": "Klienti",
+      "member": "Anëtari",
+      "task": "Detyra",
+      "date": "Data",
+      "description": "Përshkrimi"
+    },
+    "columns": {
+      "title": "Titulli",
+      "duration": "Kohëzgjatja",
+      "share": "Përqindja",
+      "date": "Data",
+      "description": "Përshkrimi",
+      "project": "Projekti",
+      "member": "Anëtari",
+      "billable": "E faturueshme"
+    },
+    "noClient": "Pa klient",
+    "noDescription": "(pa përshkrim)",
+    "unknown": "(i panjohur)",
+    "other": "Të tjera",
+    "weekOf": "Java e {{date}}",
+    "entryCount_one": "{{count}} regjistrim",
+    "entryCount_other": "{{count}} regjistrime",
+    "empty": "Nuk është regjistruar kohë në këtë periudhë",
+    "emptyHint": "Provoni një periudhë tjetër ose pastroni filtrat.",
+    "errorTitle": "Regjistrimet e kohës nuk u ngarkuan",
+    "errorHint": "Kontrolloni lidhjen dhe provoni përsëri.",
+    "retry": "Provo përsëri",
+    "refresh": "Rifresko",
+    "export": "Eksporto",
+    "exportExcel": "Eksporto Excel",
+    "exportCsv": "Eksporto CSV",
+    "barChartLabel": "Koha e regjistruar për periudhë",
+    "donutChartLabel": "Përqindja e kohës së regjistruar sipas grupit"
+  }
 }
