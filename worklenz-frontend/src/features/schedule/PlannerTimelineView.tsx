@@ -1315,6 +1315,9 @@ const PlannerTimelineView: React.FC = () => {
       const ceiling = today.endOf('year').add(2, 'year');
       if (ceiling.isAfter(end)) end = ceiling;
     }
+    // Every zoom lets you plan at least half a year ahead, even when no project runs that long.
+    const halfYearAhead = today.add(6, 'month').endOf(boundaryUnit as any);
+    if (halfYearAhead.isAfter(end)) end = halfYearAhead;
     return end;
   }, [projects, boundaryUnit, boundaryStepUnit, zoom, dateFilter, cfg.unit]);
 
