@@ -1,0 +1,150 @@
+{
+  "loadError": "Não foi possível carregar os dados.",
+  "retry": "Tentar novamente",
+  "save": "Salvar",
+  "cancel": "Cancelar",
+  "yes": "Sim",
+  "no": "Não",
+  "type": {
+    "vacation": "Férias",
+    "sick": "Licença médica"
+  },
+  "status": {
+    "pending": "Pendente",
+    "approved": "Aprovado",
+    "rejected": "Rejeitado",
+    "cancelled": "Cancelado"
+  },
+  "admin": {
+    "title": "Ausências e presença",
+    "subtitle": "Presença mensal para vales-refeição, cotas anuais de férias e pedidos de ausência.",
+    "holidaysHint": "Feriados oficiais são excluídos dos dias úteis. Gerencie-os nas",
+    "holidaysLink": "configurações do Centro de administração",
+    "tabs": {
+      "summary": "Resumo mensal",
+      "balances": "Cotas de férias",
+      "requests": "Pedidos de ausência"
+    }
+  },
+  "summary": {
+    "monthPicker": "Selecionar mês",
+    "workDaysInMonth": "Dias úteis oficiais neste mês: {{count}}",
+    "empty": "Nenhum membro da equipe encontrado.",
+    "extraWorkedHint": "Registrou trabalho em fim de semana ou feriado. Você pode conceder dias de férias extras por isso.",
+    "footnote": "Dias úteis oficiais = segunda a sexta menos os feriados oficiais. Dias trabalhados = dias úteis oficiais menos férias e licenças médicas aprovadas; também é o número de vales-refeição.",
+    "columns": {
+      "name": "Nome",
+      "email": "E-mail",
+      "work_days": "Dias úteis",
+      "worked_days": "Dias trabalhados",
+      "logged_hours": "Horas (esperadas / registradas)",
+      "office_days": "Dias no escritório",
+      "remote_days": "Dias remotos",
+      "leave_days": "Dias de férias",
+      "extra_worked_days": "Trabalhou em dias não úteis"
+    },
+    "exportPdf": "Baixar relatório PDF",
+    "hoursHint": "Esperadas = dias trabalhados × horas diárias. Registradas = tempo registrado em tarefas."
+  },
+  "balances": {
+    "yearPicker": "Selecionar ano",
+    "hint": "As férias são descontadas da cota. Transfira os dias restantes do ano anterior adicionando dias extras.",
+    "notSet": "Não definido",
+    "baseSetBy": "Definido por {{name}} em {{date}}",
+    "editBase": "Editar cota base",
+    "history": "Histórico",
+    "addExtra": "Adicionar dias",
+    "baseModalTitle": "Cota base de {{name}} ({{year}})",
+    "baseDaysLabel": "Dias de férias por ano",
+    "baseDaysRequired": "Informe o número de dias",
+    "extraModalTitle": "Adicionar dias extras para {{name}} ({{year}})",
+    "extraDaysLabel": "Número de dias",
+    "noteLabel": "Observação",
+    "noteRequired": "A observação é obrigatória, ex.: por que o dia foi concedido",
+    "notePlaceholder": "ex.: Trabalhou em um feriado, por isso ganhou um dia de folga extra",
+    "historyTitle": "Dias extras de {{name}} ({{year}})",
+    "noHistory": "Nenhum dia extra foi adicionado este ano.",
+    "addedBy": "Adicionado por {{name}}",
+    "columns": {
+      "name": "Nome",
+      "base": "Base",
+      "extra": "Extra",
+      "total": "Total",
+      "used": "Usados",
+      "pending": "Pendentes",
+      "remaining": "Restantes"
+    },
+    "editExtraModalTitle": "Editar dias extras de {{name}} ({{year}})",
+    "editedBy": "Editado por {{name}} em {{date}}",
+    "deleteExtraConfirm": "Excluir estes dias extras? A cota será reduzida."
+  },
+  "requests": {
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "approveTitle": "Aprovar pedido de ausência",
+    "rejectTitle": "Rejeitar pedido de ausência",
+    "reviewSummary": "{{name}}: {{start}} – {{end}}",
+    "reviewedBy": "{{name}}, {{date}}",
+    "notePlaceholder": "Observação (opcional)",
+    "empty": "Não há pedidos de ausência aqui.",
+    "filter": {
+      "pending": "Pendentes",
+      "approved": "Aprovados",
+      "rejected": "Rejeitados",
+      "all": "Todos"
+    },
+    "columns": {
+      "member": "Membro",
+      "period": "Período",
+      "type": "Tipo",
+      "reason": "Motivo",
+      "status": "Status"
+    },
+    "changeToApproved": "Aprovar em vez disso",
+    "changeToRejected": "Rejeitar em vez disso",
+    "deleteConfirm": "Excluir este pedido permanentemente?",
+    "deleteApprovedConfirm": "Excluir este pedido? A ausência aprovada será removida e os dias voltarão à cota.",
+    "changeToApprovedHint": "Este pedido foi rejeitado. Ao aprová-lo, a ausência será registrada e os dias descontados.",
+    "changeToRejectedHint": "Este pedido foi aprovado. Ao rejeitá-lo, a ausência será removida e os dias devolvidos."
+  },
+  "my": {
+    "title": "Minhas ausências",
+    "requestLeave": "Solicitar ausência",
+    "submitRequest": "Enviar pedido",
+    "noAllowance": "Sua cota de férias para este ano ainda não foi definida. Peça a um administrador.",
+    "requestsTitle": "Meus pedidos de ausência",
+    "noRequests": "Você não tem pedidos de ausência este ano.",
+    "extraDaysTitle": "Dias extras concedidos",
+    "cancelConfirm": "Cancelar este pedido de ausência?",
+    "cancelRequest": "Cancelar pedido",
+    "period": "Período",
+    "periodRequired": "Selecione o primeiro e o último dia",
+    "type": "Tipo",
+    "reason": "Motivo (opcional)",
+    "requestHint": "Apenas dias úteis são contados. As férias são descontadas da cota após aprovação."
+  },
+  "location": {
+    "title": "Onde trabalhei",
+    "office": "Escritório",
+    "remote": "Remoto",
+    "none": "Não definido",
+    "noDays": "Ainda não há dias úteis para mostrar."
+  },
+  "checkIn": {
+    "title": "Onde você está trabalhando hoje?",
+    "description": "Sua resposta é usada para a presença mensal e os vales-refeição.",
+    "later": "Perguntar depois",
+    "changeHint": "Escolheu errado? Você pode alterar em",
+    "changeLink": "Configurações → Minhas ausências"
+  },
+  "edit": "Editar",
+  "delete": "Excluir",
+  "close": "Fechar",
+  "details": {
+    "title": "Detalhes da ausência",
+    "editTitle": "Editar ausência",
+    "deleteConfirm": "Excluir esta ausência? Os dias voltarão à cota.",
+    "editHint": "Apenas dias úteis são contados. As alterações atualizam a cota imediatamente.",
+    "readOnlyHint": "Somente um administrador pode alterar uma ausência registrada."
+  }
+}

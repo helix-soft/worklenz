@@ -4,7 +4,7 @@ import { IWorkLenzRequest } from "../../interfaces/worklenz-request";
 import { IWorkLenzResponse } from "../../interfaces/worklenz-response";
 import { ServerResponse } from "../../models/server-response";
 import WorklenzControllerBase from "../worklenz-controller-base";
-import { getManagedMembers } from "../../shared/team-permissions";
+import { getManagedMembers, hasTeamAdminPrivileges } from "../../shared/team-permissions";
 
 interface ITimeOffFilters {
     teamMemberId?: string;
@@ -20,7 +20,7 @@ interface ITimeOffBody {
     is_full_day?: boolean;
     hours_off?: number | null;
     timezone?: string | null;
-    type?: "vacation" | "sick" | "personal" | "other" | null;
+    type?: "vacation" | "sick" | null;
 }
 
 export default class TimeOffController extends WorklenzControllerBase {
@@ -65,7 +65,7 @@ export default class TimeOffController extends WorklenzControllerBase {
         hours_off?: number | null;
         type?: string | null;
     }): string | null {
-        const allowedTypes = new Set(["vacation", "sick", "personal", "other"]);
+        const allowedTypes = new Set(["vacation", "sick"]);
         const isFullDay = payload.is_full_day !== false;
         const hoursOff = payload.hours_off;
 
@@ -87,6 +87,24 @@ export default class TimeOffController extends WorklenzControllerBase {
     }
 
     private static async canManageTargetMember(
+        user: IWorkLenzRequest["user"],
+        targetTeamMemberId: string
+    ): Promise<boolean> {
+        if (!user?.id || !targetTeamMemberId) return false;
+
+        const actor = await TimeOffController.getActorContext(user.id);
+        if (!actor?.actor_team_member_id) return false;
+
+        if (user.owner) {
+            return true;
+        }
+
+        // Leave is approval based: only Owner/Admin record time-off directly,
+        // everyone else submits a leave request (see LeaveController).
+        return hasTeamAdminPrivileges(user);
+    }
+
+    private static async canViewTargetMember(
         user: IWorkLenzRequest["user"],
         targetTeamMemberId: string
     ): Promise<boolean> {
@@ -137,8 +155,8 @@ export default class TimeOffController extends WorklenzControllerBase {
         }
 
         if (teamMemberId) {
-            const canManage = await TimeOffController.canManageTargetMember(req.user, teamMemberId);
-            if (!canManage) {
+            const canView = await TimeOffController.canViewTargetMember(req.user, teamMemberId);
+            if (!canView) {
                 return res.status(403).send(new ServerResponse(false, null, "You do not have permission to view this member's time-off"));
             }
             whereClause += ` AND mto.team_member_id = $${paramIndex}`;
@@ -379,6 +397,16 @@ export default class TimeOffController extends WorklenzControllerBase {
             return res.status(404).send(new ServerResponse(false, null, "Time-off entry not found"));
         }
 
+        // Keep the leave request this entry came from (if any) in sync.
+        await db.query(
+            `UPDATE member_leave_requests
+             SET start_date = mto.start_date::DATE, end_date = mto.end_date::DATE,
+                 type = COALESCE(mto.type, 'vacation'), updated_at = CURRENT_TIMESTAMP
+             FROM member_time_off mto
+             WHERE mto.id = $1 AND member_leave_requests.time_off_id = mto.id`,
+            [id]
+        );
+
         return res.status(200).send(new ServerResponse(true, result.rows[0], "Time-off entry updated successfully"));
     }
 
@@ -403,6 +431,13 @@ export default class TimeOffController extends WorklenzControllerBase {
         if (!canManage) {
             return res.status(403).send(new ServerResponse(false, null, "You do not have permission to delete this time-off entry"));
         }
+
+        // A deleted leave no longer counts as approved on its originating request.
+        await db.query(
+            `UPDATE member_leave_requests SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP
+             WHERE time_off_id = $1`,
+            [id]
+        );
 
         const deleteQuery = `DELETE FROM member_time_off WHERE id = $1 RETURNING id`;
 

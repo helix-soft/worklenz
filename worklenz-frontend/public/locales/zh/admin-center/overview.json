@@ -105,5 +105,9 @@
   "emailAddress": "Email Address",
   "enterOrganizationName": "Enter organization name",
   "ownerSuffix": " (Owner)",
-  "closePopover": "关闭弹出层"
+  "closePopover": "关闭弹出层",
+  "officialHolidayTitle": "法定节假日",
+  "addCustomHolidayOnThisDay": "在这一天添加自定义节假日",
+  "close": "关闭",
+  "officialHolidayReadOnly": "法定节假日来自 {{country}} 的公共假日列表，无法编辑。它们会自动从工作日中排除。"
 }

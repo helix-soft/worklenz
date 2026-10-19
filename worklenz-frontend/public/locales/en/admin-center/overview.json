@@ -105,5 +105,9 @@
   "customLogoUpgradeModalSubCopy": "Upgrade to Business to upload your organization logo. Your logo will replace the Worklenz logo everywhere in the app and in all system emails sent to your team and clients.",
   "customLogoUpgradeModalBenefitApp": "Custom logo across the full app",
   "customLogoUpgradeModalBenefitEmails": "Branded emails to team and clients",
-  "customLogoUpgradeModalBenefitProfessional": "Professional look for your organization"
+  "customLogoUpgradeModalBenefitProfessional": "Professional look for your organization",
+  "officialHolidayTitle": "Official holiday",
+  "addCustomHolidayOnThisDay": "Add custom holiday on this day",
+  "close": "Close",
+  "officialHolidayReadOnly": "Official holidays come from the public holiday list of {{country}} and cannot be edited. They are excluded from work days automatically."
 }

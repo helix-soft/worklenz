@@ -105,5 +105,9 @@
   "emailAddress": "Email Address",
   "enterOrganizationName": "Enter organization name",
   "ownerSuffix": " (Owner)",
-  "closePopover": "Fechar popover"
+  "closePopover": "Fechar popover",
+  "officialHolidayTitle": "Feriado oficial",
+  "addCustomHolidayOnThisDay": "Adicionar feriado personalizado neste dia",
+  "close": "Fechar",
+  "officialHolidayReadOnly": "Os feriados oficiais vêm da lista de feriados de {{country}} e não podem ser editados. São excluídos automaticamente dos dias úteis."
 }

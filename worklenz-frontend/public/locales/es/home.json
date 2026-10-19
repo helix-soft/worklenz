@@ -86,7 +86,6 @@
     "todo": "Por hacer",
     "doing": "Haciendo",
     "done": "Hecho",
-    "priority": "Prioridad",
     "pressTabToSelectDueDateAndProject": "Presiona Tab para seleccionar fecha de vencimiento y proyecto",
     "newTask": "Nueva tarea",
     "assignTask": "Asignar tarea",
@@ -129,7 +128,9 @@
     "weekdayMiniThu": "J",
     "weekdayMiniFri": "V",
     "weekdayMiniSat": "S",
-    "weekdayMiniSun": "D"
+    "weekdayMiniSun": "D",
+    "officialHoliday": "Festivo oficial",
+    "companyHoliday": "Festivo de la empresa"
   },
   "activityLogs": {
     "title": "Actividad Reciente",
@@ -281,7 +282,7 @@
     "rowsPerPage": "Filas por página:"
   },
   "addExpense": {
-    "modalTitle": "Agregar Gasto",
+    "modalTitle": "Agregar gasto",
     "projectLabel": "Proyecto",
     "projectPlaceholder": "Seleccionar proyecto…",
     "taskLabel": "Tarea",
@@ -289,12 +290,12 @@
     "taskPlaceholderNoProject": "Selecciona un proyecto primero",
     "taskLoading": "Cargando…",
     "noTasksFound": "No se encontraron tareas",
-    "amountLabel": "Monto",
+    "amountLabel": "Importe",
     "amountPlaceholder": "0.00",
-    "submitButton": "Agregar Gasto a la Tarea",
+    "submitButton": "Agregar gasto de tarea",
     "upgradePromptTitle": "Gastos",
     "upgradePromptDescription": "Registra costos fijos en las tareas y agrégalos a tus reportes financieros. Disponible en el plan Business.",
-    "loadTasksError": "No se pudieron cargar las tareas y la moneda para este proyecto.",
+    "loadTasksError": "No se pudieron cargar las tareas y la moneda de este proyecto.",
     "successMessage": "Costo fijo agregado a la tarea",
     "errorMessage": "Error al agregar costo fijo a la tarea"
   },
@@ -409,24 +410,6 @@
     "startTimer": "Iniciar temporizador"
   },
   "views": "Vistas",
-  "addExpense": {
-    "modalTitle": "Agregar gasto",
-    "projectLabel": "Proyecto",
-    "projectPlaceholder": "Seleccionar proyecto…",
-    "taskLabel": "Tarea",
-    "taskPlaceholderWithProject": "Buscar tarea…",
-    "taskPlaceholderNoProject": "Selecciona un proyecto primero",
-    "taskLoading": "Cargando…",
-    "noTasksFound": "No se encontraron tareas",
-    "amountLabel": "Importe",
-    "amountPlaceholder": "0.00",
-    "submitButton": "Agregar gasto de tarea",
-    "upgradePromptTitle": "Gastos",
-    "upgradePromptDescription": "Registra costos fijos en las tareas y agrégalos a tus reportes financieros. Disponible en el plan Business.",
-    "loadTasksError": "No se pudieron cargar las tareas y la moneda de este proyecto.",
-    "successMessage": "Costo fijo agregado a la tarea",
-    "errorMessage": "Error al agregar costo fijo a la tarea"
-  },
   "timeOff": {
     "timeOff": "Ausencia",
     "off": "ausente",

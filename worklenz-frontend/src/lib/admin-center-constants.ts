@@ -5,6 +5,7 @@ import {
   TeamOutlined,
   UserOutlined,
   SettingOutlined,
+  CalendarOutlined,
 } from '@/shared/antd-imports';
 import React, { ReactNode, lazy } from 'react';
 
@@ -14,6 +15,7 @@ const Teams = lazy(() => import('../pages/admin-center/teams/teams'));
 const Billing = lazy(() => import('../ee/pages/admin-center/billing/BillingSection'));
 const Projects = lazy(() => import('../pages/admin-center/projects/projects'));
 const Settings = lazy(() => import('../pages/admin-center/settings/settings'));
+const LeaveAttendance = lazy(() => import('../pages/admin-center/leave/leave-attendance'));
 
 // type of a menu item in admin center sidebar
 type AdminCenterMenuItems = {
@@ -58,6 +60,14 @@ export const adminCenterItems: AdminCenterMenuItems[] = [
     endpoint: 'projects',
     icon: React.createElement(ProfileOutlined),
     element: React.createElement(Projects),
+  },
+  {
+    key: 'leave',
+    name: 'leave',
+    defaultValue: 'Leave & attendance',
+    endpoint: 'leave',
+    icon: React.createElement(CalendarOutlined),
+    element: React.createElement(LeaveAttendance),
   },
   {
     key: 'billing',

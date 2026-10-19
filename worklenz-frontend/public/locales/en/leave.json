@@ -1,0 +1,150 @@
+{
+  "loadError": "Could not load data.",
+  "retry": "Retry",
+  "save": "Save",
+  "cancel": "Cancel",
+  "yes": "Yes",
+  "no": "No",
+  "type": {
+    "vacation": "Vacation",
+    "sick": "Sick leave"
+  },
+  "status": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "cancelled": "Cancelled"
+  },
+  "admin": {
+    "title": "Leave & attendance",
+    "subtitle": "Monthly attendance for meal vouchers, yearly leave allowances and leave requests.",
+    "holidaysHint": "Official holidays are excluded from work days. Manage them in",
+    "holidaysLink": "Admin Center settings",
+    "tabs": {
+      "summary": "Monthly summary",
+      "balances": "Leave allowances",
+      "requests": "Leave requests"
+    }
+  },
+  "summary": {
+    "monthPicker": "Select month",
+    "workDaysInMonth": "Official work days in this month: {{count}}",
+    "empty": "No team members found.",
+    "extraWorkedHint": "Checked in on a weekend or holiday. You can grant extra leave days for it.",
+    "footnote": "Official work days = Monday to Friday minus official holidays. Worked days = official work days minus approved vacation and sick leave; this is also the meal voucher count.",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "work_days": "Work days",
+      "worked_days": "Worked days",
+      "logged_hours": "Hours (expected / logged)",
+      "office_days": "Office days",
+      "remote_days": "Remote days",
+      "leave_days": "Leave days",
+      "extra_worked_days": "Worked on non-work days"
+    },
+    "exportPdf": "Download PDF report",
+    "hoursHint": "Expected = worked days × daily hours. Logged = time logged on tasks."
+  },
+  "balances": {
+    "yearPicker": "Select year",
+    "hint": "Vacation is deducted from the allowance. Carry over last year's remaining days by adding extra days.",
+    "notSet": "Not set",
+    "baseSetBy": "Set by {{name}} on {{date}}",
+    "editBase": "Edit base allowance",
+    "history": "History",
+    "addExtra": "Add days",
+    "baseModalTitle": "Base allowance for {{name}} ({{year}})",
+    "baseDaysLabel": "Leave days per year",
+    "baseDaysRequired": "Enter the number of days",
+    "extraModalTitle": "Add extra leave days for {{name}} ({{year}})",
+    "extraDaysLabel": "Number of days",
+    "noteLabel": "Note",
+    "noteRequired": "A note is required, e.g. why the day is granted",
+    "notePlaceholder": "e.g. Worked on a public holiday, so got one extra day off",
+    "historyTitle": "Extra days of {{name}} ({{year}})",
+    "noHistory": "No extra days were added this year.",
+    "addedBy": "Added by {{name}}",
+    "columns": {
+      "name": "Name",
+      "base": "Base",
+      "extra": "Extra",
+      "total": "Total",
+      "used": "Used",
+      "pending": "Pending",
+      "remaining": "Remaining"
+    },
+    "editExtraModalTitle": "Edit extra leave days of {{name}} ({{year}})",
+    "editedBy": "Edited by {{name}} on {{date}}",
+    "deleteExtraConfirm": "Delete these extra days? The allowance is reduced accordingly."
+  },
+  "requests": {
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveTitle": "Approve leave request",
+    "rejectTitle": "Reject leave request",
+    "reviewSummary": "{{name}}: {{start}} – {{end}}",
+    "reviewedBy": "{{name}}, {{date}}",
+    "notePlaceholder": "Note (optional)",
+    "empty": "There are no leave requests here.",
+    "filter": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "all": "All"
+    },
+    "columns": {
+      "member": "Member",
+      "period": "Period",
+      "type": "Type",
+      "reason": "Reason",
+      "status": "Status"
+    },
+    "changeToApproved": "Approve instead",
+    "changeToRejected": "Reject instead",
+    "deleteConfirm": "Delete this request permanently?",
+    "deleteApprovedConfirm": "Delete this request? Its approved time off is removed and the days are returned to the allowance.",
+    "changeToApprovedHint": "This request was rejected. Approving it now records the time off and deducts the days.",
+    "changeToRejectedHint": "This request was approved. Rejecting it now removes the time off and returns the days."
+  },
+  "my": {
+    "title": "My leave",
+    "requestLeave": "Request leave",
+    "submitRequest": "Submit request",
+    "noAllowance": "Your leave allowance for this year has not been set yet. Ask an admin to set it.",
+    "requestsTitle": "My leave requests",
+    "noRequests": "You have no leave requests this year.",
+    "extraDaysTitle": "Extra days granted",
+    "cancelConfirm": "Cancel this leave request?",
+    "cancelRequest": "Cancel request",
+    "period": "Period",
+    "periodRequired": "Select the first and last day",
+    "type": "Type",
+    "reason": "Reason (optional)",
+    "requestHint": "Only work days are counted. Vacation is deducted from your allowance once approved."
+  },
+  "location": {
+    "title": "Where I worked",
+    "office": "Office",
+    "remote": "Remote",
+    "none": "Not set",
+    "noDays": "No work days to show yet."
+  },
+  "checkIn": {
+    "title": "Where are you working today?",
+    "description": "Your answer is used for the monthly attendance and meal voucher count.",
+    "later": "Ask me later",
+    "changeHint": "Picked the wrong one? You can change it in",
+    "changeLink": "Settings → My leave"
+  },
+  "edit": "Edit",
+  "delete": "Delete",
+  "close": "Close",
+  "details": {
+    "title": "Leave details",
+    "editTitle": "Edit leave",
+    "deleteConfirm": "Delete this leave? The days are returned to the allowance.",
+    "editHint": "Only work days are counted. Changes update the allowance immediately.",
+    "readOnlyHint": "Recorded leave can only be changed by an admin."
+  }
+}

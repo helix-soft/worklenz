@@ -84,7 +84,8 @@ interface ScheduleState {
 
 const initialUIState: UIState = {
   isFullscreen: false,
-  showWeekends: false,
+  // Weekends are shown by default: some people work on weekends too.
+  showWeekends: true,
   zoomLevel: 1,
   viewMode: 'gantt',
   selectedTimeRange: 'month',

@@ -1,0 +1,150 @@
+{
+  "loadError": "Daten konnten nicht geladen werden.",
+  "retry": "Erneut versuchen",
+  "save": "Speichern",
+  "cancel": "Abbrechen",
+  "yes": "Ja",
+  "no": "Nein",
+  "type": {
+    "vacation": "Urlaub",
+    "sick": "Krankheit"
+  },
+  "status": {
+    "pending": "Ausstehend",
+    "approved": "Genehmigt",
+    "rejected": "Abgelehnt",
+    "cancelled": "Storniert"
+  },
+  "admin": {
+    "title": "Urlaub & Anwesenheit",
+    "subtitle": "Monatliche Anwesenheit für Essensgutscheine, jährliche Urlaubskontingente und Urlaubsanträge.",
+    "holidaysHint": "Gesetzliche Feiertage werden von den Arbeitstagen ausgeschlossen. Verwalten Sie sie in den",
+    "holidaysLink": "Admin-Center-Einstellungen",
+    "tabs": {
+      "summary": "Monatsübersicht",
+      "balances": "Urlaubskontingente",
+      "requests": "Urlaubsanträge"
+    }
+  },
+  "summary": {
+    "monthPicker": "Monat auswählen",
+    "workDaysInMonth": "Offizielle Arbeitstage in diesem Monat: {{count}}",
+    "empty": "Keine Teammitglieder gefunden.",
+    "extraWorkedHint": "An einem Wochenende oder Feiertag eingecheckt. Sie können dafür zusätzliche Urlaubstage gewähren.",
+    "footnote": "Offizielle Arbeitstage = Montag bis Freitag abzüglich gesetzlicher Feiertage. Gearbeitete Tage = offizielle Arbeitstage abzüglich genehmigten Urlaubs und Krankheitstage; dies ist auch die Anzahl der Essensgutscheine.",
+    "columns": {
+      "name": "Name",
+      "email": "E-Mail",
+      "work_days": "Arbeitstage",
+      "worked_days": "Gearbeitete Tage",
+      "logged_hours": "Stunden (Soll / erfasst)",
+      "office_days": "Bürotage",
+      "remote_days": "Remote-Tage",
+      "leave_days": "Urlaubstage",
+      "extra_worked_days": "An freien Tagen gearbeitet"
+    },
+    "exportPdf": "PDF-Bericht herunterladen",
+    "hoursHint": "Soll = gearbeitete Tage × Tagesstunden. Erfasst = auf Aufgaben erfasste Zeit."
+  },
+  "balances": {
+    "yearPicker": "Jahr auswählen",
+    "hint": "Urlaub wird vom Kontingent abgezogen. Übertragen Sie Resttage des Vorjahres als zusätzliche Tage.",
+    "notSet": "Nicht festgelegt",
+    "baseSetBy": "Festgelegt von {{name}} am {{date}}",
+    "editBase": "Basiskontingent bearbeiten",
+    "history": "Verlauf",
+    "addExtra": "Tage hinzufügen",
+    "baseModalTitle": "Basiskontingent für {{name}} ({{year}})",
+    "baseDaysLabel": "Urlaubstage pro Jahr",
+    "baseDaysRequired": "Geben Sie die Anzahl der Tage ein",
+    "extraModalTitle": "Zusätzliche Urlaubstage für {{name}} ({{year}})",
+    "extraDaysLabel": "Anzahl der Tage",
+    "noteLabel": "Notiz",
+    "noteRequired": "Eine Notiz ist erforderlich, z. B. warum der Tag gewährt wird",
+    "notePlaceholder": "z. B. An einem Feiertag gearbeitet, daher ein zusätzlicher freier Tag",
+    "historyTitle": "Zusätzliche Tage von {{name}} ({{year}})",
+    "noHistory": "In diesem Jahr wurden keine zusätzlichen Tage hinzugefügt.",
+    "addedBy": "Hinzugefügt von {{name}}",
+    "columns": {
+      "name": "Name",
+      "base": "Basis",
+      "extra": "Zusätzlich",
+      "total": "Gesamt",
+      "used": "Genommen",
+      "pending": "Ausstehend",
+      "remaining": "Verbleibend"
+    },
+    "editExtraModalTitle": "Zusätzliche Urlaubstage von {{name}} bearbeiten ({{year}})",
+    "editedBy": "Bearbeitet von {{name}} am {{date}}",
+    "deleteExtraConfirm": "Diese zusätzlichen Tage löschen? Das Kontingent wird entsprechend reduziert."
+  },
+  "requests": {
+    "approve": "Genehmigen",
+    "reject": "Ablehnen",
+    "approveTitle": "Urlaubsantrag genehmigen",
+    "rejectTitle": "Urlaubsantrag ablehnen",
+    "reviewSummary": "{{name}}: {{start}} – {{end}}",
+    "reviewedBy": "{{name}}, {{date}}",
+    "notePlaceholder": "Notiz (optional)",
+    "empty": "Hier gibt es keine Urlaubsanträge.",
+    "filter": {
+      "pending": "Ausstehend",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "all": "Alle"
+    },
+    "columns": {
+      "member": "Mitglied",
+      "period": "Zeitraum",
+      "type": "Art",
+      "reason": "Grund",
+      "status": "Status"
+    },
+    "changeToApproved": "Doch genehmigen",
+    "changeToRejected": "Doch ablehnen",
+    "deleteConfirm": "Diesen Antrag endgültig löschen?",
+    "deleteApprovedConfirm": "Diesen Antrag löschen? Der genehmigte Urlaub wird entfernt und die Tage werden dem Kontingent gutgeschrieben.",
+    "changeToApprovedHint": "Dieser Antrag wurde abgelehnt. Bei Genehmigung wird der Urlaub eingetragen und die Tage werden abgezogen.",
+    "changeToRejectedHint": "Dieser Antrag wurde genehmigt. Bei Ablehnung wird der Urlaub entfernt und die Tage werden gutgeschrieben."
+  },
+  "my": {
+    "title": "Mein Urlaub",
+    "requestLeave": "Urlaub beantragen",
+    "submitRequest": "Antrag senden",
+    "noAllowance": "Ihr Urlaubskontingent für dieses Jahr ist noch nicht festgelegt. Bitten Sie einen Admin darum.",
+    "requestsTitle": "Meine Urlaubsanträge",
+    "noRequests": "Sie haben in diesem Jahr keine Urlaubsanträge.",
+    "extraDaysTitle": "Gewährte zusätzliche Tage",
+    "cancelConfirm": "Diesen Urlaubsantrag stornieren?",
+    "cancelRequest": "Antrag stornieren",
+    "period": "Zeitraum",
+    "periodRequired": "Wählen Sie den ersten und letzten Tag",
+    "type": "Art",
+    "reason": "Grund (optional)",
+    "requestHint": "Es zählen nur Arbeitstage. Urlaub wird nach Genehmigung vom Kontingent abgezogen."
+  },
+  "location": {
+    "title": "Wo ich gearbeitet habe",
+    "office": "Büro",
+    "remote": "Remote",
+    "none": "Nicht festgelegt",
+    "noDays": "Noch keine Arbeitstage vorhanden."
+  },
+  "checkIn": {
+    "title": "Wo arbeitest du heute?",
+    "description": "Deine Antwort wird für die monatliche Anwesenheit und die Essensgutscheine verwendet.",
+    "later": "Später fragen",
+    "changeHint": "Falsch ausgewählt? Du kannst es ändern unter",
+    "changeLink": "Einstellungen → Mein Urlaub"
+  },
+  "edit": "Bearbeiten",
+  "delete": "Löschen",
+  "close": "Schließen",
+  "details": {
+    "title": "Urlaubsdetails",
+    "editTitle": "Urlaub bearbeiten",
+    "deleteConfirm": "Diesen Urlaub löschen? Die Tage werden dem Kontingent gutgeschrieben.",
+    "editHint": "Es zählen nur Arbeitstage. Änderungen wirken sich sofort auf das Kontingent aus.",
+    "readOnlyHint": "Erfasster Urlaub kann nur von einem Admin geändert werden."
+  }
+}

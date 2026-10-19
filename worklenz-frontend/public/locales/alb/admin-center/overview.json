@@ -105,5 +105,9 @@
   "emailAddress": "Email Address",
   "enterOrganizationName": "Enter organization name",
   "ownerSuffix": " (Owner)",
-  "closePopover": "Mbyll dritaren"
+  "closePopover": "Mbyll dritaren",
+  "officialHolidayTitle": "Festë zyrtare",
+  "addCustomHolidayOnThisDay": "Shto festë të personalizuar në këtë ditë",
+  "close": "Mbyll",
+  "officialHolidayReadOnly": "Festat zyrtare vijnë nga lista e festave publike të {{country}} dhe nuk mund të ndryshohen. Ato përjashtohen automatikisht nga ditët e punës."
 }

@@ -19,7 +19,6 @@ import logger from '@/utils/errorLogger';
 import { scheduleAPIService } from '@/api/schedule/schedule.api.service';
 import { adminCenterApiService } from '@/api/admin-center/admin-center.api.service';
 import { Settings } from '@/types/schedule/schedule-v2.types';
-import OrganizationCalculationMethod from '@/components/admin-center/overview/organization-calculation-method/organization-calculation-method';
 import HolidayCalendar from '@/components/admin-center/overview/holiday-calendar/HolidayCalendar';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import { useAppSelector } from '@/hooks/useAppSelector';
@@ -36,7 +35,7 @@ import {
 
 const SettingsPage: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { organization, holidaySettings, countriesWithStates, loadingCountries } = useAppSelector(
+  const { holidaySettings, countriesWithStates, loadingCountries } = useAppSelector(
     (state: RootState) => state.adminCenterReducer
   );
   const themeMode = useAppSelector((state: RootState) => state.themeReducer.mode);
@@ -223,13 +222,6 @@ const SettingsPage: React.FC = () => {
             </Form.Item>
           </Form>
         </Card>
-
-        {organization && (
-          <OrganizationCalculationMethod
-            organization={organization}
-            refetch={getAdminCenterSettings}
-          />
-        )}
 
         <Card>
           <Typography.Title level={5} style={{ margin: 0 }}>

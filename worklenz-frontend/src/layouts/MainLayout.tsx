@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { memo, useMemo } from 'react';
 
 import GlobalUpgradeModal from '@/components/upgrade/GlobalUpgradeModal';
+import { WorkLocationCheckIn } from '@/components/leave/work-location-check-in';
 import { PROJECTS_RAIL_SUB_ROUTES } from '@/features/navigation/nav-registry';
 import { useHomeDashboardSocketSync } from '@/hooks/useHomeDashboardSocketSync';
 
@@ -83,6 +84,7 @@ const MainLayout = memo(() => {
       </Layout.Content>
 
       <GlobalUpgradeModal />
+      <WorkLocationCheckIn />
     </>
   );
 });

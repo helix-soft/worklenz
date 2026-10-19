@@ -40,7 +40,7 @@
   "integrations": "Integrações",
   "integrations-search": "aplicativos conexões slack api integrações ferramentas",
   "configuration": "Configuração",
-  "configuration-search": "configuração definições configuração geral configuração da organização",
+  "configuration-search": "configuração ajustes workspace organização gerenciamento de configuração",
   "account-deletion": "Excluir Conta",
   "account-deletion-search": "excluir conta remover perfil zona de perigo encerrar conta",
   "team-hierarchy": "Hierarquia da Equipe",
@@ -49,6 +49,6 @@
   "guest-members-search": "convidados visitantes usuários externos acesso temporário",
   "mobile-app": "App Móvel",
   "mobile-app-search": "ios android celular móvel baixar código qr app store google play",
-  "configuration": "Configuração",
-  "configuration-search": "configuração ajustes workspace organização gerenciamento de configuração"
+  "my-leave": "Minhas ausências",
+  "my-leave-search": "férias ausência folga escritório remoto"
 }

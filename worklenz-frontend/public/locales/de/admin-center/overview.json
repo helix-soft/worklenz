@@ -105,5 +105,9 @@
   "emailAddress": "Email Address",
   "enterOrganizationName": "Enter organization name",
   "ownerSuffix": " (Owner)",
-  "closePopover": "Popover schließen"
+  "closePopover": "Popover schließen",
+  "officialHolidayTitle": "Gesetzlicher Feiertag",
+  "addCustomHolidayOnThisDay": "Eigenen Feiertag an diesem Tag hinzufügen",
+  "close": "Schließen",
+  "officialHolidayReadOnly": "Gesetzliche Feiertage stammen aus der Feiertagsliste von {{country}} und können nicht bearbeitet werden. Sie werden automatisch von den Arbeitstagen ausgenommen."
 }

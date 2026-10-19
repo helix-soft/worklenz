@@ -1,0 +1,150 @@
+{
+  "loadError": "无法加载数据。",
+  "retry": "重试",
+  "save": "保存",
+  "cancel": "取消",
+  "yes": "是",
+  "no": "否",
+  "type": {
+    "vacation": "年假",
+    "sick": "病假"
+  },
+  "status": {
+    "pending": "待审批",
+    "approved": "已批准",
+    "rejected": "已拒绝",
+    "cancelled": "已取消"
+  },
+  "admin": {
+    "title": "休假与考勤",
+    "subtitle": "用于餐券的月度考勤、年度假期额度和休假申请。",
+    "holidaysHint": "法定节假日不计入工作日。请在以下位置管理：",
+    "holidaysLink": "管理中心设置",
+    "tabs": {
+      "summary": "月度汇总",
+      "balances": "假期额度",
+      "requests": "休假申请"
+    }
+  },
+  "summary": {
+    "monthPicker": "选择月份",
+    "workDaysInMonth": "本月法定工作日：{{count}}",
+    "empty": "未找到团队成员。",
+    "extraWorkedHint": "在周末或节假日签到。您可以为此授予额外假期。",
+    "footnote": "法定工作日 = 周一至周五减去法定节假日。出勤天数 = 法定工作日减去已批准的年假和病假；也即餐券数量。",
+    "columns": {
+      "name": "姓名",
+      "email": "邮箱",
+      "work_days": "工作日",
+      "worked_days": "出勤天数",
+      "logged_hours": "工时（应计 / 已记录）",
+      "office_days": "办公室天数",
+      "remote_days": "远程天数",
+      "leave_days": "休假天数",
+      "extra_worked_days": "非工作日出勤"
+    },
+    "exportPdf": "下载 PDF 报告",
+    "hoursHint": "应计 = 出勤天数 × 每日工时。已记录 = 在任务上记录的时间。"
+  },
+  "balances": {
+    "yearPicker": "选择年份",
+    "hint": "年假从额度中扣除。可通过添加额外天数结转上一年剩余天数。",
+    "notSet": "未设置",
+    "baseSetBy": "由 {{name}} 于 {{date}} 设置",
+    "editBase": "编辑基础额度",
+    "history": "历史记录",
+    "addExtra": "添加天数",
+    "baseModalTitle": "{{name}} 的基础额度（{{year}}）",
+    "baseDaysLabel": "每年假期天数",
+    "baseDaysRequired": "请输入天数",
+    "extraModalTitle": "为 {{name}} 添加额外假期（{{year}}）",
+    "extraDaysLabel": "天数",
+    "noteLabel": "备注",
+    "noteRequired": "必须填写备注，例如授予原因",
+    "notePlaceholder": "例如：节假日加班，因此额外获得一天假期",
+    "historyTitle": "{{name}} 的额外天数（{{year}}）",
+    "noHistory": "今年没有添加额外天数。",
+    "addedBy": "由 {{name}} 添加",
+    "columns": {
+      "name": "姓名",
+      "base": "基础",
+      "extra": "额外",
+      "total": "合计",
+      "used": "已用",
+      "pending": "待审批",
+      "remaining": "剩余"
+    },
+    "editExtraModalTitle": "编辑 {{name}} 的额外假期（{{year}}）",
+    "editedBy": "由 {{name}} 于 {{date}} 编辑",
+    "deleteExtraConfirm": "删除这些额外天数？额度将相应减少。"
+  },
+  "requests": {
+    "approve": "批准",
+    "reject": "拒绝",
+    "approveTitle": "批准休假申请",
+    "rejectTitle": "拒绝休假申请",
+    "reviewSummary": "{{name}}：{{start}} – {{end}}",
+    "reviewedBy": "{{name}}，{{date}}",
+    "notePlaceholder": "备注（可选）",
+    "empty": "暂无休假申请。",
+    "filter": {
+      "pending": "待审批",
+      "approved": "已批准",
+      "rejected": "已拒绝",
+      "all": "全部"
+    },
+    "columns": {
+      "member": "成员",
+      "period": "期间",
+      "type": "类型",
+      "reason": "原因",
+      "status": "状态"
+    },
+    "changeToApproved": "改为批准",
+    "changeToRejected": "改为拒绝",
+    "deleteConfirm": "永久删除此申请？",
+    "deleteApprovedConfirm": "删除此申请？已批准的休假将被移除，天数退回额度。",
+    "changeToApprovedHint": "此申请已被拒绝。现在批准将记录休假并扣除天数。",
+    "changeToRejectedHint": "此申请已被批准。现在拒绝将移除休假并退回天数。"
+  },
+  "my": {
+    "title": "我的休假",
+    "requestLeave": "申请休假",
+    "submitRequest": "提交申请",
+    "noAllowance": "您今年的假期额度尚未设置，请联系管理员。",
+    "requestsTitle": "我的休假申请",
+    "noRequests": "您今年没有休假申请。",
+    "extraDaysTitle": "已授予的额外天数",
+    "cancelConfirm": "取消此休假申请？",
+    "cancelRequest": "取消申请",
+    "period": "期间",
+    "periodRequired": "请选择第一天和最后一天",
+    "type": "类型",
+    "reason": "原因（可选）",
+    "requestHint": "仅计算工作日。年假在批准后从额度中扣除。"
+  },
+  "location": {
+    "title": "我的工作地点",
+    "office": "办公室",
+    "remote": "远程",
+    "none": "未设置",
+    "noDays": "暂无工作日。"
+  },
+  "checkIn": {
+    "title": "你今天在哪里工作？",
+    "description": "你的回答将用于月度考勤和餐券统计。",
+    "later": "稍后再问",
+    "changeHint": "选错了？可以在这里修改：",
+    "changeLink": "设置 → 我的休假"
+  },
+  "edit": "编辑",
+  "delete": "删除",
+  "close": "关闭",
+  "details": {
+    "title": "休假详情",
+    "editTitle": "编辑休假",
+    "deleteConfirm": "删除此休假？天数将退回额度。",
+    "editHint": "仅计算工作日。更改会立即更新额度。",
+    "readOnlyHint": "已记录的休假只能由管理员修改。"
+  }
+}

@@ -18,11 +18,12 @@ import {
   ApiOutlined,
   UsergroupAddOutlined,
 } from '@/shared/antd-imports';
-import { MobileOutlined } from '@ant-design/icons';
+import { CalendarOutlined, MobileOutlined } from '@ant-design/icons';
 import React, { ReactNode, lazy } from 'react';
 import { ILocalSession } from '@/types/auth/local-session.types';
 import { hasBusinessFeatureAccess } from '@/ee/utils/subscription-utils';
 const ProfileSettings = lazy(() => import('../../pages/settings/profile/profile-settings'));
+const MyLeaveSettings = lazy(() => import('@/pages/settings/my-leave/my-leave-settings'));
 const NotificationsSettings = lazy(
   () => import('../../pages/settings/notifications/notifications-settings')
 );
@@ -123,6 +124,16 @@ export const settingsItems: SettingMenuItem[] = [
     groupDefaultValue: 'Account & Personal',
     icon: React.createElement(LockOutlined),
     element: React.createElement(ChangePassword),
+  },
+  {
+    key: 'my-leave',
+    name: 'my-leave',
+    defaultValue: 'My leave',
+    endpoint: 'my-leave',
+    groupKey: 'account-personal',
+    groupDefaultValue: 'Account & Personal',
+    icon: React.createElement(CalendarOutlined),
+    element: React.createElement(MyLeaveSettings),
   },
   {
     key: 'language-and-region',

@@ -86,7 +86,6 @@
     "todo": "A fazer",
     "doing": "Fazendo",
     "done": "Concluído",
-    "priority": "Prioridade",
     "pressTabToSelectDueDateAndProject": "Pressione Tab para selecionar data de vencimento e projeto",
     "newTask": "Nova tarefa",
     "assignTask": "Atribuir tarefa",
@@ -129,7 +128,9 @@
     "weekdayMiniThu": "Q",
     "weekdayMiniFri": "S",
     "weekdayMiniSat": "S",
-    "weekdayMiniSun": "D"
+    "weekdayMiniSun": "D",
+    "officialHoliday": "Feriado oficial",
+    "companyHoliday": "Feriado da empresa"
   },
   "activityLogs": {
     "title": "Atividade Recente",
@@ -281,20 +282,20 @@
     "rowsPerPage": "Linhas por página:"
   },
   "addExpense": {
-    "modalTitle": "Adicionar Despesa",
+    "modalTitle": "Adicionar despesa",
     "projectLabel": "Projeto",
     "projectPlaceholder": "Selecionar projeto…",
     "taskLabel": "Tarefa",
-    "taskPlaceholderWithProject": "Buscar tarefa…",
+    "taskPlaceholderWithProject": "Pesquisar tarefa…",
     "taskPlaceholderNoProject": "Selecione um projeto primeiro",
     "taskLoading": "Carregando…",
     "noTasksFound": "Nenhuma tarefa encontrada",
     "amountLabel": "Valor",
     "amountPlaceholder": "0.00",
-    "submitButton": "Adicionar Despesa à Tarefa",
+    "submitButton": "Adicionar despesa à tarefa",
     "upgradePromptTitle": "Despesas",
-    "upgradePromptDescription": "Registre custos fixos nas tarefas e adicione-os aos seus relatórios financeiros. Disponível no plano Business.",
-    "loadTasksError": "Não foi possível carregar tarefas e moeda para este projeto.",
+    "upgradePromptDescription": "Registre custos fixos nas tarefas e agrupe-os nos seus relatórios financeiros. Disponível no plano Business.",
+    "loadTasksError": "Não foi possível carregar as tarefas e a moeda deste projeto.",
     "successMessage": "Custo fixo adicionado à tarefa",
     "errorMessage": "Falha ao adicionar custo fixo à tarefa"
   },
@@ -409,24 +410,6 @@
     "startTimer": "Iniciar temporizador"
   },
   "views": "Visualizações",
-  "addExpense": {
-    "modalTitle": "Adicionar despesa",
-    "projectLabel": "Projeto",
-    "projectPlaceholder": "Selecionar projeto…",
-    "taskLabel": "Tarefa",
-    "taskPlaceholderWithProject": "Pesquisar tarefa…",
-    "taskPlaceholderNoProject": "Selecione um projeto primeiro",
-    "taskLoading": "Carregando…",
-    "noTasksFound": "Nenhuma tarefa encontrada",
-    "amountLabel": "Valor",
-    "amountPlaceholder": "0.00",
-    "submitButton": "Adicionar despesa à tarefa",
-    "upgradePromptTitle": "Despesas",
-    "upgradePromptDescription": "Registre custos fixos nas tarefas e agrupe-os nos seus relatórios financeiros. Disponível no plano Business.",
-    "loadTasksError": "Não foi possível carregar as tarefas e a moeda deste projeto.",
-    "successMessage": "Custo fixo adicionado à tarefa",
-    "errorMessage": "Falha ao adicionar custo fixo à tarefa"
-  },
   "timeOff": {
     "timeOff": "Ausência",
     "off": "ausente",

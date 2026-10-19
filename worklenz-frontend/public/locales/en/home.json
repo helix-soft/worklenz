@@ -128,7 +128,9 @@
     "weekdayMiniThu": "T",
     "weekdayMiniFri": "F",
     "weekdayMiniSat": "S",
-    "weekdayMiniSun": "S"
+    "weekdayMiniSun": "S",
+    "officialHoliday": "Official holiday",
+    "companyHoliday": "Company holiday"
   },
   "activityLogs": {
     "title": "Recent Activity",

@@ -1,0 +1,150 @@
+{
+  "loadError": "Të dhënat nuk u ngarkuan.",
+  "retry": "Provo përsëri",
+  "save": "Ruaj",
+  "cancel": "Anulo",
+  "yes": "Po",
+  "no": "Jo",
+  "type": {
+    "vacation": "Pushime",
+    "sick": "Leje mjekësore"
+  },
+  "status": {
+    "pending": "Në pritje",
+    "approved": "Miratuar",
+    "rejected": "Refuzuar",
+    "cancelled": "Anuluar"
+  },
+  "admin": {
+    "title": "Lejet dhe prania",
+    "subtitle": "Prania mujore për kuponat e ushqimit, kuota vjetore e lejeve dhe kërkesat për leje.",
+    "holidaysHint": "Festat zyrtare përjashtohen nga ditët e punës. Menaxhojini te",
+    "holidaysLink": "cilësimet e Qendrës së Administrimit",
+    "tabs": {
+      "summary": "Përmbledhje mujore",
+      "balances": "Kuotat e lejeve",
+      "requests": "Kërkesat për leje"
+    }
+  },
+  "summary": {
+    "monthPicker": "Zgjidh muajin",
+    "workDaysInMonth": "Ditë pune zyrtare këtë muaj: {{count}}",
+    "empty": "Nuk u gjetën anëtarë të ekipit.",
+    "extraWorkedHint": "U regjistrua në fundjavë ose festë. Mund t'i jepni ditë leje shtesë për këtë.",
+    "footnote": "Ditë pune zyrtare = e hënë deri të premte minus festat zyrtare. Ditë të punuara = ditë pune zyrtare minus pushimet dhe lejet mjekësore të miratuara; ky është edhe numri i kuponave të ushqimit.",
+    "columns": {
+      "name": "Emri",
+      "email": "Email",
+      "work_days": "Ditë pune",
+      "worked_days": "Ditë të punuara",
+      "logged_hours": "Orë (të pritura / të regjistruara)",
+      "office_days": "Ditë në zyrë",
+      "remote_days": "Ditë në distancë",
+      "leave_days": "Ditë leje",
+      "extra_worked_days": "Punuar në ditë pushimi"
+    },
+    "exportPdf": "Shkarko raportin PDF",
+    "hoursHint": "Të pritura = ditë të punuara × orë ditore. Të regjistruara = koha e regjistruar në detyra."
+  },
+  "balances": {
+    "yearPicker": "Zgjidh vitin",
+    "hint": "Pushimet zbriten nga kuota. Transferoni ditët e mbetura të vitit të kaluar duke shtuar ditë shtesë.",
+    "notSet": "Pa caktuar",
+    "baseSetBy": "Caktuar nga {{name}} më {{date}}",
+    "editBase": "Ndrysho kuotën bazë",
+    "history": "Historiku",
+    "addExtra": "Shto ditë",
+    "baseModalTitle": "Kuota bazë për {{name}} ({{year}})",
+    "baseDaysLabel": "Ditë leje në vit",
+    "baseDaysRequired": "Vendosni numrin e ditëve",
+    "extraModalTitle": "Shto ditë leje shtesë për {{name}} ({{year}})",
+    "extraDaysLabel": "Numri i ditëve",
+    "noteLabel": "Shënim",
+    "noteRequired": "Shënimi është i detyrueshëm, p.sh. pse jepet dita",
+    "notePlaceholder": "p.sh. Punoi në një festë zyrtare, prandaj mori një ditë pushimi shtesë",
+    "historyTitle": "Ditët shtesë të {{name}} ({{year}})",
+    "noHistory": "Nuk u shtuan ditë shtesë këtë vit.",
+    "addedBy": "Shtuar nga {{name}}",
+    "columns": {
+      "name": "Emri",
+      "base": "Bazë",
+      "extra": "Shtesë",
+      "total": "Gjithsej",
+      "used": "Përdorur",
+      "pending": "Në pritje",
+      "remaining": "Mbetur"
+    },
+    "editExtraModalTitle": "Ndrysho ditët shtesë të {{name}} ({{year}})",
+    "editedBy": "Ndryshuar nga {{name}} më {{date}}",
+    "deleteExtraConfirm": "Të fshihen këto ditë shtesë? Kuota do të ulet përkatësisht."
+  },
+  "requests": {
+    "approve": "Mirato",
+    "reject": "Refuzo",
+    "approveTitle": "Mirato kërkesën për leje",
+    "rejectTitle": "Refuzo kërkesën për leje",
+    "reviewSummary": "{{name}}: {{start}} – {{end}}",
+    "reviewedBy": "{{name}}, {{date}}",
+    "notePlaceholder": "Shënim (opsional)",
+    "empty": "Nuk ka kërkesa për leje këtu.",
+    "filter": {
+      "pending": "Në pritje",
+      "approved": "Miratuar",
+      "rejected": "Refuzuar",
+      "all": "Të gjitha"
+    },
+    "columns": {
+      "member": "Anëtari",
+      "period": "Periudha",
+      "type": "Lloji",
+      "reason": "Arsyeja",
+      "status": "Statusi"
+    },
+    "changeToApproved": "Mirato në vend të kësaj",
+    "changeToRejected": "Refuzo në vend të kësaj",
+    "deleteConfirm": "Të fshihet përfundimisht kjo kërkesë?",
+    "deleteApprovedConfirm": "Të fshihet kjo kërkesë? Leja e miratuar hiqet dhe ditët i kthehen kuotës.",
+    "changeToApprovedHint": "Kjo kërkesë u refuzua. Miratimi tani regjistron lejen dhe zbret ditët.",
+    "changeToRejectedHint": "Kjo kërkesë u miratua. Refuzimi tani heq lejen dhe kthen ditët."
+  },
+  "my": {
+    "title": "Lejet e mia",
+    "requestLeave": "Kërko leje",
+    "submitRequest": "Dërgo kërkesën",
+    "noAllowance": "Kuota juaj e lejeve për këtë vit nuk është caktuar ende. Kërkojini një administratori.",
+    "requestsTitle": "Kërkesat e mia për leje",
+    "noRequests": "Nuk keni kërkesa për leje këtë vit.",
+    "extraDaysTitle": "Ditë shtesë të dhëna",
+    "cancelConfirm": "Të anulohet kjo kërkesë për leje?",
+    "cancelRequest": "Anulo kërkesën",
+    "period": "Periudha",
+    "periodRequired": "Zgjidhni ditën e parë dhe të fundit",
+    "type": "Lloji",
+    "reason": "Arsyeja (opsionale)",
+    "requestHint": "Llogariten vetëm ditët e punës. Pushimet zbriten nga kuota pasi miratohen."
+  },
+  "location": {
+    "title": "Ku kam punuar",
+    "office": "Zyrë",
+    "remote": "Në distancë",
+    "none": "Pa caktuar",
+    "noDays": "Ende nuk ka ditë pune për të shfaqur."
+  },
+  "checkIn": {
+    "title": "Ku po punon sot?",
+    "description": "Përgjigjja jote përdoret për praninë mujore dhe kuponat e ushqimit.",
+    "later": "Më pyet më vonë",
+    "changeHint": "Zgjodhe gabim? Mund ta ndryshosh te",
+    "changeLink": "Cilësimet → Lejet e mia"
+  },
+  "edit": "Ndrysho",
+  "delete": "Fshi",
+  "close": "Mbyll",
+  "details": {
+    "title": "Detajet e lejes",
+    "editTitle": "Ndrysho lejen",
+    "deleteConfirm": "Të fshihet kjo leje? Ditët i kthehen kuotës.",
+    "editHint": "Llogariten vetëm ditët e punës. Ndryshimet përditësojnë kuotën menjëherë.",
+    "readOnlyHint": "Leja e regjistruar mund të ndryshohet vetëm nga një administrator."
+  }
+}

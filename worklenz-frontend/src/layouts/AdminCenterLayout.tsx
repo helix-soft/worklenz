@@ -16,7 +16,7 @@ const AdminCenterLayout: React.FC = () => {
           {/* Sticky left column — title + sidebar together */}
           <Flex
             vertical
-            className="w-full max-w-60"
+            className="w-full max-w-60 shrink-0"
             style={{ position: 'sticky', top: 80, height: 'fit-content' }}
           >
             <Typography.Title level={4} style={{ marginBottom: 24 }}>
@@ -26,7 +26,8 @@ const AdminCenterLayout: React.FC = () => {
           </Flex>
 
           {/* Scrollable content */}
-          <Flex className="w-full">
+          {/* min-w-0 lets wide pages (tables) scroll inside instead of squeezing the sidebar */}
+          <Flex className="w-full min-w-0">
             <Outlet />
           </Flex>
         </Flex>

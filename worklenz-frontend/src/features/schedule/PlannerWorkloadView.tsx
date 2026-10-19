@@ -49,6 +49,7 @@ import { setProjectId } from '@/features/project/project.slice';
 import { ITask } from '@/types/tasks/task.types';
 import { WorklenzLogoLoader } from '@/components/worklenz-loader/worklenz-loader';
 import { getEnglishWeekdayName } from '@/utils/dateUtils';
+import { useHolidayNames } from '@/hooks/useHolidayNames';
 
 type Axis = 'member' | 'project';
 type Group = 'members' | 'projects';
@@ -56,7 +57,7 @@ type RangeKey = 'day' | 'week' | 'month';
 
 const RANGE_CFG: Record<RangeKey, { label: string; spanDays: number }> = {
   day: { label: 'Day', spanDays: 1 },
-  week: { label: 'Week', spanDays: 5 },
+  week: { label: 'Week', spanDays: 7 },
   month: { label: 'Month', spanDays: 28 },
 };
 
@@ -209,7 +210,8 @@ const PlannerWorkloadView: React.FC = () => {
   const totalRowBg = themeWiseColor('#fafafa', '#262626', themeMode);
 
   // ── Shared workspace settings — same values Schedule/Resources use, not a second copy ──
-  const workingHours = useAppSelector(state => state.scheduleReducer.workingHours) || 8;
+  // The settings API can return hours as a numeric string ("8.00"); keep it a number so sums add up.
+  const workingHours = Number(useAppSelector(state => state.scheduleReducer.workingHours)) || 8;
   const workingDaysRaw = useAppSelector(state => state.scheduleReducer.workingDays);
   const workingDaySet = useMemo(() => {
     const days = (workingDaysRaw?.length
@@ -278,11 +280,7 @@ const PlannerWorkloadView: React.FC = () => {
   const stepAnchor = (dir: 1 | -1) => {
     if (range === 'week') return setAnchor(a => a + dir * 7);
     if (range === 'month') return setAnchor(a => a + dir * 28);
-    setAnchor(a => {
-      let next = a + dir;
-      while (!isWorkingDay(baseDate.add(next, 'day'))) next += dir;
-      return next;
-    });
+    setAnchor(a => a + dir);
   };
 
   const goToToday = () => {
@@ -296,21 +294,13 @@ const PlannerWorkloadView: React.FC = () => {
     }
   };
 
-  // Visible business days for Day/Week grid columns
+  // Visible days for Day/Week grid columns — every day of the week is shown (some people
+  // work on weekends); non-working days and holidays are tinted instead of hidden.
   const days = useMemo(() => {
     if (range === 'month') return [];
     const n = RANGE_CFG[range].spanDays;
-    const list: { offset: number; date: Dayjs }[] = [];
-    let o = anchor;
-    let guard = 0;
-    while (list.length < n && guard < 60) {
-      const date = baseDate.add(o, 'day');
-      if (isWorkingDay(date)) list.push({ offset: o, date });
-      o++;
-      guard++;
-    }
-    return list;
-  }, [range, anchor, baseDate, workingDaySet]);
+    return Array.from({ length: n }, (_, i) => ({ offset: anchor + i, date: baseDate.add(anchor + i, 'day') }));
+  }, [range, anchor, baseDate]);
 
   // Weekly buckets for Month view — rollup meters only, no per-day cells / drag / add
   const weekBuckets = useMemo(() => {
@@ -320,8 +310,7 @@ const PlannerWorkloadView: React.FC = () => {
       const weekStart = anchor + w * 7;
       const dates: string[] = [];
       for (let i = 0; i < 7; i++) {
-        const date = baseDate.add(weekStart + i, 'day');
-        if (isWorkingDay(date)) dates.push(date.format('YYYY-MM-DD'));
+        dates.push(baseDate.add(weekStart + i, 'day').format('YYYY-MM-DD'));
       }
       const first = dayjs(dates[0] ?? baseDate.add(weekStart, 'day').format('YYYY-MM-DD'));
       const last = dayjs(dates[dates.length - 1] ?? first.format('YYYY-MM-DD'));
@@ -330,7 +319,7 @@ const PlannerWorkloadView: React.FC = () => {
       buckets.push({ label, dates });
     }
     return buckets;
-  }, [range, anchor, baseDate, workingDaySet]);
+  }, [range, anchor, baseDate]);
 
   const rangeLabel = useMemo(() => {
     if (range === 'month') {
@@ -351,6 +340,15 @@ const PlannerWorkloadView: React.FC = () => {
   );
   const startDate = visibleDateStrs[0];
   const endDate = visibleDateStrs[visibleDateStrs.length - 1];
+
+  const holidayNames = useHolidayNames(startDate ? dayjs(startDate) : null, endDate ? dayjs(endDate) : null);
+  /** Column tint shared by the header, the member cells and the team total. */
+  const dayColumnBg = (date: Dayjs) =>
+    holidayNames.has(date.format('YYYY-MM-DD'))
+      ? token.colorErrorBg
+      : !isWorkingDay(date)
+        ? token.colorFillQuaternary
+        : undefined;
 
   // ── Data: members & projects (real, shared with the rest of Planner) ──
   const { data: membersResp, isLoading: membersLoading } = useFetchScheduleMembersQuery();
@@ -1239,24 +1237,40 @@ const PlannerWorkloadView: React.FC = () => {
               {/* Header */}
               <div ref={gridHeaderRef} style={{ display: 'flex', position: 'sticky', top: 0, zIndex: 6, background: cardBg, borderBottom: `1px solid ${borderColor}` }}>
                 <div style={{ ...stickyLeftStyle, zIndex: 7, padding: '6px 8px', display: 'flex', alignItems: 'center' }} />
-                {days.map(d => (
-                  <div
-                    key={d.offset}
-                    style={{
-                      flex: 1,
-                      minWidth: 90,
-                      textAlign: 'center',
-                      padding: '6px 4px',
-                      borderRight: `1px solid ${borderColor}`,
-                      background: d.date.isSame(dayjs(), 'day') ? token.colorPrimaryBg : undefined,
-                    }}
-                  >
-                    <div style={{ fontSize: 11, fontWeight: 600, color: d.date.isSame(dayjs(), 'day') ? token.colorPrimary : undefined }}>
-                      {weekdayShort[(d.date.day() + 6) % 7]} {d.date.date()}
-                    </div>
-                    <div style={{ fontSize: 12, opacity: 0.45 }}>{d.date.format('MMM')}</div>
-                  </div>
-                ))}
+                {days.map(d => {
+                  const holidayName = holidayNames.get(d.date.format('YYYY-MM-DD'));
+                  const isToday = d.date.isSame(dayjs(), 'day');
+                  return (
+                    <Tooltip key={d.offset} title={holidayName}>
+                      <div
+                        style={{
+                          flex: 1,
+                          minWidth: 90,
+                          textAlign: 'center',
+                          padding: '6px 4px',
+                          borderRight: `1px solid ${borderColor}`,
+                          background: isToday ? token.colorPrimaryBg : dayColumnBg(d.date),
+                          color: holidayName && !isToday ? token.colorError : undefined,
+                        }}
+                      >
+                        <div style={{ fontSize: 11, fontWeight: 600, color: isToday ? token.colorPrimary : undefined }}>
+                          {weekdayShort[(d.date.day() + 6) % 7]} {d.date.date()}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            opacity: holidayName ? 0.85 : 0.45,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {holidayName || d.date.format('MMM')}
+                        </div>
+                      </div>
+                    </Tooltip>
+                  );
+                })}
                 <div style={{ ...stickyRightStyle, zIndex: 7, padding: '8px 8px', fontSize: 12, fontWeight: 600, opacity: 0.45, textAlign: 'center' }}>
                   {group === 'members' ? t('util', { defaultValue: 'UTIL' }) : t('load', { defaultValue: 'LOAD' })}
                 </div>
@@ -1289,11 +1303,14 @@ const PlannerWorkloadView: React.FC = () => {
                       );
                       const used = dayLoad(row.axis, row.key, dateStr);
                       const dayCapInfo = row.axis === 'member' ? memberCapacityMap.get(`${row.key}_${dateStr}`) : null;
-                      const effectiveDayCap = dayCapInfo ? dayCapInfo.working_hours : (isWorkingDay(dayjs(dateStr)) ? workingHours : 0);
+                      const effectiveDayCap = dayCapInfo
+                        ? dayCapInfo.working_hours
+                        : isWorkingDay(dayjs(dateStr)) && !holidayNames.has(dateStr)
+                          ? workingHours
+                          : 0;
                       const isFullDayTimeOff = Boolean(
                         dayCapInfo?.is_time_off && dayCapInfo?.is_full_day_time_off !== false && dayCapInfo?.working_hours === 0
                       );
-                      const isHoliday = Boolean(dayCapInfo?.is_holiday);
                       const isPartialTimeOff = Boolean(
                         dayCapInfo?.is_time_off && (dayCapInfo?.is_full_day_time_off === false || (dayCapInfo.time_off_hours && dayCapInfo.working_hours > 0))
                       );
@@ -1329,7 +1346,7 @@ const PlannerWorkloadView: React.FC = () => {
                               ? 'rgba(255,77,79,.06)'
                               : isFullDayTimeOff
                                 ? 'repeating-linear-gradient(45deg, rgba(250, 173, 20, 0.08) 0 4px, transparent 4px 8px)'
-                                : undefined,
+                                : dayColumnBg(d.date),
                             display: 'flex',
                             flexDirection: 'column',
                             gap: 4,
@@ -1391,11 +1408,6 @@ const PlannerWorkloadView: React.FC = () => {
                               🔵 {t('timeOff', { defaultValue: 'Time Off' })}
                             </div>
                           )}
-                          {isHoliday && effectiveDayCap === 0 && !isFullDayTimeOff && (
-                            <div style={{ fontSize: 11, color: '#faad14', fontWeight: 600, textAlign: 'center' }}>
-                              🎉 {t('holiday', { defaultValue: 'Holiday' })}
-                            </div>
-                          )}
                           {isPartialTimeOff && (
                             <div style={{ fontSize: 10, color: '#fa8c16', fontWeight: 600, textAlign: 'center' }}>
                               {dayCapInfo.time_off_hours}h {t('timeOff', { defaultValue: 'Time Off' })}
@@ -1446,10 +1458,20 @@ const PlannerWorkloadView: React.FC = () => {
                     const totalDay = Math.round(wlMembers.reduce((s, m) => s + dayLoad('member', m.id, dateStr), 0) * 10) / 10;
                     const totalCapDay = wlMembers.reduce((s, m) => {
                       const c = memberCapacityMap.get(`${m.id}_${dateStr}`);
-                      return s + (c ? c.working_hours : (isWorkingDay(d.date) ? workingHours : 0));
+                      return s + (c ? c.working_hours : isWorkingDay(d.date) && !holidayNames.has(dateStr) ? workingHours : 0);
                     }, 0);
                     return (
-                      <div key={d.offset} style={{ flex: 1, minWidth: 90, borderRight: `1px solid ${borderColor}`, padding: '12px 5px', textAlign: 'center' }}>
+                      <div
+                        key={d.offset}
+                        style={{
+                          flex: 1,
+                          minWidth: 90,
+                          borderRight: `1px solid ${borderColor}`,
+                          padding: '12px 5px',
+                          textAlign: 'center',
+                          background: dayColumnBg(d.date),
+                        }}
+                      >
                         <div style={{ fontSize: 12, fontWeight: 700 }}>{totalDay}h</div>
                         <div style={{ fontSize: 11, opacity: 0.5 }}>/ {totalCapDay}h</div>
                       </div>

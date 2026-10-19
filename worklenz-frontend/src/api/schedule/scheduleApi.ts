@@ -144,7 +144,7 @@ export interface TimeOffEntry {
   is_full_day: boolean;
   hours_off: number | null;
   timezone: string | null;
-  type: 'vacation' | 'sick' | 'personal' | 'other' | null;
+  type: 'vacation' | 'sick' | null;
   created_at: string;
   member_name: string;
   member_email: string;
@@ -165,7 +165,7 @@ export interface CreateTimeOffRequest {
   is_full_day?: boolean;
   hours_off?: number | null;
   timezone?: string | null;
-  type?: 'vacation' | 'sick' | 'personal' | 'other' | null;
+  type?: 'vacation' | 'sick' | null;
 }
 
 export interface UpdateTimeOffRequest {
@@ -176,7 +176,7 @@ export interface UpdateTimeOffRequest {
   is_full_day?: boolean;
   hours_off?: number | null;
   timezone?: string | null;
-  type?: 'vacation' | 'sick' | 'personal' | 'other' | null;
+  type?: 'vacation' | 'sick' | null;
 }
 
 export interface TimeOffSummary {
@@ -191,7 +191,7 @@ export interface TimeOffSummary {
     is_full_day: boolean;
     hours_off: number | null;
     timezone: string | null;
-    type: 'vacation' | 'sick' | 'personal' | 'other' | null;
+    type: 'vacation' | 'sick' | null;
   }>;
   total_days_off: number;
 }

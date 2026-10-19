@@ -1,4 +1,3 @@
-import Holidays from "date-holidays";
 import { IWorkLenzRequest } from "../interfaces/worklenz-request";
 import { IWorkLenzResponse } from "../interfaces/worklenz-response";
 import db from "../config/db";
@@ -11,58 +10,7 @@ import {
   IImportCountryHolidaysRequest,
 } from "../interfaces/holiday.interface";
 import { log_error } from "../shared/utils";
-
-const COUNTRY_HOLIDAY_POPULATE_START_YEAR = 2020;
-const COUNTRY_HOLIDAY_POPULATE_END_YEAR = 2050;
-
-interface DateHolidayEntry {
-  type?: string;
-  start?: Date | string;
-  name?: string;
-}
-
-const insertPublicHolidaysForCountry = async (
-  countryCode: string,
-  startYear = COUNTRY_HOLIDAY_POPULATE_START_YEAR,
-  endYear = COUNTRY_HOLIDAY_POPULATE_END_YEAR
-): Promise<number> => {
-  const hd = new Holidays();
-  hd.init(countryCode);
-  hd.setLanguages("en");
-
-  let totalPopulated = 0;
-  const insertQuery = `
-    INSERT INTO country_holidays (country_code, name, description, date, is_recurring)
-    VALUES ($1, $2, $3, $4, $5)
-    ON CONFLICT (country_code, name, date) DO NOTHING
-  `;
-
-  for (let year = startYear; year <= endYear; year++) {
-    const holidays = hd.getHolidays(year) as DateHolidayEntry[];
-
-    if (!holidays?.length) {
-      continue;
-    }
-
-    const publicHolidays = holidays.filter(holiday => holiday.type === "public");
-
-    for (const holiday of publicHolidays) {
-      if (!holiday.start) {
-        continue;
-      }
-
-      const date = new Date(holiday.start);
-      const dateStr = date.toISOString().split("T")[0];
-      const name = holiday.name || "Unknown Holiday";
-      const description = holiday.type || "Public Holiday";
-
-      await db.query(insertQuery, [countryCode, name, description, dateStr, true]);
-      totalPopulated++;
-    }
-  }
-
-  return totalPopulated;
-};
+import { insertPublicHolidaysForCountry } from "../services/country-holidays";
 
 export default class HolidayController extends WorklenzControllerBase {
   @HandleExceptions()

@@ -13,6 +13,7 @@ import {
   Space,
   Tag,
   Popconfirm,
+  Alert,
   message,
 } from '@/shared/antd-imports';
 import { PlusOutlined, DeleteOutlined, LeftOutlined, RightOutlined } from '@/shared/antd-imports';
@@ -136,6 +137,8 @@ const HolidayCalendar: React.FC<HolidayCalendarProps> = ({ themeMode, workingDay
   const [modalVisible, setModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedHoliday, setSelectedHoliday] = useState<IHolidayCalendarEvent | null>(null);
+  // Official (country) holiday opened from the calendar; shown read-only.
+  const [officialHoliday, setOfficialHoliday] = useState<IHolidayCalendarEvent | null>(null);
   const [currentDate, setCurrentDate] = useState<Dayjs>(dayjs());
   const [isPopulatingHolidays, setIsPopulatingHolidays] = useState(false);
   const [hasAttemptedPopulation, setHasAttemptedPopulation] = useState(false);
@@ -188,8 +191,12 @@ const HolidayCalendar: React.FC<HolidayCalendarProps> = ({ themeMode, workingDay
         }
 
         // Append any backend types that are NOT in the predefined list
-        const predefinedNames = new Set(PREDEFINED_HOLIDAY_DISPLAY.map(p => String(p?.name || '').toLowerCase()));
-        const extraTypes = backendTypes.filter(t => !predefinedNames.has(String(t?.name || '').toLowerCase()));
+        const predefinedNames = new Set(
+          PREDEFINED_HOLIDAY_DISPLAY.map(p => String(p?.name || '').toLowerCase())
+        );
+        const extraTypes = backendTypes.filter(
+          t => !predefinedNames.has(String(t?.name || '').toLowerCase())
+        );
 
         const mergedTypes: IHolidayType[] = [...orderedTypes, ...extraTypes];
         setHolidayTypes(mergedTypes);
@@ -462,8 +469,14 @@ const HolidayCalendar: React.FC<HolidayCalendarProps> = ({ themeMode, workingDay
       h => dayjs(h.date).isSame(date, 'day') && h.source === 'custom' && h.is_editable
     );
 
+    const existingOfficialHoliday = holidays.find(
+      h => dayjs(h.date).isSame(date, 'day') && h.source === 'official'
+    );
+
     if (existingCustomHoliday) {
       handleEditHoliday(existingCustomHoliday);
+    } else if (existingOfficialHoliday) {
+      setOfficialHoliday(existingOfficialHoliday);
     } else {
       form.setFieldValue('date', date);
       setModalVisible(true);
@@ -580,7 +593,7 @@ const HolidayCalendar: React.FC<HolidayCalendarProps> = ({ themeMode, workingDay
             onOpenChange={setDatePickerOpen}
             format="MMM YYYY"
             style={{ width: '120px' }}
-            getPopupContainer={(trigger) => trigger.parentElement || document.body}
+            getPopupContainer={trigger => trigger.parentElement || document.body}
           />
           <Button
             type="text"
@@ -686,6 +699,58 @@ const HolidayCalendar: React.FC<HolidayCalendarProps> = ({ themeMode, workingDay
             </Space>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* ── Official Holiday (read-only) Modal ── */}
+      <Modal
+        title={t('officialHolidayTitle', { defaultValue: 'Official holiday' })}
+        open={!!officialHoliday}
+        onCancel={() => setOfficialHoliday(null)}
+        footer={
+          <Space>
+            <Button
+              icon={<PlusOutlined />}
+              onClick={() => {
+                const date = officialHoliday ? dayjs(officialHoliday.date) : undefined;
+                setOfficialHoliday(null);
+                form.setFieldValue('date', date);
+                setModalVisible(true);
+              }}
+            >
+              {t('addCustomHolidayOnThisDay', { defaultValue: 'Add custom holiday on this day' })}
+            </Button>
+            <Button type="primary" onClick={() => setOfficialHoliday(null)}>
+              {t('close', { defaultValue: 'Close' })}
+            </Button>
+          </Space>
+        }
+        destroyOnHidden
+      >
+        {officialHoliday && (
+          <Form layout="vertical" disabled>
+            <Form.Item label={t('holidayName')}>
+              <Input value={officialHoliday.name} />
+            </Form.Item>
+            <Form.Item label={t('description')}>
+              <TextArea rows={2} value={officialHoliday.description || ''} />
+            </Form.Item>
+            <Form.Item label={t('date')}>
+              <DatePicker style={{ width: '100%' }} value={dayjs(officialHoliday.date)} />
+            </Form.Item>
+            <Form.Item label={t('holidayType')}>
+              <Input value={officialHoliday.holiday_type_name || ''} />
+            </Form.Item>
+          </Form>
+        )}
+        <Alert
+          type="info"
+          showIcon
+          message={t('officialHolidayReadOnly', {
+            defaultValue:
+              'Official holidays come from the public holiday list of {{country}} and cannot be edited. They are excluded from work days automatically.',
+            country: holidaySettings?.country_code || '',
+          })}
+        />
       </Modal>
 
       {/* ── Edit Holiday Modal ── */}

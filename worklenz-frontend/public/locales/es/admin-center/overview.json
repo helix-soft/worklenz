@@ -105,5 +105,9 @@
   "emailAddress": "Email Address",
   "enterOrganizationName": "Enter organization name",
   "ownerSuffix": " (Owner)",
-  "closePopover": "Cerrar ventana emergente"
+  "closePopover": "Cerrar ventana emergente",
+  "officialHolidayTitle": "Festivo oficial",
+  "addCustomHolidayOnThisDay": "Añadir festivo personalizado este día",
+  "close": "Cerrar",
+  "officialHolidayReadOnly": "Los festivos oficiales provienen de la lista de festivos de {{country}} y no se pueden editar. Se excluyen automáticamente de los días laborables."
 }

@@ -463,3 +463,46 @@
   outline: 2px solid var(--ant-colorPrimary, #1677ff);
   outline-offset: 1px;
 }
+
+/* ── Holidays (official + company) ─────────────────────────────── */
+.home-calendar-day-cell-holiday {
+  background: #fff1f0;
+}
+
+.home-calendar__holiday-pill {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ffccc7;
+  color: #a8071a;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 18px;
+}
+
+.home-calendar-mini-day-holiday {
+  background: #ffccc7;
+  color: #a8071a;
+  font-weight: 600;
+}
+
+.home-calendar-dark .home-calendar-day-cell-holiday {
+  background: #2a1215;
+}
+
+.home-calendar-dark .home-calendar__holiday-pill,
+.home-calendar-dark .home-calendar-mini-day-holiday {
+  background: #58181c;
+  color: #ffa39e;
+}
+
+/* Today keeps its own highlight even on a holiday. */
+.home-calendar-mini-day-today.home-calendar-mini-day-holiday {
+  background: #1677ff;
+  color: #fff;
+}

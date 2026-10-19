@@ -1,0 +1,150 @@
+{
+  "loadError": "No se pudieron cargar los datos.",
+  "retry": "Reintentar",
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "yes": "Sí",
+  "no": "No",
+  "type": {
+    "vacation": "Vacaciones",
+    "sick": "Baja por enfermedad"
+  },
+  "status": {
+    "pending": "Pendiente",
+    "approved": "Aprobada",
+    "rejected": "Rechazada",
+    "cancelled": "Cancelada"
+  },
+  "admin": {
+    "title": "Ausencias y asistencia",
+    "subtitle": "Asistencia mensual para vales de comida, días de vacaciones anuales y solicitudes de ausencia.",
+    "holidaysHint": "Los festivos oficiales se excluyen de los días laborables. Gestiónalos en",
+    "holidaysLink": "la configuración del Centro de administración",
+    "tabs": {
+      "summary": "Resumen mensual",
+      "balances": "Días de vacaciones",
+      "requests": "Solicitudes de ausencia"
+    }
+  },
+  "summary": {
+    "monthPicker": "Seleccionar mes",
+    "workDaysInMonth": "Días laborables oficiales este mes: {{count}}",
+    "empty": "No se encontraron miembros del equipo.",
+    "extraWorkedHint": "Registró trabajo en fin de semana o festivo. Puedes concederle días de vacaciones adicionales.",
+    "footnote": "Días laborables oficiales = de lunes a viernes menos los festivos oficiales. Días trabajados = días laborables oficiales menos vacaciones y bajas aprobadas; también es el número de vales de comida.",
+    "columns": {
+      "name": "Nombre",
+      "email": "Correo",
+      "work_days": "Días laborables",
+      "worked_days": "Días trabajados",
+      "logged_hours": "Horas (esperadas / registradas)",
+      "office_days": "Días en oficina",
+      "remote_days": "Días en remoto",
+      "leave_days": "Días de vacaciones",
+      "extra_worked_days": "Trabajado en días no laborables"
+    },
+    "exportPdf": "Descargar informe PDF",
+    "hoursHint": "Esperadas = días trabajados × horas diarias. Registradas = tiempo registrado en tareas."
+  },
+  "balances": {
+    "yearPicker": "Seleccionar año",
+    "hint": "Las vacaciones se descuentan del cupo. Traslada los días restantes del año anterior añadiendo días extra.",
+    "notSet": "Sin definir",
+    "baseSetBy": "Definido por {{name}} el {{date}}",
+    "editBase": "Editar cupo base",
+    "history": "Historial",
+    "addExtra": "Añadir días",
+    "baseModalTitle": "Cupo base de {{name}} ({{year}})",
+    "baseDaysLabel": "Días de vacaciones por año",
+    "baseDaysRequired": "Introduce el número de días",
+    "extraModalTitle": "Añadir días extra a {{name}} ({{year}})",
+    "extraDaysLabel": "Número de días",
+    "noteLabel": "Nota",
+    "noteRequired": "La nota es obligatoria, p. ej. por qué se concede el día",
+    "notePlaceholder": "p. ej. Trabajó en un festivo, por eso recibe un día libre extra",
+    "historyTitle": "Días extra de {{name}} ({{year}})",
+    "noHistory": "No se añadieron días extra este año.",
+    "addedBy": "Añadido por {{name}}",
+    "columns": {
+      "name": "Nombre",
+      "base": "Base",
+      "extra": "Extra",
+      "total": "Total",
+      "used": "Usados",
+      "pending": "Pendientes",
+      "remaining": "Restantes"
+    },
+    "editExtraModalTitle": "Editar días extra de {{name}} ({{year}})",
+    "editedBy": "Editado por {{name}} el {{date}}",
+    "deleteExtraConfirm": "¿Eliminar estos días extra? El cupo se reducirá en consecuencia."
+  },
+  "requests": {
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "approveTitle": "Aprobar solicitud de ausencia",
+    "rejectTitle": "Rechazar solicitud de ausencia",
+    "reviewSummary": "{{name}}: {{start}} – {{end}}",
+    "reviewedBy": "{{name}}, {{date}}",
+    "notePlaceholder": "Nota (opcional)",
+    "empty": "No hay solicitudes de ausencia aquí.",
+    "filter": {
+      "pending": "Pendientes",
+      "approved": "Aprobadas",
+      "rejected": "Rechazadas",
+      "all": "Todas"
+    },
+    "columns": {
+      "member": "Miembro",
+      "period": "Periodo",
+      "type": "Tipo",
+      "reason": "Motivo",
+      "status": "Estado"
+    },
+    "changeToApproved": "Aprobar en su lugar",
+    "changeToRejected": "Rechazar en su lugar",
+    "deleteConfirm": "¿Eliminar esta solicitud definitivamente?",
+    "deleteApprovedConfirm": "¿Eliminar esta solicitud? Se quitará la ausencia aprobada y los días volverán al cupo.",
+    "changeToApprovedHint": "Esta solicitud fue rechazada. Al aprobarla se registrará la ausencia y se descontarán los días.",
+    "changeToRejectedHint": "Esta solicitud fue aprobada. Al rechazarla se quitará la ausencia y se devolverán los días."
+  },
+  "my": {
+    "title": "Mis ausencias",
+    "requestLeave": "Solicitar ausencia",
+    "submitRequest": "Enviar solicitud",
+    "noAllowance": "Tu cupo de vacaciones para este año aún no está definido. Pídeselo a un administrador.",
+    "requestsTitle": "Mis solicitudes de ausencia",
+    "noRequests": "No tienes solicitudes de ausencia este año.",
+    "extraDaysTitle": "Días extra concedidos",
+    "cancelConfirm": "¿Cancelar esta solicitud de ausencia?",
+    "cancelRequest": "Cancelar solicitud",
+    "period": "Periodo",
+    "periodRequired": "Selecciona el primer y el último día",
+    "type": "Tipo",
+    "reason": "Motivo (opcional)",
+    "requestHint": "Solo cuentan los días laborables. Las vacaciones se descuentan del cupo una vez aprobadas."
+  },
+  "location": {
+    "title": "Dónde trabajé",
+    "office": "Oficina",
+    "remote": "Remoto",
+    "none": "Sin definir",
+    "noDays": "Todavía no hay días laborables."
+  },
+  "checkIn": {
+    "title": "¿Dónde trabajas hoy?",
+    "description": "Tu respuesta se usa para la asistencia mensual y los vales de comida.",
+    "later": "Preguntar más tarde",
+    "changeHint": "¿Te equivocaste? Puedes cambiarlo en",
+    "changeLink": "Configuración → Mis ausencias"
+  },
+  "edit": "Editar",
+  "delete": "Eliminar",
+  "close": "Cerrar",
+  "details": {
+    "title": "Detalles de la ausencia",
+    "editTitle": "Editar ausencia",
+    "deleteConfirm": "¿Eliminar esta ausencia? Los días volverán al cupo.",
+    "editHint": "Solo cuentan los días laborables. Los cambios actualizan el cupo de inmediato.",
+    "readOnlyHint": "Solo un administrador puede cambiar una ausencia registrada."
+  }
+}

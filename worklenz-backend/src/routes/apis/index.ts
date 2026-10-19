@@ -74,6 +74,7 @@ import projectFinanceApiRouter from "../../ee/routes/apis/project-finance-api-ro
 import projectRatecardApiRouter from "../../ee/routes/apis/project-ratecard-api-router";
 import ratecardApiRouter from "../../ee/routes/apis/ratecard-api-router";
 import holidayApiRouter from "./holiday-api-router";
+import leaveApiRouter from "./leave-api-router";
 import userActivityLogsApiRouter from "./user-activity-logs-api-router";
 import supportApiRouter from "./support-api-router";
 import accountApiRouter from "./account-api-router";
@@ -192,6 +193,7 @@ api.use("/project-ratecard", projectRatecardApiRouter);
 api.use("/ratecard", ratecardApiRouter);
 
 api.use("/holidays", holidayApiRouter);
+api.use("/leave", leaveApiRouter);
 
 api.use("/logs", userActivityLogsApiRouter);
 

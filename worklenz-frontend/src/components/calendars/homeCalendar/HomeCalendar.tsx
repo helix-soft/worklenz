@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 import isoWeek from 'dayjs/plugin/isoWeek';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +19,9 @@ import {
   useGetClientsLookupQuery,
 } from '@/api/home-page/home-page.api.service';
 import { useFetchTimeOffQuery, TimeOffEntry } from '@/api/schedule/scheduleApi';
+import { leaveApiService } from '@/api/leave/leave.api.service';
+import { ICalendarHoliday } from '@/types/leave/leave.types';
+import logger from '@/utils/errorLogger';
 import { setHomeTasksConfig } from '@/features/home-page/home-page.slice';
 import {
   setSelectedTaskId,
@@ -136,6 +139,50 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
     });
     return map;
   }, [timeOffEntries]);
+
+  // Official (country) and custom company holidays, highlighted in every view.
+  const [holidays, setHolidays] = useState<ICalendarHoliday[]>([]);
+  useEffect(() => {
+    let isCancelled = false;
+    leaveApiService
+      .getHolidays(rangeStart.format('YYYY-MM-DD'), rangeEnd.format('YYYY-MM-DD'))
+      .then(res => {
+        if (!isCancelled) setHolidays(res.done ? res.body : []);
+      })
+      .catch(error => logger.error('Error fetching holidays for calendar', error));
+    return () => {
+      isCancelled = true;
+    };
+  }, [rangeStart, rangeEnd]);
+
+  const holidaysByDate = useMemo(() => {
+    const map = new Map<string, ICalendarHoliday[]>();
+    holidays.forEach(holiday => map.set(holiday.date, [...(map.get(holiday.date) || []), holiday]));
+    return map;
+  }, [holidays]);
+
+  const renderHolidayPills = useCallback(
+    (date: Dayjs) => {
+      const entries = holidaysByDate.get(date.format('YYYY-MM-DD'));
+      if (!entries?.length) return null;
+      return (
+        <div className="home-calendar__indicators" onClick={e => e.stopPropagation()}>
+          {entries.map(holiday => {
+            const kind =
+              holiday.source === 'official'
+                ? t('homeCalendar.officialHoliday', { defaultValue: 'Official holiday' })
+                : t('homeCalendar.companyHoliday', { defaultValue: 'Company holiday' });
+            return (
+              <Tooltip key={`${holiday.date}-${holiday.name}`} title={`${kind}: ${holiday.name}`}>
+                <span className="home-calendar__holiday-pill">{holiday.name}</span>
+              </Tooltip>
+            );
+          })}
+        </div>
+      );
+    },
+    [holidaysByDate, t]
+  );
 
   // Team-scoped project list — independent of which tasks are currently
   // loaded, so projects with no due tasks in the visible range still show up.
@@ -357,7 +404,9 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
       return (
         <div className="home-calendar__indicators" onClick={e => e.stopPropagation()}>
           {entries.map(entry => {
-            const typeLabel = entry.type ? t(`timeOff.types.${entry.type}`, { defaultValue: entry.type }) : '';
+            const typeLabel = entry.type
+              ? t(`timeOff.types.${entry.type}`, { defaultValue: entry.type })
+              : '';
             const text =
               entry.is_full_day === false && entry.hours_off
                 ? `${entry.hours_off}h ${t('timeOff.off', { defaultValue: 'off' })}`
@@ -424,10 +473,11 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
                 const isToday = date.isSame(dayjs(), 'day');
                 const dateKey = date.format('YYYY-MM-DD');
                 const dayTasks = tasksByDate.get(dateKey) || [];
+                const isHoliday = holidaysByDate.has(dateKey);
                 return (
                   <div
                     key={dateKey}
-                    className={`home-calendar-day-cell ${inMonth ? '' : 'home-calendar-day-cell-muted'}`}
+                    className={`home-calendar-day-cell ${inMonth ? '' : 'home-calendar-day-cell-muted'} ${isHoliday ? 'home-calendar-day-cell-holiday' : ''}`}
                     onClick={() => {
                       handleSelectDate(date);
                       openAddModal(date);
@@ -443,8 +493,11 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
                         {t('homeCalendar.addHint', { defaultValue: '+ Add' })}
                       </span>
                     </div>
+                    {renderHolidayPills(date)}
                     {renderTimeOffPill(date)}
-                    <div className="home-calendar-day-tasks">{renderDaySummary(dayTasks, date)}</div>
+                    <div className="home-calendar-day-tasks">
+                      {renderDaySummary(dayTasks, date)}
+                    </div>
                   </div>
                 );
               })}
@@ -465,8 +518,12 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
           const isToday = date.isSame(dayjs(), 'day');
           const dateKey = date.format('YYYY-MM-DD');
           const dayTasks = tasksByDate.get(dateKey) || [];
+          const isHoliday = holidaysByDate.has(dateKey);
           return (
-            <div key={dateKey} className="home-calendar-week-col">
+            <div
+              key={dateKey}
+              className={`home-calendar-week-col ${isHoliday ? 'home-calendar-day-cell-holiday' : ''}`}
+            >
               <div className="home-calendar-week-col-header">
                 <span className="home-calendar-weekday-label">{date.format('ddd')}</span>
                 <span
@@ -474,6 +531,7 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
                 >
                   {date.date()}
                 </span>
+                {renderHolidayPills(date)}
                 {renderTimeOffPill(date)}
               </div>
               <div
@@ -530,10 +588,14 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
                 {days.map(date => {
                   const inMonth = date.isSame(monthStart, 'month');
                   const isToday = date.isSame(dayjs(), 'day');
+                  const dayHolidays = inMonth
+                    ? holidaysByDate.get(date.format('YYYY-MM-DD'))
+                    : undefined;
                   return (
                     <span
                       key={date.format('YYYY-MM-DD')}
-                      className={`home-calendar-mini-day ${inMonth ? '' : 'home-calendar-mini-day-muted'} ${isToday ? 'home-calendar-mini-day-today' : ''}`}
+                      title={dayHolidays?.map(h => h.name).join(', ')}
+                      className={`home-calendar-mini-day ${inMonth ? '' : 'home-calendar-mini-day-muted'} ${isToday ? 'home-calendar-mini-day-today' : ''} ${dayHolidays ? 'home-calendar-mini-day-holiday' : ''}`}
                     >
                       {date.date()}
                     </span>
@@ -623,7 +685,11 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
       {calView === 'week' && renderWeek()}
       {calView === 'year' && renderYear()}
 
-      <HomeAddTaskModal open={modalOpen} defaultDate={modalDate} onClose={() => setModalOpen(false)} />
+      <HomeAddTaskModal
+        open={modalOpen}
+        defaultDate={modalDate}
+        onClose={() => setModalOpen(false)}
+      />
     </div>
   );
 };

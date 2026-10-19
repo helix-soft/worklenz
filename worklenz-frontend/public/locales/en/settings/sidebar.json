@@ -44,11 +44,11 @@
   "integrations": "Integrations",
   "integrations-search": "apps connections slack api system integrations connected tools",
   "configuration": "Configuration",
-  "configuration-search": "configuration settings general settings organization config",
+  "configuration-search": "settings workspace organization configuration settings management",
   "account-deletion": "Delete Account",
   "account-deletion-search": "remove account delete profile danger zone close account",
   "mobile-app": "Mobile App",
   "mobile-app-search": "ios android phone mobile download qr code app store google play",
-  "configuration": "Configuration",
-  "configuration-search": "settings workspace organization configuration settings management"
+  "my-leave": "My leave",
+  "my-leave-search": "leave vacation holiday time off meal voucher office remote"
 }

@@ -48,7 +48,7 @@ export interface EditableTimeOffEntry {
   is_full_day: boolean;
   hours_off: number | null;
   timezone: string | null;
-  type: 'vacation' | 'sick' | 'personal' | 'other' | null;
+  type: 'vacation' | 'sick' | null;
 }
 
 interface TimeOffCalendarProps {
@@ -67,7 +67,7 @@ interface TimeOffFormValues {
   reason?: string;
   is_full_day?: boolean;
   hours_off?: number;
-  type?: 'vacation' | 'sick' | 'personal' | 'other';
+  type?: 'vacation' | 'sick';
   timezone?: string;
 }
 
@@ -250,8 +250,6 @@ const TimeOffCalendar: React.FC<TimeOffCalendarProps> = ({
         const colorMap: Record<string, string> = {
           vacation: 'gold',
           sick: 'red',
-          personal: 'geekblue',
-          other: 'default',
         };
         return (
           <Tag color={colorMap[value] || 'default'}>
@@ -420,8 +418,6 @@ const TimeOffCalendar: React.FC<TimeOffCalendarProps> = ({
                 <Select allowClear placeholder={t('selectType', { defaultValue: 'Select type' })}>
                   <Option value="vacation">{t('timeOffTypeVacation', { defaultValue: 'Vacation' })}</Option>
                   <Option value="sick">{t('timeOffTypeSick', { defaultValue: 'Sick' })}</Option>
-                  <Option value="personal">{t('timeOffTypePersonal', { defaultValue: 'Personal' })}</Option>
-                  <Option value="other">{t('timeOffTypeOther', { defaultValue: 'Other' })}</Option>
                 </Select>
               </Form.Item>
             </Flex>

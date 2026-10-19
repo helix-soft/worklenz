@@ -21,7 +21,7 @@ import { LogTimeModal } from '@/components/time-entries/LogTimeModal';
 import { CreateProjectModal } from '@/components/projects/create-project-modal/create-project-modal';
 import HomeAddTaskModal from '@/pages/home/task-list/HomeAddTaskModal';
 import AddGuestModal from '@/components/common/add-guest/AddGuestModal';
-import TimeOffCalendar from '@/components/schedule/task-timeline/TimeOffCalendar';
+import { RequestLeaveModal } from '@/components/leave/request-leave-modal';
 import { IMyTask } from '@/types/home/my-tasks.types';
 import {
   setSelectedTaskId,
@@ -63,7 +63,6 @@ const QuickActionButton: React.FC<QuickActionButtonProps> = ({
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [guestModalOpen, setGuestModalOpen] = useState(false);
   const [timeOffOpen, setTimeOffOpen] = useState(false);
-  const currentSession = authService.getCurrentSession();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -276,18 +275,7 @@ const QuickActionButton: React.FC<QuickActionButtonProps> = ({
         onClose={() => setGuestModalOpen(false)}
       />
 
-      <TimeOffCalendar
-        members={[
-          {
-            id: currentSession?.team_member_id || '',
-            name: currentSession?.name || '',
-            email: currentSession?.email,
-          },
-        ].filter(m => !!m.id)}
-        visible={timeOffOpen}
-        onClose={() => setTimeOffOpen(false)}
-        preselectedMemberId={currentSession?.team_member_id || null}
-      />
+      <RequestLeaveModal open={timeOffOpen} onClose={() => setTimeOffOpen(false)} />
     </div>
   );
 };

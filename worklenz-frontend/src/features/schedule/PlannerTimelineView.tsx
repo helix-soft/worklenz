@@ -32,6 +32,7 @@ import {
 } from '@/api/schedule/scheduleApi';
 import { ProjectTimelineItem } from '@/types/schedule/schedule-v2.types';
 import { WorklenzLogoLoader } from '@/components/worklenz-loader/worklenz-loader';
+import { useHolidayNames } from '@/hooks/useHolidayNames';
 import { setProjectId } from '@/features/project/project.slice';
 import { setSelectedTaskId, setShowTaskDrawer } from '@/features/task-drawer/task-drawer.slice';
 
@@ -1329,8 +1330,12 @@ const PlannerTimelineView: React.FC = () => {
 
   const totalWidth = totalDays * pxPerDay;
 
+  // Official (country) and company holidays, shaded like weekends but in an error tint.
+  // Only fetched at day granularity, where a single day is visible as its own column.
+  const holidayNames = useHolidayNames(rangeStart, rangeEnd, cfg.unit === 'day');
+
   const units = useMemo(() => {
-    const list: { key: string; label: string; subLabel?: string; isWeekend: boolean; width: number }[] = [];
+    const list: { key: string; label: string; subLabel?: string; isWeekend: boolean; holidayName?: string; width: number }[] = [];
     let cur = rangeStart;
     while (cur.isBefore(rangeEnd)) {
       const next = cur.add(1, cfg.unit);
@@ -1346,12 +1351,13 @@ const PlannerTimelineView: React.FC = () => {
         label: cfg.unit === 'year' ? cur.format('YYYY') : cfg.unit === 'day' ? cur.format('D') : cur.format('MMM'),
         subLabel: cfg.unit === 'day' ? cur.format('ddd') : undefined,
         isWeekend: cfg.unit === 'day' && (cur.day() === 0 || cur.day() === 6),
+        holidayName: cfg.unit === 'day' ? holidayNames.get(cur.format('YYYY-MM-DD')) : undefined,
         width: days * pxPerDay,
       });
       cur = next;
     }
     return list;
-  }, [rangeStart, rangeEnd, cfg.unit, pxPerDay]);
+  }, [rangeStart, rangeEnd, cfg.unit, pxPerDay, holidayNames]);
 
   // Coarse grouping row spanning the fine units above (see TIMELINE_ZOOM_CFG.topUnit) —
   // mirrors PlannerScheduleView's monthGroups/weekGroups spanning-header pattern.
@@ -1833,8 +1839,8 @@ const PlannerTimelineView: React.FC = () => {
               )}
               <div style={{ display: 'flex', width: totalWidth, height: UNIT_HEADER_HEIGHT, minHeight: UNIT_HEADER_HEIGHT }}>
                 {units.map(u => (
+                  <Tooltip key={u.key} title={u.holidayName}>
                   <div
-                    key={u.key}
                     style={{
                       width: u.width,
                       minWidth: u.width,
@@ -1846,7 +1852,8 @@ const PlannerTimelineView: React.FC = () => {
                       fontSize: 12,
                       fontWeight: 600,
                       borderRight: `1px solid ${borderColor}`,
-                      background: u.isWeekend ? token.colorFillQuaternary : undefined,
+                      background: u.holidayName ? token.colorErrorBg : u.isWeekend ? token.colorFillQuaternary : undefined,
+                      color: u.holidayName ? token.colorError : undefined,
                     }}
                   >
                     {u.subLabel && (
@@ -1854,6 +1861,7 @@ const PlannerTimelineView: React.FC = () => {
                     )}
                     <span style={{ lineHeight: 1.3 }}>{u.label}</span>
                   </div>
+                  </Tooltip>
                 ))}
               </div>
 
@@ -1901,7 +1909,7 @@ const PlannerTimelineView: React.FC = () => {
                   return units.map(u => {
                     const left = x;
                     x += u.width;
-                    if (!u.isWeekend) return null;
+                    if (!u.isWeekend && !u.holidayName) return null;
                     return (
                       <div
                         key={`weekend-${u.key}`}
@@ -1911,7 +1919,7 @@ const PlannerTimelineView: React.FC = () => {
                           bottom: 0,
                           left,
                           width: u.width,
-                          background: token.colorFillQuaternary,
+                          background: u.holidayName ? token.colorErrorBg : token.colorFillQuaternary,
                           zIndex: 0,
                           pointerEvents: 'none',
                         }}

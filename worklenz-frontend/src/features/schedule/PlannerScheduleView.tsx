@@ -33,6 +33,7 @@ import { useAuthService } from '@/hooks/useAuth';
 import { getUserSession } from '@/utils/session-helper';
 import { WorklenzLogoLoader } from '@/components/worklenz-loader/worklenz-loader';
 import { getEnglishWeekdayName } from '@/utils/dateUtils';
+import { useHolidayNames } from '@/hooks/useHolidayNames';
 
 type ZoomLevel = 'days' | 'weeks' | 'months';
 
@@ -80,7 +81,8 @@ const PlannerScheduleView: React.FC = () => {
   const themeMode = useAppSelector(state => state.themeReducer.mode);
   const { token } = theme.useToken();
   const showWeekends = useAppSelector(selectShowWeekends);
-  const workingHours = useAppSelector(state => state.scheduleReducer.workingHours) || 8;
+  // The settings API can return hours as a numeric string ("8.00"); keep it a number so sums add up.
+  const workingHours = Number(useAppSelector(state => state.scheduleReducer.workingHours)) || 8;
   const workingDaysRaw = useAppSelector(state => state.scheduleReducer.workingDays);
   const showTaskDrawer = useAppSelector(state => state.taskDrawerReducer.showTaskDrawer);
 
@@ -478,16 +480,8 @@ const PlannerScheduleView: React.FC = () => {
     return map;
   }, [capacityResponse]);
 
-  const isOrgHoliday = useMemo(() => {
-    const set = new Set<string>();
-    const memberCapList: any[] = capacityResponse?.body || [];
-    memberCapList.forEach(m => {
-      m.daily_capacity?.forEach((c: any) => {
-        if (c.is_holiday) set.add(c.date);
-      });
-    });
-    return set;
-  }, [capacityResponse]);
+  // Official (country) and company holidays for the visible days; their columns are tinted.
+  const holidayNames = useHolidayNames(days[0]?.date ?? null, days[days.length - 1]?.date ?? null);
 
   // Surface the backend's truncation notice (the timeline query caps out at a fixed
   // row count) instead of letting tasks silently vanish from view with no indication.
@@ -1678,9 +1672,10 @@ const PlannerScheduleView: React.FC = () => {
                 const dateStr = d.date.format('YYYY-MM-DD');
                 const isToday = dateStr === todayStr;
                 const isNonWorkingDay = !isWorkingDay(d.date);
+                const holidayName = holidayNames.get(dateStr);
                 return (
+                  <Tooltip key={d.offset} title={holidayName}>
                   <div
-                    key={d.offset}
                     style={{
                       width: colWidth,
                       minWidth: colWidth,
@@ -1688,7 +1683,14 @@ const PlannerScheduleView: React.FC = () => {
                       textAlign: 'center',
                       padding: '6px 4px',
                       borderRight: `1px solid ${borderColor}`,
-                      background: isToday ? token.colorPrimaryBg : isNonWorkingDay ? token.colorFillQuaternary : cardBg,
+                      background: isToday
+                        ? token.colorPrimaryBg
+                        : holidayName
+                          ? token.colorErrorBg
+                          : isNonWorkingDay
+                            ? token.colorFillQuaternary
+                            : cardBg,
+                      color: holidayName && !isToday ? token.colorError : undefined,
                     }}
                   >
                     <div
@@ -1703,14 +1705,22 @@ const PlannerScheduleView: React.FC = () => {
                       }}
                     >
                       {cfg.dense === 'bar' ? d.date.date() : `${weekdayShort[(d.date.day() + 6) % 7]} ${d.date.date()}`}
-                      {isOrgHoliday.has(dateStr) && (
-                        <Tooltip title={t('holiday', { defaultValue: 'Holiday' })}>
-                          <span style={{ fontSize: 10 }}>🎉</span>
-                        </Tooltip>
-                      )}
                     </div>
-                    {cfg.dense !== 'bar' && <div style={{ fontSize: 12, opacity: 0.45 }}>{d.date.format('MMM')}</div>}
+                    {cfg.dense !== 'bar' && (
+                      <div
+                        style={{
+                          fontSize: 12,
+                          opacity: holidayName ? 0.85 : 0.45,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {holidayName || d.date.format('MMM')}
+                      </div>
+                    )}
                   </div>
+                  </Tooltip>
                 );
               })}
             </div>
@@ -1750,11 +1760,14 @@ const PlannerScheduleView: React.FC = () => {
                       const dateStr = d.date.format('YYYY-MM-DD');
                       const capInfo = memberCapacityMap.get(`${memberId}_${dateStr}`);
                       const nonWorkingDay = !isWorkingDay(d.date);
-                      const effectiveDayCap = capInfo ? capInfo.working_hours : (nonWorkingDay ? 0 : workingHours);
+                      const effectiveDayCap = capInfo
+                        ? capInfo.working_hours
+                        : nonWorkingDay || holidayNames.has(dateStr)
+                          ? 0
+                          : workingHours;
                       const isFullDayTimeOff = Boolean(
                         capInfo?.is_time_off && capInfo?.is_full_day_time_off !== false && capInfo?.working_hours === 0
                       );
-                      const isHoliday = Boolean(capInfo?.is_holiday);
                       const isPartialTimeOff = Boolean(
                         capInfo?.is_time_off && (capInfo?.is_full_day_time_off === false || (capInfo.time_off_hours && capInfo.working_hours > 0))
                       );
@@ -1814,9 +1827,11 @@ const PlannerScheduleView: React.FC = () => {
                               ? 'rgba(255,77,79,.06)'
                               : isFullDayTimeOff
                                 ? 'repeating-linear-gradient(45deg, rgba(250, 173, 20, 0.08) 0 4px, transparent 4px 8px)'
-                                : nonWorkingDay
-                                  ? token.colorFillQuaternary
-                                  : undefined,
+                                : holidayNames.has(dateStr)
+                                  ? token.colorErrorBg
+                                  : nonWorkingDay
+                                    ? token.colorFillQuaternary
+                                    : undefined,
                             display: 'flex',
                             flexDirection: 'column',
                             gap: 4,
@@ -2089,11 +2104,6 @@ const PlannerScheduleView: React.FC = () => {
                           {isFullDayTimeOff && (
                             <div style={{ fontSize: 11, color: '#fa8c16', fontWeight: 600, textAlign: 'center', margin: '2px 0' }}>
                               🔵 {t('timeOff', { defaultValue: 'Time Off' })}
-                            </div>
-                          )}
-                          {isHoliday && effectiveDayCap === 0 && !isFullDayTimeOff && (
-                            <div style={{ fontSize: 11, color: '#faad14', fontWeight: 600, textAlign: 'center', margin: '2px 0' }}>
-                              🎉 {t('holiday', { defaultValue: 'Holiday' })}
                             </div>
                           )}
                           {isPartialTimeOff && (

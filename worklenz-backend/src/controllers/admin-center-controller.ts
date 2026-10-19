@@ -1,4 +1,5 @@
 import { IWorkLenzRequest } from "../interfaces/worklenz-request";
+import { ensureCountryHolidays } from "../services/country-holidays";
 import { IWorkLenzResponse } from "../interfaces/worklenz-response";
 
 import db from "../config/db";
@@ -1625,6 +1626,16 @@ export default class AdminCenterController extends WorklenzControllerBase {
       } catch (error) {
         // Log error but don't fail the settings update
         console.error("Error syncing Sri Lankan holidays:", error);
+      }
+    }
+
+    // Other countries: make sure the official holidays exist so calendars and leave
+    // calculations can use them right away.
+    if (auto_sync_holidays && country_code && country_code !== "LK") {
+      try {
+        await ensureCountryHolidays(country_code);
+      } catch (error) {
+        console.error("Error populating country holidays:", error);
       }
     }
 
