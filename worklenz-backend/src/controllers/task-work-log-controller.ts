@@ -12,6 +12,7 @@ import HandleExceptions from "../decorators/handle-exceptions";
 import momentTime from "moment-timezone";
 import { SocketEvents } from "../socket.io/events";
 import { IO } from "../shared/io";
+import { ensureMeetingsTask } from "../services/meetings-task.service";
 
 export default class TaskWorklogController extends WorklenzControllerBase {
   // Broadcasts to every team member's own socket instead of a server-wide
@@ -42,10 +43,11 @@ export default class TaskWorklogController extends WorklenzControllerBase {
     req: IWorkLenzRequest,
     res: IWorkLenzResponse,
   ): Promise<IWorkLenzResponse> {
-    const { id, seconds_spent, description, created_at, formatted_start, activity } =
+    const { id, seconds_spent, description, created_at, formatted_start, activity, google_event_id } =
       req.body;
-    const q = `INSERT INTO task_work_log (time_spent, description, task_id, user_id, created_at, activity)
-               VALUES ($1, $2, $3, $4, $5, $6);`;
+    // google_event_id: set when the log was made from a Google Calendar event (Log Time week view).
+    const q = `INSERT INTO task_work_log (time_spent, description, task_id, user_id, created_at, activity, google_event_id)
+               VALUES ($1, $2, $3, $4, $5, $6, $7);`;
     const params = [
       seconds_spent,
       description,
@@ -53,6 +55,7 @@ export default class TaskWorklogController extends WorklenzControllerBase {
       req.user?.id,
       formatted_start,
       activity || null,
+      google_event_id || null,
     ];
     const result = await db.query(q, params);
     const [data] = result.rows;
@@ -657,6 +660,19 @@ export default class TaskWorklogController extends WorklenzControllerBase {
     return res.status(200).send(new ServerResponse(true, result.rows));
   }
 
+  /** The project's "Meetings" task that calendar events are logged to; created on first use. */
+  @HandleExceptions()
+  public static async getMeetingsTask(
+    req: IWorkLenzRequest,
+    res: IWorkLenzResponse,
+  ): Promise<IWorkLenzResponse> {
+    const { project_id } = req.body as Record<string, string>;
+    if (!project_id) return res.status(400).send(new ServerResponse(false, null, "project_id is required"));
+    const task = await ensureMeetingsTask(project_id, req.user?.team_id as string, req.user?.id as string);
+    if (!task) return res.status(404).send(new ServerResponse(false, null, "Project not found"));
+    return res.status(200).send(new ServerResponse(true, task));
+  }
+
   @HandleExceptions()
   public static async getMyTasksInProject(
     req: IWorkLenzRequest,
@@ -829,6 +845,7 @@ export default class TaskWorklogController extends WorklenzControllerBase {
         twl.time_spent,
         twl.description,
         twl.activity,
+        twl.google_event_id,
         t1.name AS task_name,
         t1.billable,
         t1.end_date AS due_date,

@@ -91,6 +91,8 @@ export interface IRecentTimeLog {
   time_spent?: number;
   description?: string | null;
   activity?: string | null;
+  /** Google Calendar event this log was made from (Log Time week view), if any. */
+  google_event_id?: string | null;
   status_name?: string;
   status_color?: string;
   status_color_dark?: string;
@@ -184,6 +186,12 @@ export const taskTimeLogsApiService = {
 
   getMyRecentProjects: async (): Promise<IServerResponse<IRecentProject[]>> => {
     const response = await apiClient.get(`${rootUrl}/my-recent-projects`);
+    return response.data;
+  },
+
+  /** The project's "Meetings" task for calendar events; the backend creates it on first use. */
+  getMeetingsTask: async (projectId: string): Promise<IServerResponse<{ id: string; name: string }>> => {
+    const response = await apiClient.post(`${rootUrl}/meetings-task`, { project_id: projectId });
     return response.data;
   },
 

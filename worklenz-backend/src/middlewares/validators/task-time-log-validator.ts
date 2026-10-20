@@ -18,6 +18,15 @@ export default async function (req: IWorkLenzRequest, res: IWorkLenzResponse, ne
     return res.status(400).send(new ServerResponse(false, null, "Invalid activity"));
   }
 
+  const { google_event_id } = req.body;
+  if (
+    google_event_id !== undefined &&
+    google_event_id !== null &&
+    (typeof google_event_id !== "string" || google_event_id.length > 1024)
+  ) {
+    return res.status(400).send(new ServerResponse(false, null, "Invalid calendar event"));
+  }
+
   // On PUT the route param carries the work log id, which lets the check exempt
   // edits that leave the log's date untouched.
   const violation = await getBackdateViolation(

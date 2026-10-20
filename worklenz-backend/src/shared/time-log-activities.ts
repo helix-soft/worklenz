@@ -7,6 +7,10 @@ export const TIME_LOG_ACTIVITIES = [
   "support",
   "pr",
   "meeting",
+  "demo",
+  "workshop",
+  "training",
+  "interview",
 ] as const;
 
 export type TimeLogActivity = (typeof TIME_LOG_ACTIVITIES)[number];

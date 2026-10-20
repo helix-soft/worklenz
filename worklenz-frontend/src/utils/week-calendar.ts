@@ -8,6 +8,8 @@ export interface IWeekCalendarEntry {
   id: string;
   taskId: string;
   taskName: string;
+  /** Main label on the calendar block: the event title for calendar-event logs, else the task. */
+  title?: string;
   projectId: string;
   projectName: string;
   projectColor: string | null;

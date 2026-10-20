@@ -18,6 +18,7 @@ taskWorkLogApiRouter.get("/my-tasks", safeControllerFunction(TaskWorklogControll
 taskWorkLogApiRouter.get("/my-summary", safeControllerFunction(TaskWorklogController.getMySummary));
 taskWorkLogApiRouter.get("/my-weekly-breakdown", safeControllerFunction(TaskWorklogController.getMyWeeklyBreakdown));
 taskWorkLogApiRouter.get("/my-recent-projects", safeControllerFunction(TaskWorklogController.getMyRecentProjects));
+taskWorkLogApiRouter.post("/meetings-task", safeControllerFunction(TaskWorklogController.getMeetingsTask));
 taskWorkLogApiRouter.get("/my-tasks-in-project", safeControllerFunction(TaskWorklogController.getMyTasksInProject));
 taskWorkLogApiRouter.get("/running-timers", safeControllerFunction(TaskWorklogController.getAllRunningTimers));
 taskWorkLogApiRouter.get("/recent-logs", safeControllerFunction(TaskWorklogController.getRecentTimeLogs));

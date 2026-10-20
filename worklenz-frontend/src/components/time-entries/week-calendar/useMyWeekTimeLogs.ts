@@ -68,6 +68,8 @@ const toCalendarEntry = (log: IRecentTimeLog): IWeekCalendarEntry => ({
   id: log.id,
   taskId: log.task_id,
   taskName: log.task_name || '',
+  // Logs made from a calendar event (on the project's Meetings task) read better by the event title.
+  title: (log.google_event_id && (log.description || '').trim()) || log.task_name || '',
   projectId: log.project_id,
   projectName: log.project_name || '',
   projectColor: log.project_color || null,

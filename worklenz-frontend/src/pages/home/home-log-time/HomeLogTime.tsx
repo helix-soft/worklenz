@@ -15,6 +15,7 @@ import {
   CaretUpOutlined,
   CaretDownOutlined,
   Tag,
+  Alert,
 } from '@/shared/antd-imports';
 import dayjs, { Dayjs } from 'dayjs';
 import { useTranslation } from 'react-i18next';
@@ -56,7 +57,14 @@ import { getTimeRangeSeconds } from '@/utils/time-text-input';
 import { DEFAULT_TIME_LOG_ACTIVITY, TimeLogActivity } from '@/shared/time-log-activities';
 import { TimeLogActivitySelect } from '@/components/time-entries/TimeLogActivitySelect';
 import { TimeRangeDurationHint } from '@/components/time-entries/TimeRangeDurationHint';
-import { MyWeekCalendar } from '@/components/time-entries/week-calendar/MyWeekCalendar';
+import {
+  IWeekGhostEvent,
+  MyWeekCalendar,
+} from '@/components/time-entries/week-calendar/MyWeekCalendar';
+import {
+  getCalendarColor,
+  useGoogleCalendarEvents,
+} from '@/components/calendars/homeCalendar/useGoogleCalendarEvents';
 import { useMyWeekTimeLogs } from '@/components/time-entries/week-calendar/useMyWeekTimeLogs';
 import { getWeekStart, IWeekCalendarEntry } from '@/utils/week-calendar';
 import './home-log-time.css';
@@ -202,6 +210,36 @@ const HomeLogTime: React.FC = () => {
   const [weekStart, setWeekStart] = useState<Dayjs>(() => getWeekStart());
   const [weekRefreshKey, setWeekRefreshKey] = useState(0);
   const weekLogs = useMyWeekTimeLogs(weekStart, weekRefreshKey);
+
+  // Google Calendar events of the week that are not logged yet, shown as faded placeholders.
+  // Clicking one fills Quick Time Entry; the log is linked to the event so it disappears after.
+  const weekEnd = useMemo(() => weekStart.add(6, 'day'), [weekStart]);
+  const { status: googleStatus, eventsByDate } = useGoogleCalendarEvents(weekStart, weekEnd);
+  const [selectedGhost, setSelectedGhost] = useState<IWeekGhostEvent | null>(null);
+  const [meetingsTask, setMeetingsTask] = useState<{ id: string; name: string } | null>(null);
+
+  const ghostEvents = useMemo(() => {
+    const loggedEventIds = new Set(weekLogs.logs.map(log => log.google_event_id).filter(Boolean));
+    const now = dayjs();
+    const byId = new Map<string, IWeekGhostEvent>();
+    eventsByDate.forEach(events =>
+      events.forEach(event => {
+        if (event.is_all_day || !event.start_at || !event.end_at) return;
+        if (byId.has(event.google_event_id) || loggedEventIds.has(event.google_event_id)) return;
+        const start = dayjs(event.start_at);
+        // Future time can't be logged, so only events that have started are offered.
+        if (!start.isBefore(now)) return;
+        byId.set(event.google_event_id, {
+          id: event.google_event_id,
+          title: event.title || t('homeCalendar.google.untitled', { defaultValue: '(No title)' }),
+          start,
+          end: dayjs(event.end_at),
+          color: getCalendarColor(event),
+        });
+      })
+    );
+    return Array.from(byId.values());
+  }, [eventsByDate, weekLogs.logs, t]);
 
   // Recently Logged table — sort/filter/pagination state
   const [logSortField, setLogSortField] = useState<LogSortField>('created_at');
@@ -428,7 +466,45 @@ const HomeLogTime: React.FC = () => {
   }, [selProjectId, taskSearch]);
 
   const projectOptions = projects.map((p: IProject) => ({ value: p.id, label: p.name }));
-  const taskOptions = tasks.map(t => ({ value: t.id, label: t.name }));
+  const taskOptions = [
+    // The Meetings task may have just been created and not be in the loaded list yet.
+    ...(meetingsTask && !tasks.some(task => task.id === meetingsTask.id)
+      ? [{ value: meetingsTask.id, label: meetingsTask.name }]
+      : []),
+    ...tasks.map(t => ({ value: t.id, label: t.name })),
+  ];
+
+  /** Selects the project's Meetings task (created on first use) for a calendar event log. */
+  const selectMeetingsTask = useCallback(
+    async (projectId: string) => {
+      try {
+        const res = await taskTimeLogsApiService.getMeetingsTask(projectId);
+        if (!res.done) throw new Error(res.message || 'Failed to load the Meetings task');
+        setMeetingsTask(res.body);
+        setSelTaskId(res.body.id);
+      } catch {
+        notification.error({
+          message: t('logTime.calendarEvents.meetingsTaskFailed', {
+            defaultValue: 'Could not prepare the Meetings task. Pick a task manually.',
+          }),
+        });
+      }
+    },
+    [t]
+  );
+
+  const handleSelectGhost = (ghost: IWeekGhostEvent) => {
+    setSelectedGhost(ghost);
+    setDate(ghost.start.startOf('day'));
+    setStartTime(ghost.start);
+    setEndTime(ghost.end);
+    setNotes(ghost.title.slice(0, 500));
+    setActivity('meeting');
+    if (selProjectId) void selectMeetingsTask(selProjectId);
+    quickEntryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  const clearSelectedGhost = () => setSelectedGhost(null);
 
   const loggedSeconds = useMemo(() => getTimeRangeSeconds(startTime, endTime), [startTime, endTime]);
 
@@ -441,6 +517,8 @@ const HomeLogTime: React.FC = () => {
     setSelProjectId(projectId);
     setSelTaskId(undefined);
     setTaskSearch('');
+    setMeetingsTask(null);
+    if (selectedGhost) void selectMeetingsTask(projectId);
   };
 
   const handleSubmit = async () => {
@@ -466,7 +544,9 @@ const HomeLogTime: React.FC = () => {
         seconds_spent: loggedSeconds,
         activity,
         description: notes || undefined,
+        google_event_id: selectedGhost?.id,
       });
+      setSelectedGhost(null);
       setStartTime(null);
       setEndTime(null);
       setNotes('');
@@ -743,6 +823,27 @@ const HomeLogTime: React.FC = () => {
         >
           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 14 }}>{t('logTime.quickEntryTitle', { defaultValue: 'Quick Time Entry' })}</div>
 
+          {selectedGhost && (
+            <Alert
+              type="info"
+              showIcon
+              closable
+              onClose={clearSelectedGhost}
+              style={{ marginBottom: 14 }}
+              message={t('logTime.calendarEvents.logging', {
+                defaultValue: 'Logging calendar event: {{title}}',
+                title: selectedGhost.title,
+              })}
+              description={
+                selProjectId
+                  ? undefined
+                  : t('logTime.calendarEvents.pickProject', {
+                      defaultValue: 'Pick the project; the time goes to its Meetings task.',
+                    })
+              }
+            />
+          )}
+
           <div style={{ marginBottom: 14 }}>
             <label style={fldLbl}>{t('logTime.projectLabel', { defaultValue: 'Project' })}</label>
             <Select
@@ -897,15 +998,32 @@ const HomeLogTime: React.FC = () => {
             </div>
 
             {logView === 'week' ? (
-              <MyWeekCalendar
-                weekStart={weekStart}
-                onWeekStartChange={setWeekStart}
-                entries={weekLogs.entries}
-                isLoading={weekLogs.isLoading}
-                hasError={weekLogs.hasError}
-                onRetry={weekLogs.reload}
-                onOpenEntry={handleOpenCalendarEntry}
-              />
+              <>
+                {googleStatus?.configured && !googleStatus.connected && (
+                  <Button
+                    type="link"
+                    size="small"
+                    style={{ alignSelf: 'flex-start', padding: 0, marginBottom: 6, fontSize: 12 }}
+                    onClick={() => navigate('/worklenz/settings/integrations')}
+                  >
+                    {t('logTime.calendarEvents.connect', {
+                      defaultValue: 'Connect Google Calendar to log your meetings from here',
+                    })}
+                  </Button>
+                )}
+                <MyWeekCalendar
+                  weekStart={weekStart}
+                  onWeekStartChange={setWeekStart}
+                  entries={weekLogs.entries}
+                  isLoading={weekLogs.isLoading}
+                  hasError={weekLogs.hasError}
+                  onRetry={weekLogs.reload}
+                  onOpenEntry={handleOpenCalendarEntry}
+                  ghostEvents={ghostEvents}
+                  selectedGhostId={selectedGhost?.id ?? null}
+                  onSelectGhost={handleSelectGhost}
+                />
+              </>
             ) : (
             <>
 

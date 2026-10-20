@@ -35,6 +35,8 @@ export interface IGoogleCalendarEvent {
   calendar_id: string;
   calendar_name: string | null;
   calendar_is_primary: boolean;
+  /** Google's own event id (stable across syncs, unlike `id`). */
+  google_event_id: string;
   /** RFC 5545 UID; null until the event is re-synced. */
   ical_uid: string | null;
   /** Google account the event was synced from. */

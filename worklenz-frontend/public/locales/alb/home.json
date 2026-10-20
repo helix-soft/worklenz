@@ -270,6 +270,13 @@
     "weekdayFri": "Pre",
     "weekdaySat": "Sht",
     "weekdaySun": "Die",
+    "calendarEvents": {
+      "clickToLog": "Ende i paregjistruar. Kliko për ta regjistruar.",
+      "logging": "Po regjistrohet ngjarja e kalendarit: {{title}}",
+      "pickProject": "Zgjidh projektin; koha shkon te detyra Meetings e tij.",
+      "meetingsTaskFailed": "Detyra Meetings nuk u përgatit dot. Zgjidh një detyrë manualisht.",
+      "connect": "Lidh Google Calendar për të regjistruar takimet nga këtu"
+    },
     "week": {
       "viewWeek": "Java",
       "previous": "Java e mëparshme",
@@ -293,7 +300,11 @@
       "testing": "Testim",
       "support": "Mbështetje",
       "pr": "PR",
-      "meeting": "Takim"
+      "meeting": "Sync",
+      "demo": "Demo",
+      "workshop": "Punëtori",
+      "training": "Trajnim",
+      "interview": "Intervistë"
     },
     "sameStartEnd": "Ora e fillimit dhe e mbarimit nuk mund të jenë të njëjta",
     "rangeNextDay": "(përfundon ditën tjetër)"

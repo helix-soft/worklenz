@@ -270,6 +270,13 @@
     "weekdayFri": "Fri",
     "weekdaySat": "Sat",
     "weekdaySun": "Sun",
+    "calendarEvents": {
+      "clickToLog": "Not logged yet. Click to log it.",
+      "logging": "Logging calendar event: {{title}}",
+      "pickProject": "Pick the project; the time goes to its Meetings task.",
+      "meetingsTaskFailed": "Could not prepare the Meetings task. Pick a task manually.",
+      "connect": "Connect Google Calendar to log your meetings from here"
+    },
     "week": {
       "viewWeek": "Week",
       "previous": "Previous week",
@@ -293,7 +300,11 @@
       "testing": "Testing",
       "support": "Support",
       "pr": "PR",
-      "meeting": "Meeting"
+      "meeting": "Sync",
+      "demo": "Demo",
+      "workshop": "Workshop",
+      "training": "Training",
+      "interview": "Interview"
     },
     "sameStartEnd": "Start and end time cannot be the same",
     "rangeNextDay": "(ends the next day)"

@@ -270,6 +270,13 @@
     "weekdayFri": "周五",
     "weekdaySat": "周六",
     "weekdaySun": "周日",
+    "calendarEvents": {
+      "clickToLog": "尚未记录。点击即可记录。",
+      "logging": "正在记录日历事件：{{title}}",
+      "pickProject": "选择项目；时间将记录到该项目的 Meetings 任务。",
+      "meetingsTaskFailed": "无法准备 Meetings 任务。请手动选择任务。",
+      "connect": "连接 Google 日历，即可在此记录会议时间"
+    },
     "week": {
       "viewWeek": "周",
       "previous": "上一周",
@@ -293,7 +300,11 @@
       "testing": "测试",
       "support": "支持",
       "pr": "PR",
-      "meeting": "会议"
+      "meeting": "同步会",
+      "demo": "演示",
+      "workshop": "研讨会",
+      "training": "培训",
+      "interview": "面试"
     },
     "sameStartEnd": "开始时间和结束时间不能相同",
     "rangeNextDay": "（次日结束）"

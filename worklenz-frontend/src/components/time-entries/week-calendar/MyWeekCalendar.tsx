@@ -14,6 +14,7 @@ import {
   WarningOutlined,
 } from '@/shared/antd-imports';
 import {
+  assignLanes,
   buildWeekCalendar,
   getWeekStart,
   IWeekCalendarDay,
@@ -35,6 +36,19 @@ interface MyWeekCalendarProps {
   hasError: boolean;
   onRetry: () => void;
   onOpenEntry: (entry: IWeekCalendarEntry) => void;
+  /** Calendar events not logged yet, drawn as faded placeholders that can be clicked to log them. */
+  ghostEvents?: IWeekGhostEvent[];
+  selectedGhostId?: string | null;
+  onSelectGhost?: (ghost: IWeekGhostEvent) => void;
+}
+
+/** A calendar event shown as a faded placeholder on the hour grid. */
+export interface IWeekGhostEvent {
+  id: string;
+  title: string;
+  start: Dayjs;
+  end: Dayjs;
+  color: string;
 }
 
 /**
@@ -43,7 +57,18 @@ interface MyWeekCalendarProps {
  * and are shown side by side with a warning outline, plus the overlapping time per day.
  */
 export const MyWeekCalendar: React.FC<MyWeekCalendarProps> = memo(
-  ({ weekStart, onWeekStartChange, entries, isLoading, hasError, onRetry, onOpenEntry }) => {
+  ({
+    weekStart,
+    onWeekStartChange,
+    entries,
+    isLoading,
+    hasError,
+    onRetry,
+    onOpenEntry,
+    ghostEvents = NO_GHOSTS,
+    selectedGhostId = null,
+    onSelectGhost,
+  }) => {
     const { t } = useTranslation('home');
     const { token } = theme.useToken();
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -185,6 +210,9 @@ export const MyWeekCalendar: React.FC<MyWeekCalendarProps> = memo(
                       now={now}
                       holidayName={holidayNames.get(day.date.format('YYYY-MM-DD'))}
                       onOpenEntry={onOpenEntry}
+                      ghostEvents={ghostEvents}
+                      selectedGhostId={selectedGhostId}
+                      onSelectGhost={onSelectGhost}
                     />
                   ))}
                 </div>
@@ -192,7 +220,7 @@ export const MyWeekCalendar: React.FC<MyWeekCalendarProps> = memo(
             </div>
           </div>
         )}
-        {!hasError && !isLoading && entries.length === 0 && (
+        {!hasError && !isLoading && entries.length === 0 && ghostEvents.length === 0 && (
           <Typography.Text
             type="secondary"
             style={{ fontSize: 12, marginTop: 8, textAlign: 'center' }}
@@ -324,10 +352,45 @@ const DayColumn: React.FC<{
   now: Dayjs;
   holidayName?: string;
   onOpenEntry: (entry: IWeekCalendarEntry) => void;
-}> = ({ day, now, holidayName, onOpenEntry }) => {
+  ghostEvents: IWeekGhostEvent[];
+  selectedGhostId: string | null;
+  onSelectGhost?: (ghost: IWeekGhostEvent) => void;
+}> = ({ day, now, holidayName, onOpenEntry, ghostEvents, selectedGhostId, onSelectGhost }) => {
   const { token } = theme.useToken();
   const isToday = day.date.isSame(now, 'day');
   const nowMinute = now.diff(day.date, 'minute');
+
+  // Logs and calendar placeholders share the columns so neither covers the other. Lanes are laid
+  // out on copies: the logs' own overlap warnings (from buildWeekCalendar) stay log-only.
+  const layout = useMemo(() => {
+    const dayEnd = day.date.add(1, 'day');
+    const items: LayoutItem[] = [
+      ...day.segments.map(segment => ({
+        kind: 'log' as const,
+        key: segment.key,
+        segment,
+        startMinute: segment.startMinute,
+        endMinute: segment.endMinute,
+        lane: 0,
+        laneCount: 1,
+        isOverlapping: false,
+      })),
+      ...ghostEvents
+        .filter(ghost => ghost.start.isBefore(dayEnd) && ghost.end.isAfter(day.date))
+        .map(ghost => ({
+          kind: 'ghost' as const,
+          key: `ghost-${ghost.id}`,
+          ghost,
+          startMinute: Math.max(0, ghost.start.diff(day.date, 'second') / 60),
+          endMinute: Math.min(MINUTES_IN_DAY, ghost.end.diff(day.date, 'second') / 60),
+          lane: 0,
+          laneCount: 1,
+          isOverlapping: false,
+        })),
+    ];
+    assignLanes(items);
+    return items;
+  }, [day, ghostEvents]);
 
   return (
     <div
@@ -340,9 +403,22 @@ const DayColumn: React.FC<{
         backgroundImage: `repeating-linear-gradient(to bottom, ${token.colorBorderSecondary} 0, ${token.colorBorderSecondary} 1px, transparent 1px, transparent ${HOUR_HEIGHT}px)`,
       }}
     >
-      {day.segments.map(segment => (
-        <EntryBlock key={segment.key} segment={segment} onOpenEntry={onOpenEntry} />
-      ))}
+      {layout.map(item =>
+        item.kind === 'log' ? (
+          <EntryBlock
+            key={item.key}
+            segment={{ ...item.segment, lane: item.lane, laneCount: item.laneCount }}
+            onOpenEntry={onOpenEntry}
+          />
+        ) : (
+          <GhostBlock
+            key={item.key}
+            item={item}
+            isSelected={item.ghost.id === selectedGhostId}
+            onSelect={onSelectGhost}
+          />
+        )
+      )}
       {isToday && (
         <div
           aria-hidden
@@ -378,12 +454,14 @@ const EntryBlock: React.FC<{
   const end = entry.start.add(entry.seconds, 'second');
   const timeRange = `${entry.start.format('HH:mm')} – ${end.format('HH:mm')}`;
   const duration = formatDurationClock(entry.seconds);
-  const label = `${entry.taskName}, ${entry.projectName}, ${timeRange} (${duration})`;
+  const title = entry.title || entry.taskName;
+  const label = `${title}, ${entry.projectName}, ${timeRange} (${duration})`;
 
   return (
     <Tooltip
       title={
         <div>
+          {/* Same layout for every log: task, project, time, activity, then the description */}
           <div style={{ fontWeight: 600 }}>{entry.taskName}</div>
           <div style={{ opacity: 0.8 }}>{entry.projectName}</div>
           <div>
@@ -396,7 +474,9 @@ const EntryBlock: React.FC<{
               })}
             </div>
           )}
-          {entry.description && <div style={{ marginTop: 4 }}>{entry.description}</div>}
+          {entry.description && (
+            <div style={{ marginTop: 6, fontSize: 12, opacity: 0.85 }}>{entry.description}</div>
+          )}
           {segment.isOverlapping && (
             <div style={{ marginTop: 4 }}>
               <WarningOutlined />{' '}
@@ -440,7 +520,7 @@ const EntryBlock: React.FC<{
             textOverflow: 'ellipsis',
           }}
         >
-          {entry.taskName}
+          {title}
         </div>
         {height >= 34 && (
           <div
@@ -459,8 +539,87 @@ const EntryBlock: React.FC<{
   );
 };
 
+const GhostBlock: React.FC<{
+  item: Extract<LayoutItem, { kind: 'ghost' }>;
+  isSelected: boolean;
+  onSelect?: (ghost: IWeekGhostEvent) => void;
+}> = ({ item, isSelected, onSelect }) => {
+  const { t } = useTranslation('home');
+  const { token } = theme.useToken();
+  const { ghost } = item;
+  const top = (item.startMinute / 60) * HOUR_HEIGHT;
+  const height = Math.max(MIN_BLOCK_HEIGHT, ((item.endMinute - item.startMinute) / 60) * HOUR_HEIGHT - 2);
+  const widthPercent = 100 / item.laneCount;
+  const timeRange = `${ghost.start.format('HH:mm')} – ${ghost.end.format('HH:mm')}`;
+  const hint = t('logTime.calendarEvents.clickToLog', { defaultValue: 'Not logged yet. Click to log it.' });
+
+  return (
+    <Tooltip
+      title={
+        <div>
+          <div style={{ fontWeight: 600 }}>{ghost.title}</div>
+          <div>{timeRange}</div>
+          <div style={{ marginTop: 4, opacity: 0.8 }}>{hint}</div>
+        </div>
+      }
+    >
+      <button
+        type="button"
+        aria-label={`${ghost.title}, ${timeRange}. ${hint}`}
+        aria-pressed={isSelected}
+        onClick={() => onSelect?.(ghost)}
+        style={{
+          position: 'absolute',
+          top: top + 1,
+          height,
+          left: `calc(${item.lane * widthPercent}% + 2px)`,
+          width: `calc(${widthPercent}% - 4px)`,
+          padding: '2px 4px 2px 6px',
+          // Not-logged events use the warning (amber) palette: something still to do here,
+          // clearly different from the logged blocks in both themes.
+          border: `1px dashed ${isSelected ? token.colorPrimary : token.colorWarning}`,
+          borderLeft: `3px solid ${isSelected ? token.colorPrimary : token.colorWarning}`,
+          borderRadius: 4,
+          background: isSelected ? token.colorPrimaryBg : token.colorWarningBg,
+          color: isSelected ? token.colorText : token.colorWarningText,
+          textAlign: 'left',
+          overflow: 'hidden',
+          cursor: 'pointer',
+          zIndex: 1,
+          fontSize: 11,
+          lineHeight: 1.3,
+          transition: 'background 150ms, border-color 150ms',
+        }}
+      >
+        <div style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {ghost.title}
+        </div>
+        {height >= 34 && (
+          <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {timeRange}
+          </div>
+        )}
+      </button>
+    </Tooltip>
+  );
+};
+
+type LayoutItem =
+  | ({ kind: 'log'; key: string; segment: IWeekCalendarSegment } & LaneFields)
+  | ({ kind: 'ghost'; key: string; ghost: IWeekGhostEvent } & LaneFields);
+
+interface LaneFields {
+  startMinute: number;
+  endMinute: number;
+  lane: number;
+  laneCount: number;
+  isOverlapping: boolean;
+}
+
 // Static content
 const HOUR_HEIGHT = 44;
+const MINUTES_IN_DAY = 24 * 60;
+const NO_GHOSTS: IWeekGhostEvent[] = [];
 const GUTTER_WIDTH = 48;
 const MIN_BLOCK_HEIGHT = 16;
 const MIN_BODY_HEIGHT = 360;

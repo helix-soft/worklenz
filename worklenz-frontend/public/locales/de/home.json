@@ -270,6 +270,13 @@
     "weekdayFri": "Fr",
     "weekdaySat": "Sa",
     "weekdaySun": "So",
+    "calendarEvents": {
+      "clickToLog": "Noch nicht erfasst. Zum Erfassen klicken.",
+      "logging": "Kalendertermin wird erfasst: {{title}}",
+      "pickProject": "Wähle das Projekt; die Zeit wird auf dessen Meetings-Aufgabe gebucht.",
+      "meetingsTaskFailed": "Die Meetings-Aufgabe konnte nicht vorbereitet werden. Wähle eine Aufgabe manuell.",
+      "connect": "Verbinde Google Kalender, um deine Meetings hier zu erfassen"
+    },
     "week": {
       "viewWeek": "Woche",
       "previous": "Vorherige Woche",
@@ -293,7 +300,11 @@
       "testing": "Testen",
       "support": "Support",
       "pr": "PR",
-      "meeting": "Meeting"
+      "meeting": "Sync",
+      "demo": "Demo",
+      "workshop": "Workshop",
+      "training": "Schulung",
+      "interview": "Vorstellungsgespräch"
     },
     "sameStartEnd": "Start- und Endzeit dürfen nicht gleich sein",
     "rangeNextDay": "(endet am nächsten Tag)"

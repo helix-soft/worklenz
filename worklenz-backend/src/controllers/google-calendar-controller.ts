@@ -97,7 +97,7 @@ export default class GoogleCalendarController extends WorklenzControllerBase {
     // Timed events are compared with a one-day margin on both ends; the client places them in
     // the viewer's own timezone.
     const result = await db.query(
-      `SELECT e.id, e.title, e.description, e.location, e.is_all_day,
+      `SELECT e.id, e.google_event_id, e.title, e.description, e.location, e.is_all_day,
               e.start_at, e.end_at, to_char(e.start_date, 'YYYY-MM-DD') AS start_date,
               to_char(e.end_date, 'YYYY-MM-DD') AS end_date, e.html_link, e.hangout_link,
               e.organizer_email, e.attendees, gc.id AS calendar_id, gc.summary AS calendar_name,

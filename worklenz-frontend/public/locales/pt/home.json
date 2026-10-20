@@ -270,6 +270,13 @@
     "weekdayFri": "Sex",
     "weekdaySat": "Sáb",
     "weekdaySun": "Dom",
+    "calendarEvents": {
+      "clickToLog": "Ainda não registrado. Clique para registrar.",
+      "logging": "Registrando evento do calendário: {{title}}",
+      "pickProject": "Escolha o projeto; o tempo vai para a tarefa Meetings dele.",
+      "meetingsTaskFailed": "Não foi possível preparar a tarefa Meetings. Escolha uma tarefa manualmente.",
+      "connect": "Conecte o Google Agenda para registrar suas reuniões aqui"
+    },
     "week": {
       "viewWeek": "Semana",
       "previous": "Semana anterior",
@@ -293,7 +300,11 @@
       "testing": "Testes",
       "support": "Suporte",
       "pr": "PR",
-      "meeting": "Reunião"
+      "meeting": "Sync",
+      "demo": "Demonstração",
+      "workshop": "Workshop",
+      "training": "Treinamento",
+      "interview": "Entrevista"
     },
     "sameStartEnd": "O horário de início e término não podem ser iguais",
     "rangeNextDay": "(termina no dia seguinte)"

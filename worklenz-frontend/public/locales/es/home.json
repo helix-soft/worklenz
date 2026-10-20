@@ -270,6 +270,13 @@
     "weekdayFri": "Vie",
     "weekdaySat": "Sáb",
     "weekdaySun": "Dom",
+    "calendarEvents": {
+      "clickToLog": "Aún no registrado. Haz clic para registrarlo.",
+      "logging": "Registrando evento del calendario: {{title}}",
+      "pickProject": "Elige el proyecto; el tiempo va a su tarea Meetings.",
+      "meetingsTaskFailed": "No se pudo preparar la tarea Meetings. Elige una tarea manualmente.",
+      "connect": "Conecta Google Calendar para registrar tus reuniones desde aquí"
+    },
     "week": {
       "viewWeek": "Semana",
       "previous": "Semana anterior",
@@ -293,7 +300,11 @@
       "testing": "Pruebas",
       "support": "Soporte",
       "pr": "PR",
-      "meeting": "Reunión"
+      "meeting": "Sync",
+      "demo": "Demo",
+      "workshop": "Taller",
+      "training": "Formación",
+      "interview": "Entrevista"
     },
     "sameStartEnd": "La hora de inicio y fin no pueden ser iguales",
     "rangeNextDay": "(termina al día siguiente)"

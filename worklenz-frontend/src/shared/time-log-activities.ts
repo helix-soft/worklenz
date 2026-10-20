@@ -6,7 +6,11 @@ export const TIME_LOG_ACTIVITIES = [
   { value: 'testing', defaultLabel: 'Testing' },
   { value: 'support', defaultLabel: 'Support' },
   { value: 'pr', defaultLabel: 'PR' },
-  { value: 'meeting', defaultLabel: 'Meeting' },
+  { value: 'meeting', defaultLabel: 'Sync' },
+  { value: 'demo', defaultLabel: 'Demo' },
+  { value: 'workshop', defaultLabel: 'Workshop' },
+  { value: 'training', defaultLabel: 'Training' },
+  { value: 'interview', defaultLabel: 'Interview' },
 ] as const;
 
 export type TimeLogActivity = (typeof TIME_LOG_ACTIVITIES)[number]['value'];
