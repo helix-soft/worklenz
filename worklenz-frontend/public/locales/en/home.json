@@ -51,6 +51,7 @@
     "upcoming": "Upcoming",
     "overdue": "Overdue",
     "noDueDate": "No due date",
+    "resetFilters": "Reset filters",
     "noTasks": "No tasks to show.",
     "addTask": "+ Add task",
     "addTaskButton": "Add Task",

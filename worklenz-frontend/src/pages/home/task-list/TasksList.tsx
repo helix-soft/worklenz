@@ -11,6 +11,7 @@ import {
   Pagination,
   theme,
   PlusOutlined,
+  ClearOutlined,
 } from '@/shared/antd-imports';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +20,15 @@ import { useDebouncedMediaQuery } from '@/hooks/useDebouncedMediaQuery';
 
 import ListView, { toHomeTaskTab } from './ListView';
 import HomeAddTaskModal from './HomeAddTaskModal';
+import {
+  DEFAULT_TASK_LIST_FILTERS,
+  type SavedSortField,
+  hasActiveTaskListFilters,
+  readSavedTaskListFilters,
+  writeSavedTaskListFilters,
+} from './savedTaskListFilters';
+import { useAuthService } from '@/hooks/useAuth';
+import { setHomeTasksConfig } from '@/features/home-page/home-page.slice';
 import { WorklenzLogoLoader } from '@/components/worklenz-loader/worklenz-loader';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
@@ -45,7 +55,7 @@ interface TasksListProps {
   cardTitle?: string;
 }
 
-type SortField = 'name' | 'project_name' | 'end_date' | 'priority' | null;
+type SortField = SavedSortField;
 
 const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
   const dispatch = useAppDispatch();
@@ -58,14 +68,52 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
-  const [sortField, setSortField] = useState<SortField>(null);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [selectedProjectIds, setSelectedProjectIds] = useState<React.Key[]>([]);
-  const [selectedPriorityIds, setSelectedPriorityIds] = useState<React.Key[]>([]);
+  // Filters, sort and tab are remembered per user (see savedTaskListFilters) so they survive
+  // page changes; the Reset button clears them.
+  const userId = useAuthService().getCurrentSession()?.id;
+  const [savedFilters] = useState(() => readSavedTaskListFilters(userId));
+  const [sortField, setSortField] = useState<SortField>(savedFilters.sortField);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(savedFilters.sortOrder);
+  const [selectedProjectIds, setSelectedProjectIds] = useState<React.Key[]>(savedFilters.projectIds);
+  const [selectedPriorityIds, setSelectedPriorityIds] = useState<React.Key[]>(savedFilters.priorityIds);
   const [addTaskOpen, setAddTaskOpen] = useState(false);
   const themeMode = useAppSelector(state => state.themeReducer.mode);
 
   const { homeTasksConfig } = useAppSelector(state => state.homePageReducer);
+
+  // Restore the saved tab once; saving waits until then so the default tab can't overwrite it.
+  const [isTabRestored, setIsTabRestored] = useState(false);
+  useEffect(() => {
+    if (toHomeTaskTab(savedFilters.tab) !== toHomeTaskTab(homeTasksConfig.current_tab)) {
+      dispatch(setHomeTasksConfig({ ...homeTasksConfig, current_tab: toHomeTaskTab(savedFilters.tab) }));
+    }
+    setIsTabRestored(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const currentFilters = useMemo(
+    () => ({
+      tab: toHomeTaskTab(homeTasksConfig.current_tab),
+      projectIds: selectedProjectIds,
+      priorityIds: selectedPriorityIds,
+      sortField,
+      sortOrder,
+    }),
+    [homeTasksConfig.current_tab, selectedProjectIds, selectedPriorityIds, sortField, sortOrder]
+  );
+  const hasActiveFilters = hasActiveTaskListFilters(currentFilters);
+
+  useEffect(() => {
+    if (isTabRestored) writeSavedTaskListFilters(userId, currentFilters);
+  }, [isTabRestored, userId, currentFilters]);
+
+  const resetFilters = useCallback(() => {
+    setSelectedProjectIds([]);
+    setSelectedPriorityIds([]);
+    setSortField(DEFAULT_TASK_LIST_FILTERS.sortField);
+    setSortOrder(DEFAULT_TASK_LIST_FILTERS.sortOrder);
+    dispatch(setHomeTasksConfig({ ...homeTasksConfig, current_tab: DEFAULT_TASK_LIST_FILTERS.tab }));
+  }, [dispatch, homeTasksConfig]);
 
   // Reset to page 1 whenever the active tab, group_by, filters, or sort
   // change. Adjusted during render (React's documented pattern) rather than
@@ -355,6 +403,11 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
         }}
       >
         <div style={{ fontSize: 14, fontWeight: 600 }}>{cardTitle || t('tasks.tasks', { defaultValue: 'Tasks' })}</div>
+        {hasActiveFilters && (
+          <Button size="small" icon={<ClearOutlined />} onClick={resetFilters}>
+            {t('tasks.resetFilters', { defaultValue: 'Reset filters' })}
+          </Button>
+        )}
       </div>
 
       <div

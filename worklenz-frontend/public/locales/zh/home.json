@@ -45,6 +45,7 @@
     "upcoming": "即将到来",
     "overdue": "逾期",
     "noDueDate": "没有截止日期",
+    "resetFilters": "重置筛选",
     "noTasks": "没有任务可显示。",
     "addTask": "+ 添加任务",
     "addTaskButton": "添加任务",

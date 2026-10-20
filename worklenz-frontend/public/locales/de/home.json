@@ -45,6 +45,7 @@
     "upcoming": "Bevorstehend",
     "overdue": "Überfällig",
     "noDueDate": "Kein Fälligkeitsdatum",
+    "resetFilters": "Filter zurücksetzen",
     "noTasks": "Keine Aufgaben zum Anzeigen.",
     "addTask": "+ Aufgabe hinzufügen",
     "addTaskButton": "Aufgabe hinzufügen",

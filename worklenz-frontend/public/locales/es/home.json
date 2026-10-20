@@ -45,6 +45,7 @@
     "upcoming": "Próximas",
     "overdue": "Vencidas",
     "noDueDate": "Sin fecha de vencimiento",
+    "resetFilters": "Restablecer filtros",
     "noTasks": "No hay tareas para mostrar.",
     "addTask": "+ Agregar tarea",
     "addTaskButton": "Agregar tarea",
