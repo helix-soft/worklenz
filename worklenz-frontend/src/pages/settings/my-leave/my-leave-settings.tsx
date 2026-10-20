@@ -38,7 +38,8 @@ const MyLeaveSettings = () => {
   useDocumentTitle(t('my.title', { defaultValue: 'My leave' }));
 
   return (
-    <Flex vertical gap={16}>
+    // Full width like the other Settings pages (Notifications, Change Password).
+    <Flex vertical gap={16} style={{ width: '100%' }}>
       <LeaveOverviewCard />
       <WorkLocationsCard />
     </Flex>
