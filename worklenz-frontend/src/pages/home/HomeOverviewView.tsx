@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import Flex from 'antd/es/flex';
-import GreetingWithTime from './GreetingWithTime';
 import TasksList from '@/pages/home/task-list/TasksList';
 import HomeStatCards from './home-stat-cards/HomeStatCards';
 import HomeProgressDonut from './home-progress-donut/HomeProgressDonut';
@@ -75,11 +74,6 @@ const HomeOverviewView: React.FC = () => {
         boxSizing: 'border-box',
       }}
     >
-      {/* Greeting banner */}
-      <div style={{ marginBottom: 10 }}>
-        <GreetingWithTime />
-      </div>
-
       {/* Period toggle */}
       <PeriodToggle period={period} onChange={setPeriod} />
 
