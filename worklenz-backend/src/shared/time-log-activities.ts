@@ -8,7 +8,6 @@ export const TIME_LOG_ACTIVITIES = [
   "pr",
   "meeting",
   "demo",
-  "workshop",
   "training",
   "interview",
 ] as const;

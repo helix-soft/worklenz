@@ -8,7 +8,6 @@ export const TIME_LOG_ACTIVITIES = [
   { value: 'pr', defaultLabel: 'PR' },
   { value: 'meeting', defaultLabel: 'Sync' },
   { value: 'demo', defaultLabel: 'Demo' },
-  { value: 'workshop', defaultLabel: 'Workshop' },
   { value: 'training', defaultLabel: 'Training' },
   { value: 'interview', defaultLabel: 'Interview' },
 ] as const;

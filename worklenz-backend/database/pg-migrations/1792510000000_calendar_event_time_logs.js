@@ -5,10 +5,10 @@
 //   so the event's placeholder disappears once it has been logged.
 // - tasks.system_kind marks the per-project "Meetings" task that calendar events are logged to
 //   (one per project, created on first use).
-// - New activity types for meeting-like events: demo, workshop, training, interview.
+// - New activity types for meeting-like events: demo, training, interview.
 
 const OLD_ACTIVITIES = ["development", "specification", "management", "testing", "support", "pr", "meeting"];
-const NEW_ACTIVITIES = [...OLD_ACTIVITIES, "demo", "workshop", "training", "interview"];
+const NEW_ACTIVITIES = [...OLD_ACTIVITIES, "demo", "training", "interview"];
 
 const activityCheck = activities =>
   `activity IS NULL OR activity::text = ANY (ARRAY[${activities.map(a => `'${a}'`).join(", ")}]::text[])`;
@@ -32,7 +32,7 @@ exports.up = pgm => {
 };
 
 exports.down = pgm => {
-  pgm.sql(`UPDATE task_work_log SET activity = 'meeting' WHERE activity IN ('demo', 'workshop', 'training', 'interview')`);
+  pgm.sql(`UPDATE task_work_log SET activity = 'meeting' WHERE activity IN ('demo', 'training', 'interview')`);
   pgm.dropConstraint("task_work_log", "task_work_log_activity_check");
   pgm.addConstraint("task_work_log", "task_work_log_activity_check", { check: activityCheck(OLD_ACTIVITIES) });
 
