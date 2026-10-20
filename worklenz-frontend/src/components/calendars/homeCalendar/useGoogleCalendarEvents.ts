@@ -132,10 +132,12 @@ export const compareEvents = (a: IGoogleCalendarEvent, b: IGoogleCalendarEvent) 
 export const formatEventTimeRange = (event: IGoogleCalendarEvent) =>
   `${dayjs(event.start_at).format('HH:mm')} – ${dayjs(event.end_at).format('HH:mm')}`;
 
-const PRIMARY_CALENDAR_COLOR = '#722ed1';
-const CALENDAR_PALETTE = ['#13c2c2', '#52c41a', '#fa8c16', '#eb2f96', '#2f54eb', '#a0d911', '#faad14'];
+// Matched to the Helixsoft brand (logo teal #78bcc4 and red #f7444e): the primary calendar is
+// the brand teal, other calendars get the brand red and teal/coral variants.
+const PRIMARY_CALENDAR_COLOR = '#78bcc4';
+const CALENDAR_PALETTE = ['#f7444e', '#4a9aa3', '#e9868c', '#2f7a83', '#a6d4d9', '#c9545c'];
 
-/** Stable color per Google calendar: the primary calendar is violet, others get a palette color. */
+/** Stable color per Google calendar: the primary calendar is the brand teal, others get a palette color. */
 export const getCalendarColor = (event: Pick<IGoogleCalendarEvent, 'calendar_id' | 'calendar_is_primary'>) => {
   if (event.calendar_is_primary) return PRIMARY_CALENDAR_COLOR;
   let hash = 0;

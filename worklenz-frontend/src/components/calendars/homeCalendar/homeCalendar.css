@@ -540,7 +540,7 @@
 
 .home-calendar__gcal-more {
   background: transparent;
-  color: #722ed1;
+  color: #2f7a83;
 }
 
 .home-calendar__gcal-pill:focus-visible,
@@ -555,7 +555,7 @@
 }
 
 .home-calendar-dark .home-calendar__gcal-more {
-  color: #b37feb;
+  color: #78bcc4;
 }
 
 /* ── Agenda view ──────────────────────────────────────────────── */
@@ -618,7 +618,7 @@
 }
 
 .home-calendar-agenda-dot-event {
-  background: #722ed1;
+  background: #78bcc4;
 }
 
 .home-calendar-agenda-dot-holiday {

@@ -392,7 +392,12 @@ const EventBlock = ({
       >
         <span
           className="home-calendar-time-grid-event-time"
-          style={{ color: isPast ? token.colorTextTertiary : color }}
+          // Mixed toward the text color so light brand colors stay readable in both themes.
+          style={{
+            color: isPast
+              ? token.colorTextTertiary
+              : `color-mix(in srgb, ${color} 70%, ${token.colorText})`,
+          }}
         >
           {time}
         </span>
