@@ -400,6 +400,8 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
           justifyContent: 'space-between',
           marginBottom: 16,
           flexShrink: 0,
+          // Reserve the Reset button's height so the title doesn't shift when it appears.
+          minHeight: token.controlHeightSM,
         }}
       >
         <div style={{ fontSize: 14, fontWeight: 600 }}>{cardTitle || t('tasks.tasks', { defaultValue: 'Tasks' })}</div>
