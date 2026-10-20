@@ -154,6 +154,9 @@
       "lastSynced": "Last synced {{date}}",
       "sync": "Sync calendar",
       "connect": "Connect Google Calendar"
+    },
+    "week": {
+      "allDay": "all-day"
     }
   },
   "activityLogs": {

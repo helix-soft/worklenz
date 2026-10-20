@@ -4,7 +4,7 @@ import { TimeOffEntry } from '@/api/schedule/scheduleApi';
 import { IHomeCalendarTask } from '@/types/home/home-page.types';
 import { ICalendarHoliday } from '@/types/leave/leave.types';
 import { IGoogleCalendarEvent } from '@/types/google-calendar.types';
-import { formatEventTimeRange } from './useGoogleCalendarEvents';
+import { formatEventTimeRange, getCalendarColor } from './useGoogleCalendarEvents';
 
 /**
  * Agenda: one block per day that has something on it (header row: weekday left, full date right),
@@ -48,6 +48,7 @@ export const AgendaView = ({
             : formatEventTimeRange(event),
           title: event.title || t('homeCalendar.google.untitled', { defaultValue: '(No title)' }),
           kind: 'event' as const,
+          color: getCalendarColor(event),
           onClick: () => onOpenEvent(event),
         })),
         ...(tasksByDate.get(key) || []).map(task => ({

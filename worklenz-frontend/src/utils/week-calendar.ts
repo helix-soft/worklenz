@@ -96,10 +96,19 @@ export const buildWeekCalendar = (
  * Segments are grouped into clusters of transitively overlapping intervals; each cluster
  * shares one lane count so widths line up.
  */
-export const assignLanes = (segments: IWeekCalendarSegment[]): void => {
+/** Anything laid out on the hour grid: a time range in minutes plus the lane fields filled in here. */
+export interface ILaneSegment {
+  startMinute: number;
+  endMinute: number;
+  lane: number;
+  laneCount: number;
+  isOverlapping: boolean;
+}
+
+export const assignLanes = <T extends ILaneSegment>(segments: T[]): void => {
   segments.sort((a, b) => a.startMinute - b.startMinute || b.endMinute - a.endMinute);
 
-  let cluster: IWeekCalendarSegment[] = [];
+  let cluster: T[] = [];
   let laneEnds: number[] = [];
   let clusterEnd = -Infinity;
 
@@ -148,7 +157,7 @@ export const getOverlapMinutes = (segments: IWeekCalendarSegment[]): number => {
   return overlap;
 };
 
-const overlapsAny = (segment: IWeekCalendarSegment, others: IWeekCalendarSegment[]): boolean =>
+const overlapsAny = (segment: ILaneSegment, others: ILaneSegment[]): boolean =>
   others.some(
     other =>
       other !== segment &&

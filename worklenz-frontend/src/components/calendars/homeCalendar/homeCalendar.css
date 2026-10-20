@@ -676,3 +676,124 @@
     font-size: 12px;
   }
 }
+
+/* ── Week view: hour grid ─────────────────────────────────────── */
+.home-calendar-time-grid {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.home-calendar-time-grid-scroll {
+  position: relative;
+  max-height: calc(100vh - 230px);
+  min-height: 420px;
+  overflow: auto;
+}
+
+.home-calendar-time-grid-head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.home-calendar-time-grid-day-name {
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.home-calendar-time-grid-today {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.home-calendar-time-grid-gutter-label {
+  padding: 6px 6px 0 0;
+  font-size: 11px;
+  text-align: right;
+}
+
+.home-calendar-time-grid-all-day {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  min-height: 32px;
+  max-height: 132px;
+  padding: 3px;
+  overflow-y: auto;
+}
+
+.home-calendar-time-grid-chip {
+  display: block;
+  width: 100%;
+  min-height: 20px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 20px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-calendar-time-grid-hour {
+  position: absolute;
+  right: 6px;
+  transform: translateY(-50%);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.home-calendar-time-grid-now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 2px solid;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.home-calendar-time-grid-event {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.home-calendar-time-grid-event-compact {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.home-calendar-time-grid-event:focus-visible,
+.home-calendar-time-grid-chip:focus-visible {
+  outline: 2px solid #1677ff;
+  outline-offset: 1px;
+}
+
+.home-calendar-time-grid-event-time {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.home-calendar-time-grid-event-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}

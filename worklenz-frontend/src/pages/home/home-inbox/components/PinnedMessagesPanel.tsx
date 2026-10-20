@@ -136,7 +136,7 @@ const PinnedMessagesPanel: React.FC<PinnedMessagesPanelProps> = ({ projectId, on
                 {item.content_preview}
               </div>
               <div style={{ fontSize: 11, color: textSec, marginTop: 4 }}>
-                {item.created_at ? dayjs(item.created_at).format('MMM D, YYYY h:mm A') : ''}
+                {item.created_at ? dayjs(item.created_at).format('MMM D, YYYY HH:mm') : ''}
                 {item.pinned_by_name
                   ? ` · ${t('pinnedBy', { defaultValue: 'Pinned by' })} ${item.pinned_by_name}`
                   : ''}

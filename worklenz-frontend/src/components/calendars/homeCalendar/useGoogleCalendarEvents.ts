@@ -103,6 +103,17 @@ export const compareEvents = (a: IGoogleCalendarEvent, b: IGoogleCalendarEvent) 
   return dayjs(a.start_at || a.start_date).valueOf() - dayjs(b.start_at || b.start_date).valueOf();
 };
 
-/** "9:50am – 11:50am" */
+/** "09:50 – 11:50" (24-hour) */
 export const formatEventTimeRange = (event: IGoogleCalendarEvent) =>
-  `${dayjs(event.start_at).format('h:mma')} – ${dayjs(event.end_at).format('h:mma')}`;
+  `${dayjs(event.start_at).format('HH:mm')} – ${dayjs(event.end_at).format('HH:mm')}`;
+
+const PRIMARY_CALENDAR_COLOR = '#722ed1';
+const CALENDAR_PALETTE = ['#13c2c2', '#52c41a', '#fa8c16', '#eb2f96', '#2f54eb', '#a0d911', '#faad14'];
+
+/** Stable color per Google calendar: the primary calendar is violet, others get a palette color. */
+export const getCalendarColor = (event: Pick<IGoogleCalendarEvent, 'calendar_id' | 'calendar_is_primary'>) => {
+  if (event.calendar_is_primary) return PRIMARY_CALENDAR_COLOR;
+  let hash = 0;
+  for (const char of event.calendar_id || '') hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return CALENDAR_PALETTE[hash % CALENDAR_PALETTE.length];
+};

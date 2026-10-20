@@ -154,6 +154,9 @@
       "lastSynced": "Sinkronizimi i fundit: {{date}}",
       "sync": "Sinkronizo kalendarin",
       "connect": "Lidh Google Calendar"
+    },
+    "week": {
+      "allDay": "gjithë ditën"
     }
   },
   "activityLogs": {

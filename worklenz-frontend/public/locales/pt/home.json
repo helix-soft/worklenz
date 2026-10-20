@@ -154,6 +154,9 @@
       "lastSynced": "Última sincronização: {{date}}",
       "sync": "Sincronizar agenda",
       "connect": "Conectar Google Agenda"
+    },
+    "week": {
+      "allDay": "dia inteiro"
     }
   },
   "activityLogs": {

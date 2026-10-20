@@ -31,12 +31,12 @@ import {
 import { setProjectId } from '@/features/project/project.slice';
 import { IHomeCalendarTask } from '@/types/home/home-page.types';
 import HomeAddTaskModal from '@/pages/home/task-list/HomeAddTaskModal';
-import PillToggle from '@/pages/home/PillToggle';
 import MultiSelectFilterDropdown from './MultiSelectFilterDropdown';
 import { useNavigate } from 'react-router-dom';
 import { SyncOutlined } from '@ant-design/icons';
 import { IGoogleCalendarEvent } from '@/types/google-calendar.types';
-import { useGoogleCalendarEvents } from './useGoogleCalendarEvents';
+import { getCalendarColor, useGoogleCalendarEvents } from './useGoogleCalendarEvents';
+import { WeekTimeGrid } from './WeekTimeGrid';
 import { AgendaView } from './AgendaView';
 import { GoogleEventDetailsModal } from './GoogleEventDetailsModal';
 import './homeCalendar.css';
@@ -90,9 +90,8 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
     [t]
   );
 
-  const [calView, setCalView] = useState<CalendarViewType>('month');
+  const [calView, setCalView] = useState<CalendarViewType>('agenda');
   const [cursor, setCursor] = useState<Dayjs>(() => homeTasksConfig.selected_date || dayjs());
-  const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
   const [filterClients, setFilterClients] = useState<string[]>([]);
   const [filterProjects, setFilterProjects] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -114,7 +113,8 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
     {
       start_date: rangeStart.format('YYYY-MM-DD'),
       end_date: rangeEnd.format('YYYY-MM-DD'),
-      group_by: homeTasksConfig.tasks_group_by || 0,
+      // The calendar always shows the tasks assigned to me.
+      group_by: 0,
       time_zone: homeTasksConfig.time_zone || Intl.DateTimeFormat().resolvedOptions().timeZone,
     },
     { refetchOnMountOrArgChange: true }
@@ -219,6 +219,11 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
                 <button
                   type="button"
                   className="home-calendar__gcal-pill"
+                  style={{
+                    background: `color-mix(in srgb, ${getCalendarColor(event)} ${isDarkMode ? 30 : 18}%, ${isDarkMode ? '#1d1d1d' : '#ffffff'})`,
+                    borderLeft: `3px solid ${getCalendarColor(event)}`,
+                    color: 'inherit',
+                  }}
                   onClick={() => setSelectedGoogleEvent(event)}
                 >
                   {time}
@@ -242,7 +247,7 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
         </div>
       );
     },
-    [googleEventsByDate, t]
+    [googleEventsByDate, t, isDarkMode]
   );
 
   // Team-scoped project list — independent of which tasks are currently
@@ -259,15 +264,6 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
       .map(client => ({ value: client.id as string, label: client.name as string }));
   }, [clientsLookupData]);
 
-  const statusOptions = useMemo(
-    () => [
-      { value: 'todo', label: t('tasks.todo', { defaultValue: 'Todo' }) },
-      { value: 'doing', label: t('tasks.doing', { defaultValue: 'Doing' }) },
-      { value: 'done', label: t('tasks.done', { defaultValue: 'Done' }) },
-    ],
-    [t]
-  );
-
   const projectOptions = useMemo(() => {
     return (teamProjectsData?.body || [])
       .filter(project => project.id && project.name)
@@ -278,22 +274,15 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
       }));
   }, [teamProjectsData]);
 
-  const anyFilterActive =
-    filterStatuses.length > 0 || filterClients.length > 0 || filterProjects.length > 0;
+  const anyFilterActive = filterClients.length > 0 || filterProjects.length > 0;
 
   const filteredTasks = useMemo(() => {
     return allTasks.filter(task => {
-      if (filterStatuses.length) {
-        const matchesCategory = filterStatuses.some(cat =>
-          cat === 'todo' ? task.is_todo : cat === 'doing' ? task.is_doing : task.is_completed
-        );
-        if (!matchesCategory) return false;
-      }
       if (filterClients.length && !filterClients.includes(task.client_id || '')) return false;
       if (filterProjects.length && !filterProjects.includes(task.project_id || '')) return false;
       return true;
     });
-  }, [allTasks, filterStatuses, filterClients, filterProjects]);
+  }, [allTasks, filterClients, filterProjects]);
 
   const tasksByDate = useMemo(() => {
     const map = new Map<string, IHomeCalendarTask[]>();
@@ -308,7 +297,6 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
   }, [filteredTasks]);
 
   const clearFilters = () => {
-    setFilterStatuses([]);
     setFilterClients([]);
     setFilterProjects([]);
   };
@@ -337,9 +325,6 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
     dispatch(setHomeTasksConfig({ ...homeTasksConfig, selected_date: date }));
   };
 
-  const handleTaskModeChange = (value: 'to' | 'by') => {
-    dispatch(setHomeTasksConfig({ ...homeTasksConfig, tasks_group_by: value === 'by' ? 1 : 0 }));
-  };
 
   const renderDaySummary = useCallback(
     (dayTasks: IHomeCalendarTask[], date: Dayjs) => {
@@ -571,48 +556,19 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
     );
   };
 
-  /* ── Week view ── */
-  const renderWeek = () => {
-    const start = cursor.startOf('isoWeek');
-    const days = Array.from({ length: 7 }, (_, i) => start.add(i, 'day'));
-    return (
-      <div className="home-calendar-week-grid">
-        {days.map(date => {
-          const isToday = date.isSame(dayjs(), 'day');
-          const dateKey = date.format('YYYY-MM-DD');
-          const dayTasks = tasksByDate.get(dateKey) || [];
-          const isHoliday = holidaysByDate.has(dateKey);
-          return (
-            <div
-              key={dateKey}
-              className={`home-calendar-week-col ${isHoliday ? 'home-calendar-day-cell-holiday' : ''}`}
-            >
-              <div className="home-calendar-week-col-header">
-                <span className="home-calendar-weekday-label">{date.format('ddd')}</span>
-                <span
-                  className={`home-calendar-day-number ${isToday ? 'home-calendar-day-number-today' : ''}`}
-                >
-                  {date.date()}
-                </span>
-                {renderHolidayPills(date)}
-                {renderTimeOffPill(date)}
-                {renderGoogleEventPills(date)}
-              </div>
-              <div
-                className="home-calendar-week-col-body"
-                onClick={() => {
-                  handleSelectDate(date);
-                  openAddModal(date);
-                }}
-              >
-                {renderDaySummary(dayTasks, date)}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
+  /* ── Week view: hour grid with events, tasks, time off and holidays ── */
+  const renderWeek = () => (
+    <WeekTimeGrid
+      days={Array.from({ length: 7 }, (_, i) => cursor.startOf('isoWeek').add(i, 'day'))}
+      eventsByDate={googleEventsByDate}
+      tasksByDate={tasksByDate}
+      timeOffByDate={timeOffByDate}
+      holidaysByDate={holidaysByDate}
+      onOpenEvent={setSelectedGoogleEvent}
+      onOpenTask={openTaskDrawer}
+      onOpenTimeOff={onTimeOffClick}
+    />
+  );
 
   /* ── Year view ── */
   const renderYear = () => {
@@ -677,7 +633,7 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
     <div className={`home-calendar-root ${isDarkMode ? 'home-calendar-dark' : ''}`}>
       <div className="home-calendar-toolbar">
         <div className="home-calendar-view-toggle">
-          {(['week', 'month', 'year', 'agenda'] as CalendarViewType[]).map(view => (
+          {(['agenda', 'week', 'month', 'year'] as CalendarViewType[]).map(view => (
             <button
               key={view}
               type="button"
@@ -738,21 +694,6 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
 
         <div className="home-calendar-toolbar-spacer" />
 
-        <PillToggle<'to' | 'by'>
-          value={homeTasksConfig.tasks_group_by === 1 ? 'by' : 'to'}
-          onChange={handleTaskModeChange}
-          options={[
-            { value: 'to', label: t('tasks.assignedToMe', { defaultValue: 'Assigned to me' }) },
-            { value: 'by', label: t('tasks.assignedByMe', { defaultValue: 'Assigned by me' }) },
-          ]}
-        />
-
-        <MultiSelectFilterDropdown
-          label={t('homeCalendar.statusesPlaceholder', { defaultValue: 'All Statuses' })}
-          options={statusOptions}
-          selected={filterStatuses}
-          onChange={setFilterStatuses}
-        />
         <MultiSelectFilterDropdown
           label={t('homeCalendar.clientsPlaceholder', { defaultValue: 'All Clients' })}
           searchPlaceholder={t('homeCalendar.clientsSearchPlaceholder', {

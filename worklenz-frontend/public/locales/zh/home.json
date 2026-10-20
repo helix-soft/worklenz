@@ -154,6 +154,9 @@
       "lastSynced": "上次同步：{{date}}",
       "sync": "同步日历",
       "connect": "连接 Google 日历"
+    },
+    "week": {
+      "allDay": "全天"
     }
   },
   "activityLogs": {

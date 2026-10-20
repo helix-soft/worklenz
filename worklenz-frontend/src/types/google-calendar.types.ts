@@ -32,5 +32,7 @@ export interface IGoogleCalendarEvent {
   hangout_link: string | null;
   organizer_email: string | null;
   attendees: IGoogleCalendarAttendee[];
+  calendar_id: string;
   calendar_name: string | null;
+  calendar_is_primary: boolean;
 }
