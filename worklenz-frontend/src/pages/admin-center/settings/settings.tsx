@@ -167,7 +167,7 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div style={{ width: '100%' }}>
-      <WorklenzPageHeader title={<span>{t('settings')}</span>} style={{ padding: '16px 0' }} />
+      <WorklenzPageHeader title={<span>{t('settings', { defaultValue: 'Calendar settings' })}</span>} style={{ padding: '16px 0' }} />
 
       <Space direction="vertical" style={{ width: '100%' }} size={22}>
         <Card>

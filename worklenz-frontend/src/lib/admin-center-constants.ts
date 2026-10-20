@@ -81,7 +81,7 @@ export const adminCenterItems: AdminCenterMenuItems[] = [
   {
     key: 'settings',
     name: 'settings',
-    defaultValue: 'Settings',
+    defaultValue: 'Calendar settings',
     endpoint: 'settings',
     icon: React.createElement(SettingOutlined),
     element: React.createElement(Settings),
