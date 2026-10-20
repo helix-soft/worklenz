@@ -1,4 +1,4 @@
-import { mapGoogleEvent, signOAuthState, verifyOAuthState } from "../shared/google-calendar-utils";
+import { getVideoCallLink, mapGoogleEvent, signOAuthState, verifyOAuthState } from "../shared/google-calendar-utils";
 
 describe("google calendar event mapping", () => {
   it("maps a timed event to UTC instants", () => {
@@ -18,6 +18,30 @@ describe("google calendar event mapping", () => {
       start_date: null,
       hangout_link: "https://meet.google.com/abc",
     });
+  });
+
+  it("takes the video call link from a conference add-on (Zoom)", () => {
+    expect(
+      getVideoCallLink({
+        id: "z",
+        conferenceData: {
+          entryPoints: [
+            { entryPointType: "phone", uri: "tel:+40312345678" },
+            { entryPointType: "video", uri: "https://us02web.zoom.us/j/123?pwd=abc" },
+          ],
+        },
+      })
+    ).toBe("https://us02web.zoom.us/j/123?pwd=abc");
+  });
+
+  it("falls back to a meeting URL in the location or description", () => {
+    expect(getVideoCallLink({ id: "l", location: "https://teams.microsoft.com/l/meetup-join/xyz" })).toBe(
+      "https://teams.microsoft.com/l/meetup-join/xyz"
+    );
+    expect(
+      getVideoCallLink({ id: "d", description: '<a href="https://zoom.us/j/9?pwd=a&amp;b=1">Join</a>' })
+    ).toBe("https://zoom.us/j/9?pwd=a&b=1");
+    expect(getVideoCallLink({ id: "n", description: "See https://example.com" })).toBeNull();
   });
 
   it("stores an all-day event with an inclusive end date", () => {

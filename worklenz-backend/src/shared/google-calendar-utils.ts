@@ -16,14 +16,20 @@ export interface IGoogleEventAttendee {
   responseStatus?: string;
 }
 
+export interface IGoogleConferenceData {
+  entryPoints?: { entryPointType?: string; uri?: string }[];
+}
+
 export interface IGoogleEvent {
   id: string;
+  iCalUID?: string;
   status?: string;
   summary?: string;
   description?: string;
   location?: string;
   htmlLink?: string;
   hangoutLink?: string;
+  conferenceData?: IGoogleConferenceData;
   start?: IGoogleEventDateTime;
   end?: IGoogleEventDateTime;
   organizer?: { email?: string; displayName?: string };
@@ -32,6 +38,7 @@ export interface IGoogleEvent {
 
 export interface IMappedGoogleEvent {
   google_event_id: string;
+  ical_uid: string | null;
   title: string | null;
   description: string | null;
   location: string | null;
@@ -48,6 +55,20 @@ export interface IMappedGoogleEvent {
 
 const MAX_TEXT_LENGTH = 5000;
 const STATE_MAX_AGE_MS = 10 * 60 * 1000;
+
+const VIDEO_CALL_URL = /https?:\/\/[^\s<>"']*(zoom\.us|teams\.microsoft\.com|teams\.live\.com|meet\.google\.com|webex\.com)[^\s<>"']*/i;
+
+/**
+ * Video call link: Google Meet (hangoutLink), then a conference add-on's video entry point
+ * (Zoom, Teams, …), then the first known meeting URL in the location or description.
+ */
+export const getVideoCallLink = (event: IGoogleEvent): string | null => {
+  if (event.hangoutLink) return event.hangoutLink;
+  const video = event.conferenceData?.entryPoints?.find(e => e.entryPointType === "video" && e.uri);
+  if (video?.uri) return video.uri;
+  const match = `${event.location || ""} ${event.description || ""}`.match(VIDEO_CALL_URL);
+  return match ? match[0].replace(/&amp;/g, "&") : null;
+};
 
 const trimText = (value?: string) => (value ? value.slice(0, MAX_TEXT_LENGTH) : null);
 
@@ -81,6 +102,7 @@ export const mapGoogleEvent = (event: IGoogleEvent): IMappedGoogleEvent | null =
 
   return {
     google_event_id: event.id,
+    ical_uid: event.iCalUID || null,
     title: trimText(event.summary),
     description: trimText(event.description),
     location: trimText(event.location),
@@ -90,7 +112,7 @@ export const mapGoogleEvent = (event: IGoogleEvent): IMappedGoogleEvent | null =
     start_date: startDate,
     end_date: endDate,
     html_link: event.htmlLink || null,
-    hangout_link: event.hangoutLink || null,
+    hangout_link: getVideoCallLink(event),
     organizer_email: event.organizer?.email || null,
     attendees: (event.attendees || []).slice(0, 100).map(a => ({
       email: a.email || null,

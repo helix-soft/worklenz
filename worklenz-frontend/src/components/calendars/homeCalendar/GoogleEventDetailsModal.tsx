@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { Button, Flex, Modal, Typography } from '@/shared/antd-imports';
 import { IGoogleCalendarEvent } from '@/types/google-calendar.types';
 import { formatEventTimeRange } from './useGoogleCalendarEvents';
+import { OpenInCalendarButton } from './OpenInCalendarButton';
 
 /** Read-only details of a synced Google Calendar event. */
 export const GoogleEventDetailsModal = ({ event, onClose }: GoogleEventDetailsModalProps) => {
@@ -22,12 +23,8 @@ export const GoogleEventDetailsModal = ({ event, onClose }: GoogleEventDetailsMo
       title={event.title || t('homeCalendar.google.untitled', { defaultValue: '(No title)' })}
       footer={
         <Flex justify="flex-end" gap={8}>
-          {event.html_link && (
-            <Button href={event.html_link} target="_blank" rel="noopener noreferrer">
-              {t('homeCalendar.google.openInGoogle', { defaultValue: 'Open in Google Calendar' })}
-            </Button>
-          )}
-          <Button type="primary" onClick={onClose}>
+          <OpenInCalendarButton event={event} />
+          <Button onClick={onClose}>
             {t('homeCalendar.google.close', { defaultValue: 'Close' })}
           </Button>
         </Flex>

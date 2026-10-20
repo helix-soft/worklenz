@@ -101,7 +101,7 @@ export default class GoogleCalendarController extends WorklenzControllerBase {
               e.start_at, e.end_at, to_char(e.start_date, 'YYYY-MM-DD') AS start_date,
               to_char(e.end_date, 'YYYY-MM-DD') AS end_date, e.html_link, e.hangout_link,
               e.organizer_email, e.attendees, gc.id AS calendar_id, gc.summary AS calendar_name,
-              gc.is_primary AS calendar_is_primary
+              gc.is_primary AS calendar_is_primary, e.ical_uid, c.google_email AS account_email
        FROM google_calendar_events e
        JOIN google_calendar_connections c ON c.id = e.connection_id
        JOIN google_calendar_calendars gc ON gc.id = e.calendar_id

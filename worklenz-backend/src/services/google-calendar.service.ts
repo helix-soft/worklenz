@@ -246,8 +246,9 @@ export const syncConnection = async (connectionId: string): Promise<void> => {
           await client.query(
             `INSERT INTO google_calendar_events
                (connection_id, calendar_id, google_event_id, title, description, location, is_all_day,
-                start_at, end_at, start_date, end_date, html_link, hangout_link, organizer_email, attendees)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+                start_at, end_at, start_date, end_date, html_link, hangout_link, organizer_email, attendees,
+                ical_uid)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
              ON CONFLICT (calendar_id, google_event_id) DO NOTHING`,
             [
               connectionId,
@@ -265,6 +266,7 @@ export const syncConnection = async (connectionId: string): Promise<void> => {
               event.hangout_link,
               event.organizer_email,
               JSON.stringify(event.attendees),
+              event.ical_uid,
             ]
           );
         }
