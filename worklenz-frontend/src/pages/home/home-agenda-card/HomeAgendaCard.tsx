@@ -27,7 +27,7 @@ dayjs.extend(isoWeek);
  * Overview agenda: Google Calendar events, holidays and the user's time off for today or the
  * current (ISO) week. In "today" mode events that have already ended are hidden.
  */
-export const HomeAgendaCard = ({ period }: HomeAgendaCardProps) => {
+export const HomeAgendaCard = ({ period, isFullHeight = false }: HomeAgendaCardProps) => {
   const { t } = useTranslation('home');
   const { token } = theme.useToken();
   const navigate = useNavigate();
@@ -169,7 +169,13 @@ export const HomeAgendaCard = ({ period }: HomeAgendaCardProps) => {
       );
     }
     return (
-      <div style={{ overflowY: 'auto', maxHeight: 320 }}>
+      <div
+        style={
+          isFullHeight
+            ? { overflowY: 'auto', flex: 1, minHeight: 0 }
+            : { overflowY: 'auto', maxHeight: 320 }
+        }
+      >
         {blocks.map(({ date, key, rows }) => (
           <section key={key} aria-label={date.format('dddd, MMMM D, YYYY')}>
             {period === 'week' && (
@@ -198,7 +204,20 @@ export const HomeAgendaCard = ({ period }: HomeAgendaCardProps) => {
   };
 
   return (
-    <Card style={{ borderRadius: 10, overflow: 'hidden', flexShrink: 0 }} styles={{ body: { padding: 0 } }}>
+    <Card
+      style={{
+        borderRadius: 10,
+        overflow: 'hidden',
+        flexShrink: 0,
+        ...(isFullHeight && { height: '100%', display: 'flex', flexDirection: 'column' }),
+      }}
+      styles={{
+        body: {
+          padding: 0,
+          ...(isFullHeight && { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }),
+        },
+      }}
+    >
       <div
         style={{
           display: 'flex',
@@ -362,4 +381,6 @@ interface AgendaRow {
 
 interface HomeAgendaCardProps {
   period: HomePeriod;
+  /** Stretch to the parent's height and scroll inside (desktop column); otherwise capped. */
+  isFullHeight?: boolean;
 }

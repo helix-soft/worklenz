@@ -411,7 +411,10 @@
     "tasksTooltip": "Open tasks assigned to you (or reported by you, depending on the toggle above) with a due date {{periodWord}}, based on your local calendar day. Tasks already marked Done are excluded.",
     "overdueTooltip": "Open tasks assigned to you whose due date has passed. Not affected by the Today/This Week toggle, since a task is either overdue or it isn't.",
     "completedTooltip": "Tasks you moved to a Done status {{periodWord}}, based on when the task was completed, not its due date. A task due last week but finished today still counts here.",
-    "focusTimeTooltip": "Total time logged {{periodWord}} across your tasks, split into billable and non-billable based on each task's billable flag."
+    "focusTimeTooltip": "Total time logged {{periodWord}} across your tasks, split into billable and non-billable based on each task's billable flag.",
+    "timeLoggedToday": "Time logged today",
+    "timeLoggedThisWeek": "Time logged this week",
+    "timeLoggedTooltip": "Total time you logged on your tasks {{periodWord}} (timer and manual entries)."
   },
   "progressDonut": {
     "myProgressToday": "My Progress Today",

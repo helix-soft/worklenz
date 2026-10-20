@@ -411,7 +411,10 @@
     "tasksTooltip": "Detyra të hapura të caktuara për ju (ose raportuara nga ju, sipas ndryshuesit më sipër) me datë përfundimi {{periodWord}}, sipas ditës suaj lokale kalendarike. Detyrat e shënuara si Përfunduar përjashtohen.",
     "overdueTooltip": "Detyra të hapura të caktuara për ju që kanë kaluar datën e përfundimit. Nuk preket nga ndryshuesi Sot/Këtë javë, pasi një detyrë ose është ngarkuar ose nuk është.",
     "completedTooltip": "Detyrat që keni zhvendosur në statusin Përfunduar {{periodWord}}, sipas kur është përfunduar detyra, jo datës së saj të përfundimit. Një detyrë e ngarkuar javën e kaluar por e përfunduar sot ende llogaritet këtu.",
-    "focusTimeTooltip": "Koha totale e regjistruar {{periodWord}} në detyrat tuaja, e ndarë në të faturueshme dhe të pafaturueshme sipas flamurit të faturueshëm të çdo detyre."
+    "focusTimeTooltip": "Koha totale e regjistruar {{periodWord}} në detyrat tuaja, e ndarë në të faturueshme dhe të pafaturueshme sipas flamurit të faturueshëm të çdo detyre.",
+    "timeLoggedToday": "Koha e regjistruar sot",
+    "timeLoggedThisWeek": "Koha e regjistruar këtë javë",
+    "timeLoggedTooltip": "Koha totale që ke regjistruar në detyrat e tua {{periodWord}} (kohëmatës dhe regjistrime manuale)."
   },
   "progressDonut": {
     "myProgressToday": "Përparimi im i sotëm",

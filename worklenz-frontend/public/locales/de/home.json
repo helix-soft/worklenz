@@ -411,7 +411,10 @@
     "tasksTooltip": "Offene Aufgaben, die Ihnen zugewiesen sind (oder von Ihnen gemeldet, je nach Umschalter oben) mit Fälligkeitsdatum {{periodWord}}, basierend auf Ihrem lokalen Kalendertag. Bereits als Erledigt markierte Aufgaben werden ausgeschlossen.",
     "overdueTooltip": "Offene Aufgaben, die Ihnen zugewiesen sind und deren Fälligkeitsdatum verstrichen ist. Nicht betroffen vom Umschalter Heute/Diese Woche, da eine Aufgabe entweder überfällig ist oder nicht.",
     "completedTooltip": "Aufgaben, die Sie {{periodWord}} in den Status Erledigt versetzt haben, basierend auf dem Zeitpunkt der Fertigstellung, nicht dem Fälligkeitsdatum. Eine letzte Woche fällige, aber heute abgeschlossene Aufgabe zählt hier weiterhin.",
-    "focusTimeTooltip": "Gesamte erfasste Zeit {{periodWord}} über Ihre Aufgaben, aufgeteilt in abrechenbar und nicht abrechenbar basierend auf dem Abrechenbar-Kennzeichen jeder Aufgabe."
+    "focusTimeTooltip": "Gesamte erfasste Zeit {{periodWord}} über Ihre Aufgaben, aufgeteilt in abrechenbar und nicht abrechenbar basierend auf dem Abrechenbar-Kennzeichen jeder Aufgabe.",
+    "timeLoggedToday": "Heute erfasste Zeit",
+    "timeLoggedThisWeek": "Diese Woche erfasste Zeit",
+    "timeLoggedTooltip": "Gesamte Zeit, die du {{periodWord}} auf deinen Aufgaben erfasst hast (Timer und manuelle Einträge)."
   },
   "progressDonut": {
     "myProgressToday": "Mein Fortschritt heute",

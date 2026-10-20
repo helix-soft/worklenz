@@ -48,8 +48,7 @@ type CalendarViewType = 'month' | 'week' | 'year' | 'agenda';
 /** Google events shown per day cell in Week/Month before collapsing into "+N". */
 const MAX_EVENT_PILLS = 2;
 
-// Matches the status-category colors used by HomeProgressDonut so the calendar's
-// todo/doing/done counts read consistently with the rest of the Home page.
+// Status-category colors for the calendar's todo/doing/done counts.
 const STATUS_CATEGORY_COLORS = { todo: '#faad14', doing: '#1677ff', done: '#52c41a' };
 
 interface HomeCalendarProps {

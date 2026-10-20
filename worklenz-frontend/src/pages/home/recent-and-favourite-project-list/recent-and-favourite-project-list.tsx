@@ -107,7 +107,7 @@ const RecentAndFavouriteProjectList = () => {
 
   return (
     <Card style={{ width: '100%', borderRadius: 10 }} styles={{ body: { padding: '20px' } }}>
-      {/* Header — matches HomeProgressDonut's plain title styling */}
+      {/* Header — plain card title styling */}
       <div
         style={{
           display: 'flex',

@@ -41,7 +41,6 @@ const HomeStatCards: React.FC<HomeStatCardsProps> = ({ period }) => {
   const { t } = useTranslation('home');
 
   const stats = statsData?.body;
-  const tasksCount = period === 'today' ? (stats?.today ?? 0) : (stats?.week ?? 0);
   const overdueCount = stats?.overdue ?? 0;
   const completedCount = period === 'today' ? (stats?.completed_today ?? 0) : (stats?.completed_week ?? 0);
 
@@ -51,28 +50,28 @@ const HomeStatCards: React.FC<HomeStatCardsProps> = ({ period }) => {
   const focusTimeStr = loggedSeconds > 0 ? formatSecondsAsHM(loggedSeconds) : '0h';
 
   const periodWord = period === 'today' ? 'today' : 'this week';
-  const tasksTooltip = t('statCards.tasksTooltip', { periodWord, defaultValue: 'Total tasks assigned for {{periodWord}}.' });
   const overdueTooltip = t('statCards.overdueTooltip', { defaultValue: 'Tasks past their due date.' });
   const completedTooltip = t('statCards.completedTooltip', { periodWord, defaultValue: 'Tasks completed {{periodWord}}.' });
-  const focusTimeTooltip = t('statCards.focusTimeTooltip', { periodWord, defaultValue: 'Time spent on tasks {{periodWord}}.' });
+  const timeLoggedTooltip = t('statCards.timeLoggedTooltip', {
+    periodWord,
+    defaultValue: 'Total time you logged on your tasks {{periodWord}} (timer and manual entries).',
+  });
 
   const cards: StatCard[] =
     period === 'today'
       ? [
-          { label: t('statCards.tasksToday', { defaultValue: "Today's Tasks" }),         value: tasksCount,     color: undefined,     tooltip: tasksTooltip },
-          { label: t('statCards.overdue', { defaultValue: 'Overdue' }),             value: overdueCount,   color: '#ff4d4f',     tooltip: overdueTooltip },
           { label: t('statCards.completedToday', { defaultValue: 'Completed Today' }),     value: completedCount, color: '#52c41a',     tooltip: completedTooltip },
-          { label: t("statCards.todaysFocusTime", { defaultValue: "Today's Focus Time" }),  value: focusTimeStr,   color: undefined,     tooltip: focusTimeTooltip },
+          { label: t('statCards.overdue', { defaultValue: 'Overdue' }),             value: overdueCount,   color: '#ff4d4f',     tooltip: overdueTooltip },
+          { label: t('statCards.timeLoggedToday', { defaultValue: 'Time logged today' }),  value: focusTimeStr,   color: undefined,     tooltip: timeLoggedTooltip },
         ]
       : [
-          { label: t('statCards.tasksThisWeek', { defaultValue: "This Week's Tasks" }),     value: tasksCount,     color: undefined,     tooltip: tasksTooltip },
-          { label: t('statCards.overdue', { defaultValue: 'Overdue' }),             value: overdueCount,   color: '#ff4d4f',     tooltip: overdueTooltip },
           { label: t('statCards.completedThisWeek', { defaultValue: 'Completed This Week' }), value: completedCount, color: '#52c41a',     tooltip: completedTooltip },
-          { label: t("statCards.weeksFocusTime", { defaultValue: "This Week's Focus Time" }),   value: focusTimeStr,   color: undefined,     tooltip: focusTimeTooltip },
+          { label: t('statCards.overdue', { defaultValue: 'Overdue' }),             value: overdueCount,   color: '#ff4d4f',     tooltip: overdueTooltip },
+          { label: t('statCards.timeLoggedThisWeek', { defaultValue: 'Time logged this week' }),   value: focusTimeStr,   color: undefined,     tooltip: timeLoggedTooltip },
         ];
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
       {cards.map(card => (
         <div
           key={card.label}

@@ -411,7 +411,10 @@
     "tasksTooltip": "Tarefas abertas atribuídas a você (ou reportadas por você, dependendo do interruptor acima) com data de vencimento {{periodWord}}, com base no seu dia do calendário local. Tarefas já marcadas como Concluídas são excluídas.",
     "overdueTooltip": "Tarefas abertas atribuídas a você cuja data de vencimento já passou. Não é afetado pelo interruptor Hoje/Esta semana, pois uma tarefa está atrasada ou não está.",
     "completedTooltip": "Tarefas que você moveu para um status Concluída {{periodWord}}, com base em quando a tarefa foi concluída, não em sua data de vencimento. Uma tarefa vencida na semana passada mas concluída hoje ainda conta aqui.",
-    "focusTimeTooltip": "Tempo total registrado {{periodWord}} em suas tarefas, dividido em faturável e não faturável com base na flag faturável de cada tarefa."
+    "focusTimeTooltip": "Tempo total registrado {{periodWord}} em suas tarefas, dividido em faturável e não faturável com base na flag faturável de cada tarefa.",
+    "timeLoggedToday": "Tempo registrado hoje",
+    "timeLoggedThisWeek": "Tempo registrado esta semana",
+    "timeLoggedTooltip": "Tempo total que você registrou nas suas tarefas {{periodWord}} (cronômetro e lançamentos manuais)."
   },
   "progressDonut": {
     "myProgressToday": "Meu progresso de hoje",

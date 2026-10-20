@@ -411,7 +411,10 @@
     "tasksTooltip": "分配给您（或根据上方切换由您报告）的、截止日期为{{periodWord}}的未完成任务，基于您的本地日历日。已标记为“完成”的任务不计入。",
     "overdueTooltip": "分配给您且已过截止日期的未完成任务。不受“今天/本周”切换影响，因为任务要么逾期要么没有。",
     "completedTooltip": "您在{{periodWord}}移动到“完成”状态的任务，基于任务完成的时间，而非其截止日期。上周到期但今天完成的任务仍计入此处。",
-    "focusTimeTooltip": "您在{{periodWord}}记录到各任务的总时间，根据每个任务的可计费标志拆分为可计费和不可计费。"
+    "focusTimeTooltip": "您在{{periodWord}}记录到各任务的总时间，根据每个任务的可计费标志拆分为可计费和不可计费。",
+    "timeLoggedToday": "今日已记录时间",
+    "timeLoggedThisWeek": "本周已记录时间",
+    "timeLoggedTooltip": "您{{periodWord}}在任务上记录的总时间（计时器和手动录入）。"
   },
   "progressDonut": {
     "myProgressToday": "我今天的进度",

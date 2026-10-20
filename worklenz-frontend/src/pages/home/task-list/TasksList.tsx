@@ -348,7 +348,7 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
         body: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', padding: '20px' },
       }}
     >
-      {/* Header — matches HomeProgressDonut's plain title styling */}
+      {/* Header — plain card title styling */}
       <div
         className="task-list-header"
         style={{
