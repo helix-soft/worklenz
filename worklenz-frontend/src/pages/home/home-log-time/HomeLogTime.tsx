@@ -855,27 +855,6 @@ const HomeLogTime: React.FC = () => {
         >
           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 14 }}>{t('logTime.quickEntryTitle', { defaultValue: 'Quick Time Entry' })}</div>
 
-          {selectedGhost && (
-            <Alert
-              type="info"
-              showIcon
-              closable
-              onClose={clearSelectedGhost}
-              style={{ marginBottom: 14 }}
-              message={t('logTime.calendarEvents.logging', {
-                defaultValue: 'Logging calendar event: {{title}}',
-                title: selectedGhost.title,
-              })}
-              description={
-                selProjectId
-                  ? undefined
-                  : t('logTime.calendarEvents.pickProject', {
-                      defaultValue: 'Pick the project; the time goes to its Meetings task.',
-                    })
-              }
-            />
-          )}
-
           <div style={{ marginBottom: 14 }}>
             <label style={fldLbl}>{t('logTime.projectLabel', { defaultValue: 'Project' })}</label>
             <Select
@@ -989,6 +968,28 @@ const HomeLogTime: React.FC = () => {
           >
             {t('logTime.submitButton', { defaultValue: 'Log Time' })}
           </Button>
+
+          {/* Below the form, so selecting an event doesn't shift the fields */}
+          {selectedGhost && (
+            <Alert
+              type="info"
+              showIcon
+              closable
+              onClose={clearSelectedGhost}
+              style={{ marginTop: 14 }}
+              message={t('logTime.calendarEvents.logging', {
+                defaultValue: 'Logging calendar event: {{title}}',
+                title: selectedGhost.title,
+              })}
+              description={
+                selProjectId
+                  ? undefined
+                  : t('logTime.calendarEvents.pickProject', {
+                      defaultValue: 'Pick the project; the time goes to its Meetings task.',
+                    })
+              }
+            />
+          )}
         </div>
 
         {/* Right column */}
