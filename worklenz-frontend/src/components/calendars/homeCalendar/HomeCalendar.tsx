@@ -379,7 +379,10 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
         </Popover>
       );
 
-      const hasBreakdown = todoTasks.length > 0 || doingTasks.length > 0 || doneTasks.length > 0;
+      // The status breakdown only adds information when the day's tasks are in 2+ categories;
+      // with a single category it would just repeat the total.
+      const hasBreakdown =
+        [todoTasks, doingTasks, doneTasks].filter(list => list.length > 0).length > 1;
 
       const dueTaskWord = (count: number) =>
         count === 1
