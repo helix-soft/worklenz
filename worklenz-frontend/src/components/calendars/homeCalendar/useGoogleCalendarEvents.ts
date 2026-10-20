@@ -15,6 +15,8 @@ export const useGoogleCalendarEvents = (start: Dayjs, end: Dayjs) => {
   const [status, setStatus] = useState<IGoogleCalendarStatus | null>(null);
   const [events, setEvents] = useState<IGoogleCalendarEvent[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const hasAutoSynced = useRef(false);
   const startKey = start.format('YYYY-MM-DD');
   const endKey = end.format('YYYY-MM-DD');
@@ -23,8 +25,12 @@ export const useGoogleCalendarEvents = (start: Dayjs, end: Dayjs) => {
     try {
       const res = await googleCalendarApiService.getEvents(startKey, endKey);
       if (res.done) setEvents(res.body);
+      setHasError(!res.done);
     } catch (error) {
       logger.error('Error fetching Google Calendar events', error);
+      setHasError(true);
+    } finally {
+      setIsLoading(false);
     }
   }, [startKey, endKey]);
 
@@ -41,25 +47,44 @@ export const useGoogleCalendarEvents = (start: Dayjs, end: Dayjs) => {
     }
   }, [loadEvents]);
 
+  const loadStatus = useCallback(async () => {
+    try {
+      const res = await googleCalendarApiService.getStatus();
+      if (!res.done) {
+        setHasError(true);
+        setIsLoading(false);
+        return;
+      }
+      setHasError(false);
+      setStatus(res.body);
+      if (!res.body.connected) setIsLoading(false);
+      const lastSync = res.body.last_synced_at ? dayjs(res.body.last_synced_at).valueOf() : 0;
+      if (
+        res.body.connected &&
+        res.body.status === 'active' &&
+        !hasAutoSynced.current &&
+        Date.now() - lastSync > AUTO_SYNC_AFTER_MS
+      ) {
+        hasAutoSynced.current = true;
+        void sync();
+      }
+    } catch (error) {
+      logger.error('Error fetching Google Calendar status', error);
+      setHasError(true);
+      setIsLoading(false);
+    }
+  }, [sync]);
+
+  /** Retries after an error: status first, then (if connected) the events. */
+  const reload = useCallback(async () => {
+    setIsLoading(true);
+    await loadStatus();
+    await loadEvents();
+  }, [loadStatus, loadEvents]);
+
   // Status once on mount, then a background sync if the data is stale.
   useEffect(() => {
-    googleCalendarApiService
-      .getStatus()
-      .then(res => {
-        if (!res.done) return;
-        setStatus(res.body);
-        const lastSync = res.body.last_synced_at ? dayjs(res.body.last_synced_at).valueOf() : 0;
-        if (
-          res.body.connected &&
-          res.body.status === 'active' &&
-          !hasAutoSynced.current &&
-          Date.now() - lastSync > AUTO_SYNC_AFTER_MS
-        ) {
-          hasAutoSynced.current = true;
-          void sync();
-        }
-      })
-      .catch(error => logger.error('Error fetching Google Calendar status', error));
+    void loadStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -83,7 +108,7 @@ export const useGoogleCalendarEvents = (start: Dayjs, end: Dayjs) => {
     return map;
   }, [events]);
 
-  return { status, eventsByDate, isSyncing, sync };
+  return { status, eventsByDate, isSyncing, isLoading, hasError, sync, reload };
 };
 
 /** First and last local day an event covers (a timed event ending at midnight ends the day before). */

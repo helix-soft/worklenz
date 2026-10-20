@@ -5,6 +5,7 @@ import TasksList from '@/pages/home/task-list/TasksList';
 import HomeStatCards from './home-stat-cards/HomeStatCards';
 import HomeProgressDonut from './home-progress-donut/HomeProgressDonut';
 import HomeContinueCard from './home-continue-card/HomeContinueCard';
+import { HomeAgendaCard } from './home-agenda-card/HomeAgendaCard';
 import PillToggle from './PillToggle';
 import { useMediaQuery } from 'react-responsive';
 import { useTranslation } from 'react-i18next';
@@ -52,6 +53,7 @@ const HomeOverviewView: React.FC = () => {
   const rightCol = (
     <Flex vertical gap={12} style={{ width: 320, minWidth: 320, height: '100%' }}>
       <HomeProgressDonut period={period} />
+      <HomeAgendaCard period={period} />
       {/* Fills remaining rightCol height down to the bottom of the screen —
           now the only thing below the donut, since the Projects card was removed */}
       <div style={{ flex: 1, minHeight: 0 }}>
@@ -91,6 +93,7 @@ const HomeOverviewView: React.FC = () => {
           <HomeStatCards period={period} />
           <TasksList cardTitle={prioritiesTitle} />
           <HomeProgressDonut period={period} />
+          <HomeAgendaCard period={period} />
           <HomeContinueCard />
         </Flex>
       )}

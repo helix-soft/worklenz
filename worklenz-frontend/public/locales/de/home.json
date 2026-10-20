@@ -449,5 +449,15 @@
       "personal": "Persönlich",
       "other": "Sonstiges"
     }
+  },
+  "homeAgenda": {
+    "titleToday": "Agenda heute",
+    "titleWeek": "Agenda diese Woche",
+    "holiday": "Feiertag",
+    "emptyToday": "Heute keine weiteren Termine.",
+    "emptyWeek": "Keine Termine diese Woche.",
+    "notConnected": "Verbinde deinen Google Kalender, um deine Termine hier zu sehen.",
+    "error": "Dein Kalender konnte nicht geladen werden.",
+    "retry": "Erneut versuchen"
   }
 }

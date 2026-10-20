@@ -449,5 +449,15 @@
       "personal": "Personale",
       "other": "Tjetër"
     }
+  },
+  "homeAgenda": {
+    "titleToday": "Axhenda e sotme",
+    "titleWeek": "Axhenda e kësaj jave",
+    "holiday": "Festë",
+    "emptyToday": "Nuk ka më ngjarje sot.",
+    "emptyWeek": "Nuk ka ngjarje këtë javë.",
+    "notConnected": "Lidh Google Calendar për të parë takimet këtu.",
+    "error": "Kalendari nuk mund të ngarkohej.",
+    "retry": "Provo përsëri"
   }
 }

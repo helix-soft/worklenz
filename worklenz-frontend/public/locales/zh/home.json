@@ -449,5 +449,15 @@
       "personal": "事假",
       "other": "其他"
     }
+  },
+  "homeAgenda": {
+    "titleToday": "今日日程",
+    "titleWeek": "本周日程",
+    "holiday": "节假日",
+    "emptyToday": "今天没有更多日程。",
+    "emptyWeek": "本周没有日程。",
+    "notConnected": "连接 Google 日历即可在此查看会议。",
+    "error": "无法加载您的日历。",
+    "retry": "重试"
   }
 }

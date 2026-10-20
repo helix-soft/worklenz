@@ -449,5 +449,15 @@
       "personal": "Pessoal",
       "other": "Outro"
     }
+  },
+  "homeAgenda": {
+    "titleToday": "Agenda de hoje",
+    "titleWeek": "Agenda desta semana",
+    "holiday": "Feriado",
+    "emptyToday": "Não há mais eventos hoje.",
+    "emptyWeek": "Nenhum evento esta semana.",
+    "notConnected": "Conecte seu Google Agenda para ver suas reuniões aqui.",
+    "error": "Não foi possível carregar sua agenda.",
+    "retry": "Tentar novamente"
   }
 }

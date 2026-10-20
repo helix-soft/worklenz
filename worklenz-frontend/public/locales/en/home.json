@@ -449,5 +449,15 @@
       "personal": "Personal",
       "other": "Other"
     }
+  },
+  "homeAgenda": {
+    "titleToday": "Agenda today",
+    "titleWeek": "Agenda this week",
+    "holiday": "Holiday",
+    "emptyToday": "No more events today.",
+    "emptyWeek": "No events this week.",
+    "notConnected": "Connect your Google Calendar to see your meetings here.",
+    "error": "Could not load your calendar.",
+    "retry": "Retry"
   }
 }
