@@ -4,7 +4,6 @@ import {
   Badge,
   Button,
   Card,
-  Flex,
   Table,
   TableProps,
   Tooltip,
@@ -18,14 +17,12 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useDebouncedMediaQuery } from '@/hooks/useDebouncedMediaQuery';
 
-import ListView from './ListView';
+import ListView, { toHomeTaskTab } from './ListView';
 import HomeAddTaskModal from './HomeAddTaskModal';
-import PillToggle from '../PillToggle';
 import { WorklenzLogoLoader } from '@/components/worklenz-loader/worklenz-loader';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useAppDispatch } from '@/hooks/useAppDispatch';
 import EmptyListPlaceholder from '@components/EmptyListPlaceholder';
-import { setHomeTasksConfig } from '@/features/home-page/home-page.slice';
 import { IMyTask } from '@/types/home/my-tasks.types';
 import {
   setSelectedTaskId,
@@ -77,7 +74,7 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
   // against a ref and calling setCurrentPage synchronously here means the
   // page is already 1 by the time queryArg is computed in this same render.
   const filtersSignature = JSON.stringify([
-    homeTasksConfig.current_tab, homeTasksConfig.tasks_group_by,
+    homeTasksConfig.current_tab,
     selectedProjectIds, selectedPriorityIds, sortField, sortOrder,
   ]);
   const prevFiltersSignatureRef = useRef(filtersSignature);
@@ -92,6 +89,9 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
   // rippling into that unrelated consumer.
   const queryArg = useMemo(() => ({
     ...homeTasksConfig,
+    current_tab: toHomeTaskTab(homeTasksConfig.current_tab),
+    // The Overview always lists the tasks assigned to me.
+    tasks_group_by: ASSIGNED_TO_ME,
     index: currentPage,
     size: pageSize,
     projectIds: selectedProjectIds.length ? (selectedProjectIds as string[]) : undefined,
@@ -115,9 +115,9 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
   const { priorities } = useAppSelector(state => state.priorityReducer);
   const isMobile = useDebouncedMediaQuery({ query: '(max-width: 768px)' });
 
-  // Filter dropdown options — scoped to the current group_by (not just
+  // Filter dropdown options — scoped to my assigned tasks (not just
   // whatever's on the current page/tab), same endpoint HomeMyTasksView uses.
-  const { data: filterOptionsData } = useGetTaskFilterOptionsQuery({ group_by: homeTasksConfig.tasks_group_by });
+  const { data: filterOptionsData } = useGetTaskFilterOptionsQuery({ group_by: ASSIGNED_TO_ME });
 
   const projectFilterOptions = useMemo(
     () => (filterOptionsData?.body?.projects || []).map(p => ({ text: p.project_name, value: p.project_id })),
@@ -321,11 +321,6 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
     [t, currentPage, pageSize, handleSelectTask, isMobile, themeMode, renderSortableTitle, projectFilterOptions, priorityFilterOptions, selectedProjectIds, selectedPriorityIds]
   );
 
-  const handleTaskModeChange = (value: number) => {
-    dispatch(setHomeTasksConfig({ ...homeTasksConfig, tasks_group_by: value }));
-    setCurrentPage(1);
-  };
-
   return (
     <Card
       className="task-list-card"
@@ -360,16 +355,6 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
         }}
       >
         <div style={{ fontSize: 14, fontWeight: 600 }}>{cardTitle || t('tasks.tasks', { defaultValue: 'Tasks' })}</div>
-        <Flex gap={8} align="center" className="task-list-mobile-controls">
-          <PillToggle<'to' | 'by'>
-            value={homeTasksConfig.tasks_group_by === 1 ? 'by' : 'to'}
-            onChange={v => handleTaskModeChange(v === 'by' ? 1 : 0)}
-             options={[
-               { value: 'to', label: ready ? t('tasks.assignedToMe', { defaultValue: 'Assigned to me' }) : 'Assigned to me' },
-               { value: 'by', label: ready ? t('tasks.assignedByMe', { defaultValue: 'Assigned by me' }) : 'Assigned by me' },
-             ]}
-          />
-        </Flex>
       </div>
 
       <div
@@ -482,5 +467,8 @@ const TasksList: React.FC<TasksListProps> = React.memo(({ cardTitle }) => {
     </Card>
   );
 });
+
+/** tasks_group_by value for "tasks assigned to me". */
+const ASSIGNED_TO_ME = 0;
 
 export default TasksList;

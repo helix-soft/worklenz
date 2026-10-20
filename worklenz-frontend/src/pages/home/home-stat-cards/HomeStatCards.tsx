@@ -1,5 +1,4 @@
 import React from 'react';
-import { useAppSelector } from '@/hooks/useAppSelector';
 import { useGetUserTimeLoggedSummaryQuery } from '@/api/home-page/user-activity.api.service';
 import { useGetTaskStatsQuery } from '@/api/home-page/home-page.api.service';
 import { theme, Tooltip, InfoCircleOutlined } from '@/shared/antd-imports';
@@ -31,8 +30,8 @@ interface HomeStatCardsProps {
 }
 
 const HomeStatCards: React.FC<HomeStatCardsProps> = ({ period }) => {
-  const groupBy = useAppSelector(state => state.homePageReducer.homeTasksConfig.tasks_group_by);
-  const { data: statsData } = useGetTaskStatsQuery({ group_by: groupBy, time_zone: TIME_ZONE });
+  // The Overview always counts the tasks assigned to me (group_by 0).
+  const { data: statsData } = useGetTaskStatsQuery({ group_by: 0, time_zone: TIME_ZONE });
   const { data: timeSummaryData } = useGetUserTimeLoggedSummaryQuery({
     period,
     time_zone: TIME_ZONE,
