@@ -8,6 +8,7 @@ import {
   Button,
   Popconfirm,
   Popover,
+  theme,
 } from '@/shared/antd-imports';
 import {
   LoadingOutlined,
@@ -35,12 +36,12 @@ interface OrganizationLogoProps {
 }
 
 const OrganizationLogo: React.FC<OrganizationLogoProps> = ({
-  themeMode,
   organization,
   t,
   refetch,
 }) => {
   const dispatch = useAppDispatch();
+  const { token } = theme.useToken();
   const currentSession = useAuthService().getCurrentSession();
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -108,40 +109,20 @@ const OrganizationLogo: React.FC<OrganizationLogoProps> = ({
     }
 
     setUploading(true);
-    setFileSize(file.size);
 
     try {
-      // Validate image dimensions before uploading
-      const img = new Image();
+      // Validate image dimensions before uploading. Large logos are scaled down to fit
+      // MAX_LOGO_WIDTH × MAX_LOGO_HEIGHT (keeping the aspect ratio) instead of being rejected.
       const objectUrl = URL.createObjectURL(file);
+      const img = await loadImage(objectUrl).finally(() => URL.revokeObjectURL(objectUrl));
 
-      const dimensionErrors = await new Promise<string[]>(resolve => {
-        img.onload = () => {
-          const errors: string[] = [];
-
-          if (img.width < 200 || img.height < 60) {
-            errors.push(t('logoTooSmall'));
-          } else if (img.width > 800 || img.height > 240) {
-            errors.push(t('logoTooLarge'));
-          }
-
-          const aspectRatio = img.height / img.width;
-          if (aspectRatio > 2) {
-            errors.push(t('logoVerticalWarning'));
-          }
-
-          setImageDimensions({ width: img.width, height: img.height });
-          URL.revokeObjectURL(objectUrl);
-          resolve(errors);
-        };
-
-        img.onerror = () => {
-          URL.revokeObjectURL(objectUrl);
-          resolve([t('logoUploadError')]);
-        };
-
-        img.src = objectUrl;
-      });
+      const dimensionErrors: string[] = [];
+      if (img.width < 200 || img.height < 60) {
+        dimensionErrors.push(t('logoTooSmall'));
+      }
+      if (img.height / img.width > 2) {
+        dimensionErrors.push(t('logoVerticalWarning'));
+      }
 
       // Block upload if dimension/aspect ratio validation fails
       if (dimensionErrors.length > 0) {
@@ -149,16 +130,22 @@ const OrganizationLogo: React.FC<OrganizationLogoProps> = ({
         return;
       }
 
+      const original = (await getBase64(file)) as string;
+      const scale = Math.min(1, MAX_LOGO_WIDTH / img.width, MAX_LOGO_HEIGHT / img.height);
+      const base64 = scale < 1 ? scaleImage(img, scale) : original;
+      setImageDimensions({
+        width: Math.round(img.width * scale),
+        height: Math.round(img.height * scale),
+      });
+      setFileSize(Math.round(((base64.length - base64.indexOf(',') - 1) * 3) / 4));
+
       // Show file size warning (non-blocking) after dimension checks pass
-      if (validation.warning) {
+      if (validation.warning && scale === 1) {
         message.warning(validation.warning);
       }
 
-      // Convert to base64
-      const base64 = await getBase64(file);
-
       // Upload logo
-      const res = await adminCenterApiService.uploadOrganizationLogo(base64 as string);
+      const res = await adminCenterApiService.uploadOrganizationLogo(base64);
 
       if (res.done) {
         const newLogoUrl = res.body?.logo_url || null;
@@ -170,14 +157,13 @@ const OrganizationLogo: React.FC<OrganizationLogoProps> = ({
       }
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || error?.message || t('logoUploadError');
+      message.error(errorMessage);
       logger.error('Error uploading logo', errorMessage);
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-      setImageDimensions(null);
-      setFileSize(null);
     }
   };
 
@@ -250,53 +236,55 @@ const OrganizationLogo: React.FC<OrganizationLogoProps> = ({
   const logoPreview = (
     <div
       className="logo-uploader"
+      role={hasLogoFeatureAccess ? 'button' : undefined}
+      tabIndex={hasLogoFeatureAccess ? 0 : undefined}
+      aria-label={previewUrl ? t('changeLogo') : t('uploadLogo')}
       onClick={hasLogoFeatureAccess ? triggerFileInput : undefined}
+      onKeyDown={event => {
+        if (hasLogoFeatureAccess && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          triggerFileInput();
+        }
+      }}
       style={{
+        // Landscape, like the navbar slot the logo is shown in.
         width: '100%',
-        maxWidth: '240px',
-        height: '140px',
+        maxWidth: 360,
+        height: 104,
         cursor: uploading ? 'wait' : hasLogoFeatureAccess ? 'pointer' : 'not-allowed',
         position: 'relative',
-        border: `2px dashed ${themeMode === 'dark' ? '#434343' : '#d9d9d9'}`,
-        borderRadius: '12px',
+        border: `${previewUrl ? 1 : 2}px ${previewUrl ? 'solid' : 'dashed'} ${token.colorBorder}`,
+        borderRadius: token.borderRadiusLG,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: themeMode === 'dark' ? '#1f1f1f' : '#fafafa',
-        transition: 'all 0.3s ease',
+        backgroundColor: token.colorFillQuaternary,
+        transition: 'border-color 0.2s ease, background-color 0.2s ease',
         overflow: 'hidden',
         opacity: hasLogoFeatureAccess ? 1 : 0.7,
       }}
       onMouseEnter={e => {
-        if (!uploading && !previewUrl && hasLogoFeatureAccess) {
-          e.currentTarget.style.borderColor = themeMode === 'dark' ? '#595959' : '#40a9ff';
-          e.currentTarget.style.backgroundColor = themeMode === 'dark' ? '#262626' : '#f0f0f0';
+        if (!uploading && hasLogoFeatureAccess) {
+          e.currentTarget.style.borderColor = token.colorPrimary;
         }
       }}
       onMouseLeave={e => {
-        if (!previewUrl && hasLogoFeatureAccess) {
-          e.currentTarget.style.borderColor = themeMode === 'dark' ? '#434343' : '#d9d9d9';
-          e.currentTarget.style.backgroundColor = themeMode === 'dark' ? '#1f1f1f' : '#fafafa';
-        }
+        e.currentTarget.style.borderColor = token.colorBorder;
       }}
     >
       {uploading && (
         <div
           style={{
             position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
+            inset: 0,
+            background: token.colorBgMask,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 1,
-            borderRadius: '8px',
           }}
         >
-          <Spin indicator={<LoadingOutlined style={{ fontSize: 24, color: 'white' }} spin />} />
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 24, color: token.colorWhite }} spin />} />
         </div>
       )}
 
@@ -307,14 +295,14 @@ const OrganizationLogo: React.FC<OrganizationLogoProps> = ({
             top: 8,
             right: 8,
             zIndex: 2,
-            backgroundColor: 'rgba(0,0,0,0.1)',
+            backgroundColor: token.colorFillSecondary,
             borderRadius: '50%',
             padding: '4px',
             display: 'flex',
           }}
         >
           <Tooltip title={t('availableOnPaidPlans')}>
-            <InfoCircleOutlined style={{ color: '#8c8c8c' }} />
+            <InfoCircleOutlined style={{ color: token.colorTextTertiary }} />
           </Tooltip>
         </div>
       )}
@@ -329,45 +317,76 @@ const OrganizationLogo: React.FC<OrganizationLogoProps> = ({
             width: 'auto',
             height: 'auto',
             objectFit: 'contain',
-            borderRadius: '8px',
-            padding: '8px',
+            padding: '16px 20px',
+            boxSizing: 'border-box',
           }}
         />
       ) : (
-        <Flex
-          align="center"
-          justify="center"
-          vertical
-          gap={12}
-          style={{ height: '100%', padding: '16px' }}
-        >
+        <Flex align="center" justify="center" gap={12} style={{ height: '100%', padding: '16px' }}>
           <div
             style={{
-              width: '48px',
-              height: '48px',
+              width: 40,
+              height: 40,
+              flexShrink: 0,
               borderRadius: '50%',
-              backgroundColor: themeMode === 'dark' ? '#262626' : '#e6f7ff',
+              backgroundColor: token.colorPrimaryBg,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <PlusOutlined
-              style={{ fontSize: 20, color: themeMode === 'dark' ? '#8c8c8c' : '#1890ff' }}
-            />
+            <PlusOutlined style={{ fontSize: 18, color: token.colorPrimary }} />
           </div>
-          <Typography.Text type="secondary" style={{ fontSize: 13, textAlign: 'center' }}>
-            {t('uploadLogo')}
-          </Typography.Text>
-          <Typography.Text
-            type="secondary"
-            style={{ fontSize: 11, textAlign: 'center', opacity: 0.7 }}
-          >
-            {t('logoSupportedFormats')}
-          </Typography.Text>
+          <Flex vertical gap={2}>
+            <Typography.Text style={{ fontSize: 13 }}>{t('uploadLogo')}</Typography.Text>
+            <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+              {t('logoSupportedFormats')}
+            </Typography.Text>
+          </Flex>
         </Flex>
       )}
     </div>
+  );
+
+  // How the logo looks in the navbar (26px high) on the light and the dark theme.
+  const navbarPreview = previewUrl && (
+    <Flex vertical gap={6} style={{ maxWidth: 360 }}>
+      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+        {t('logoNavbarPreview', { defaultValue: 'Navbar preview' })}
+      </Typography.Text>
+      <Flex gap={8}>
+        {NAVBAR_PREVIEW_THEMES.map(variant => (
+          <Tooltip
+            key={variant}
+            title={
+              variant === 'light'
+                ? t('logoPreviewLight', { defaultValue: 'Light theme' })
+                : t('logoPreviewDark', { defaultValue: 'Dark theme' })
+            }
+          >
+            <div
+              style={{
+                flex: 1,
+                height: 44,
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 12px',
+                borderRadius: token.borderRadius,
+                border: `1px solid ${token.colorBorderSecondary}`,
+                // Fixed navbar backgrounds: this shows both themes regardless of the current one.
+                background: variant === 'light' ? NAVBAR_BG_LIGHT : NAVBAR_BG_DARK,
+              }}
+            >
+              <img
+                src={previewUrl}
+                alt=""
+                style={{ height: 26, maxWidth: 140, objectFit: 'contain', display: 'block' }}
+              />
+            </div>
+          </Tooltip>
+        ))}
+      </Flex>
+    </Flex>
   );
 
   return (
@@ -380,16 +399,14 @@ const OrganizationLogo: React.FC<OrganizationLogoProps> = ({
             </Typography.Title>
             <Tooltip title={t('logoFormatRecommendation')}>
               <InfoCircleOutlined
-                style={{
-                  color: themeMode === 'dark' ? '#8c8c8c' : '#bfbfbf',
-                  cursor: 'help',
-                }}
+                style={{ color: token.colorTextTertiary, cursor: 'help' }}
               />
             </Tooltip>
           </Flex>
 
           <Flex vertical gap={12}>
             {logoPreview}
+            {navbarPreview}
 
             {previewUrl && (
               <Flex gap={8} wrap="wrap">
@@ -521,8 +538,9 @@ const OrganizationLogo: React.FC<OrganizationLogoProps> = ({
               <div
                 style={{
                   padding: '8px 12px',
-                  backgroundColor: themeMode === 'dark' ? '#262626' : '#f5f5f5',
-                  borderRadius: '6px',
+                  backgroundColor: token.colorFillTertiary,
+                  borderRadius: token.borderRadius,
+                  width: 'fit-content',
                 }}
               >
                 <Typography.Text type="secondary" style={{ fontSize: 12 }}>
@@ -558,5 +576,33 @@ const OrganizationLogo: React.FC<OrganizationLogoProps> = ({
     </div>
   );
 };
+
+// Helpers
+const loadImage = (src: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+
+/** Scales an image down on a canvas; PNG keeps the transparent background. */
+const scaleImage = (img: HTMLImageElement, scale: number): string => {
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('Canvas is not supported');
+  context.imageSmoothingQuality = 'high';
+  context.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/png');
+};
+
+// Static content
+const MAX_LOGO_WIDTH = 800;
+const MAX_LOGO_HEIGHT = 240;
+const NAVBAR_PREVIEW_THEMES = ['light', 'dark'] as const;
+const NAVBAR_BG_LIGHT = '#ffffff';
+const NAVBAR_BG_DARK = '#141414';
 
 export default OrganizationLogo;

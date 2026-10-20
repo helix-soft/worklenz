@@ -65,3 +65,6 @@ dist-sdk
 # Security-sensitive files (Apple Sign-In, etc.)
 *.p8
 keys/*.p8
+
+# Uploads of the local storage provider (STORAGE_PROVIDER=local)
+/storage/
