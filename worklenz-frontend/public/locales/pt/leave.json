@@ -17,18 +17,18 @@
   },
   "admin": {
     "title": "Ausências e presença",
-    "subtitle": "Presença mensal para vales-refeição, cotas anuais de férias e pedidos de ausência.",
+    "subtitle": "Cotas anuais de férias e pedidos de ausência.",
     "holidaysHint": "Feriados oficiais são excluídos dos dias úteis. Gerencie-os nas",
     "holidaysLink": "configurações do Centro de administração",
     "tabs": {
-      "summary": "Resumo mensal",
       "balances": "Cotas de férias",
       "requests": "Pedidos de ausência"
-    }
+    },
+    "attendanceMoved": "O resumo mensal de presença agora está em",
+    "attendanceLink": "Relatórios → Presença"
   },
   "summary": {
     "monthPicker": "Selecionar mês",
-    "workDaysInMonth": "Dias úteis oficiais neste mês: {{count}}",
     "empty": "Nenhum membro da equipe encontrado.",
     "extraWorkedHint": "Registrou trabalho em fim de semana ou feriado. Você pode conceder dias de férias extras por isso.",
     "footnote": "Dias úteis oficiais = segunda a sexta menos os feriados oficiais. Dias trabalhados = dias úteis oficiais menos férias e licenças médicas aprovadas; também é o número de vales-refeição.",
@@ -44,7 +44,9 @@
       "extra_worked_days": "Trabalhou em dias não úteis"
     },
     "exportPdf": "Baixar relatório PDF",
-    "hoursHint": "Esperadas = dias trabalhados × horas diárias. Registradas = tempo registrado em tarefas."
+    "hoursHint": "Esperadas = dias trabalhados × horas diárias. Registradas = tempo registrado em tarefas.",
+    "refresh": "Atualizar",
+    "workDaysLabel": "Dias úteis oficiais neste mês"
   },
   "balances": {
     "yearPicker": "Selecionar ano",
@@ -146,5 +148,8 @@
     "deleteConfirm": "Excluir esta ausência? Os dias voltarão à cota.",
     "editHint": "Apenas dias úteis são contados. As alterações atualizam a cota imediatamente.",
     "readOnlyHint": "Somente um administrador pode alterar uma ausência registrada."
+  },
+  "reporting": {
+    "pageTitle": "Presença"
   }
 }

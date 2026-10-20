@@ -17,18 +17,18 @@
   },
   "admin": {
     "title": "Urlaub & Anwesenheit",
-    "subtitle": "Monatliche Anwesenheit für Essensgutscheine, jährliche Urlaubskontingente und Urlaubsanträge.",
+    "subtitle": "Jährliche Urlaubskontingente und Urlaubsanträge.",
     "holidaysHint": "Gesetzliche Feiertage werden von den Arbeitstagen ausgeschlossen. Verwalten Sie sie in den",
     "holidaysLink": "Admin-Center-Einstellungen",
     "tabs": {
-      "summary": "Monatsübersicht",
       "balances": "Urlaubskontingente",
       "requests": "Urlaubsanträge"
-    }
+    },
+    "attendanceMoved": "Die monatliche Anwesenheitsübersicht befindet sich jetzt unter",
+    "attendanceLink": "Berichte → Anwesenheit"
   },
   "summary": {
     "monthPicker": "Monat auswählen",
-    "workDaysInMonth": "Offizielle Arbeitstage in diesem Monat: {{count}}",
     "empty": "Keine Teammitglieder gefunden.",
     "extraWorkedHint": "An einem Wochenende oder Feiertag eingecheckt. Sie können dafür zusätzliche Urlaubstage gewähren.",
     "footnote": "Offizielle Arbeitstage = Montag bis Freitag abzüglich gesetzlicher Feiertage. Gearbeitete Tage = offizielle Arbeitstage abzüglich genehmigten Urlaubs und Krankheitstage; dies ist auch die Anzahl der Essensgutscheine.",
@@ -44,7 +44,9 @@
       "extra_worked_days": "An freien Tagen gearbeitet"
     },
     "exportPdf": "PDF-Bericht herunterladen",
-    "hoursHint": "Soll = gearbeitete Tage × Tagesstunden. Erfasst = auf Aufgaben erfasste Zeit."
+    "hoursHint": "Soll = gearbeitete Tage × Tagesstunden. Erfasst = auf Aufgaben erfasste Zeit.",
+    "refresh": "Aktualisieren",
+    "workDaysLabel": "Offizielle Arbeitstage in diesem Monat"
   },
   "balances": {
     "yearPicker": "Jahr auswählen",
@@ -146,5 +148,8 @@
     "deleteConfirm": "Diesen Urlaub löschen? Die Tage werden dem Kontingent gutgeschrieben.",
     "editHint": "Es zählen nur Arbeitstage. Änderungen wirken sich sofort auf das Kontingent aus.",
     "readOnlyHint": "Erfasster Urlaub kann nur von einem Admin geändert werden."
+  },
+  "reporting": {
+    "pageTitle": "Anwesenheit"
   }
 }

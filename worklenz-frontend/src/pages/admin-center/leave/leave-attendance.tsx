@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { Alert, Card, Tabs } from '@/shared/antd-imports';
 import WorklenzPageHeader from '@/components/common/WorklenzPageHeader';
 import { useDocumentTitle } from '@/hooks/useDoumentTItle';
-import { AttendanceSummaryTab } from '@/components/admin-center/leave/attendance-summary-tab';
 import { LeaveBalancesTab } from '@/components/admin-center/leave/leave-balances-tab';
 import { LeaveRequestsTab } from '@/components/admin-center/leave/leave-requests-tab';
 
@@ -19,8 +18,7 @@ const LeaveAttendance = () => {
       <WorklenzPageHeader
         title={t('admin.title', { defaultValue: 'Leave & attendance' })}
         subTitle={t('admin.subtitle', {
-          defaultValue:
-            'Monthly attendance for meal vouchers, yearly leave allowances and leave requests.',
+          defaultValue: 'Yearly leave allowances and leave requests.',
         })}
       />
       <Alert
@@ -35,6 +33,13 @@ const LeaveAttendance = () => {
             <Link to="/worklenz/admin-center/settings">
               {t('admin.holidaysLink', { defaultValue: 'Admin Center settings' })}
             </Link>
+            {'. '}
+            {t('admin.attendanceMoved', {
+              defaultValue: 'The monthly attendance summary is now under',
+            })}{' '}
+            <Link to="/worklenz/reporting/time-sheet-attendance">
+              {t('admin.attendanceLink', { defaultValue: 'Reporting → Attendance' })}
+            </Link>
           </span>
         }
       />
@@ -42,11 +47,6 @@ const LeaveAttendance = () => {
         <Tabs
           destroyOnHidden
           items={[
-            {
-              key: 'summary',
-              label: t('admin.tabs.summary', { defaultValue: 'Monthly summary' }),
-              children: <AttendanceSummaryTab />,
-            },
             {
               key: 'balances',
               label: t('admin.tabs.balances', { defaultValue: 'Leave allowances' }),

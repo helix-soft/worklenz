@@ -10,6 +10,7 @@ import {
   BarChartOutlined,
   FileOutlined,
 } from '@/shared/antd-imports';
+import { ScheduleOutlined } from '@ant-design/icons';
 
 const OverviewReports = lazy(() => import('@/pages/reporting/overview-reports/overview-reports'));
 const ProjectsReports = lazy(() => import('@/pages/reporting/projects-reports/projects-reports'));
@@ -26,6 +27,7 @@ const EstimatedVsActualTimeReports = lazy(
   () => import('@/pages/reporting/time-sheets/estimated-vs-actual-time-reports')
 );
 const TimeLogsReports = lazy(() => import('@/pages/reporting/time-sheets/time-logs'));
+const AttendanceReports = lazy(() => import('@/pages/reporting/time-sheets/attendance'));
 
 // Type definition for a menu item
 export type ReportingMenuItems = {
@@ -119,6 +121,14 @@ export const reportingsItems: ReportingMenuItems[] = [
         endpoint: 'time-sheet-logs',
         element: React.createElement(TimeLogsReports),
         icon: React.createElement(FileOutlined),
+      },
+      {
+        key: 'time-sheet-attendance',
+        name: 'attendance',
+        defaultValue: 'Attendance',
+        endpoint: 'time-sheet-attendance',
+        element: React.createElement(AttendanceReports),
+        icon: React.createElement(ScheduleOutlined),
       },
     ],
   },

@@ -18,6 +18,7 @@ import {
   SettingOutlined,
   SyncOutlined,
 } from '@/shared/antd-imports';
+import { ScheduleOutlined } from '@ant-design/icons';
 import {
   ControlOutlined,
   FolderOutlined,
@@ -175,6 +176,11 @@ export const REPORTING_NAV_SURFACE: NavSurface = {
           key: 'time-sheet-logs',
           label: { i18nNs: 'reporting-sidebar', i18nKey: 'logs', defaultValue: 'Logs' },
           icon: <FileOutlined />,
+        },
+        {
+          key: 'time-sheet-attendance',
+          label: { i18nNs: 'reporting-sidebar', i18nKey: 'attendance', defaultValue: 'Attendance' },
+          icon: <ScheduleOutlined />,
         },
       ],
     },

@@ -7,5 +7,6 @@
   "estimateVsActual": "Estimate Vs Actual",
   "logs": "Time Logs",
   "allTasks": "Tasks",
-  "currentOrganizationTooltip": "Current organization"
+  "currentOrganizationTooltip": "Current organization",
+  "attendance": "Attendance"
 }

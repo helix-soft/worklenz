@@ -7,5 +7,6 @@
   "estimateVsActual": "预计用时 vs 实际用时",
   "logs": "日志",
   "allTasks": "任务",
-  "currentOrganizationTooltip": "当前的组织"
+  "currentOrganizationTooltip": "当前的组织",
+  "attendance": "考勤"
 }

@@ -17,18 +17,18 @@
   },
   "admin": {
     "title": "Ausencias y asistencia",
-    "subtitle": "Asistencia mensual para vales de comida, días de vacaciones anuales y solicitudes de ausencia.",
+    "subtitle": "Cupos anuales de vacaciones y solicitudes de ausencia.",
     "holidaysHint": "Los festivos oficiales se excluyen de los días laborables. Gestiónalos en",
     "holidaysLink": "la configuración del Centro de administración",
     "tabs": {
-      "summary": "Resumen mensual",
       "balances": "Días de vacaciones",
       "requests": "Solicitudes de ausencia"
-    }
+    },
+    "attendanceMoved": "El resumen mensual de asistencia ahora está en",
+    "attendanceLink": "Informes → Asistencia"
   },
   "summary": {
     "monthPicker": "Seleccionar mes",
-    "workDaysInMonth": "Días laborables oficiales este mes: {{count}}",
     "empty": "No se encontraron miembros del equipo.",
     "extraWorkedHint": "Registró trabajo en fin de semana o festivo. Puedes concederle días de vacaciones adicionales.",
     "footnote": "Días laborables oficiales = de lunes a viernes menos los festivos oficiales. Días trabajados = días laborables oficiales menos vacaciones y bajas aprobadas; también es el número de vales de comida.",
@@ -44,7 +44,9 @@
       "extra_worked_days": "Trabajado en días no laborables"
     },
     "exportPdf": "Descargar informe PDF",
-    "hoursHint": "Esperadas = días trabajados × horas diarias. Registradas = tiempo registrado en tareas."
+    "hoursHint": "Esperadas = días trabajados × horas diarias. Registradas = tiempo registrado en tareas.",
+    "refresh": "Actualizar",
+    "workDaysLabel": "Días laborables oficiales este mes"
   },
   "balances": {
     "yearPicker": "Seleccionar año",
@@ -146,5 +148,8 @@
     "deleteConfirm": "¿Eliminar esta ausencia? Los días volverán al cupo.",
     "editHint": "Solo cuentan los días laborables. Los cambios actualizan el cupo de inmediato.",
     "readOnlyHint": "Solo un administrador puede cambiar una ausencia registrada."
+  },
+  "reporting": {
+    "pageTitle": "Asistencia"
   }
 }

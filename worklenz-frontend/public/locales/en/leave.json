@@ -17,18 +17,18 @@
   },
   "admin": {
     "title": "Leave & attendance",
-    "subtitle": "Monthly attendance for meal vouchers, yearly leave allowances and leave requests.",
+    "subtitle": "Yearly leave allowances and leave requests.",
     "holidaysHint": "Official holidays are excluded from work days. Manage them in",
     "holidaysLink": "Admin Center settings",
     "tabs": {
-      "summary": "Monthly summary",
       "balances": "Leave allowances",
       "requests": "Leave requests"
-    }
+    },
+    "attendanceMoved": "The monthly attendance summary is now under",
+    "attendanceLink": "Reporting → Attendance"
   },
   "summary": {
     "monthPicker": "Select month",
-    "workDaysInMonth": "Official work days in this month: {{count}}",
     "empty": "No team members found.",
     "extraWorkedHint": "Checked in on a weekend or holiday. You can grant extra leave days for it.",
     "footnote": "Official work days = Monday to Friday minus official holidays. Worked days = official work days minus approved vacation and sick leave; this is also the meal voucher count.",
@@ -44,7 +44,9 @@
       "extra_worked_days": "Worked on non-work days"
     },
     "exportPdf": "Download PDF report",
-    "hoursHint": "Expected = worked days × daily hours. Logged = time logged on tasks."
+    "hoursHint": "Expected = worked days × daily hours. Logged = time logged on tasks.",
+    "refresh": "Refresh",
+    "workDaysLabel": "Official work days in this month"
   },
   "balances": {
     "yearPicker": "Select year",
@@ -146,5 +148,8 @@
     "deleteConfirm": "Delete this leave? The days are returned to the allowance.",
     "editHint": "Only work days are counted. Changes update the allowance immediately.",
     "readOnlyHint": "Recorded leave can only be changed by an admin."
+  },
+  "reporting": {
+    "pageTitle": "Attendance"
   }
 }

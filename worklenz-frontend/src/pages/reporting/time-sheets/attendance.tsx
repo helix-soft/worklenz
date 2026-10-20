@@ -1,24 +1,34 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import dayjs, { Dayjs } from 'dayjs';
 import { FilePdfOutlined } from '@ant-design/icons';
 import {
-  Alert,
   Avatar,
   Button,
+  Card,
   DatePicker,
   Flex,
+  ReloadOutlined,
+  Result,
   Table,
   TableProps,
   Tooltip,
   Typography,
 } from '@/shared/antd-imports';
+import CustomPageHeader from '@/components/reporting/common/CustomPageHeader';
+import { useDocumentTitle } from '@/hooks/useDoumentTItle';
 import { leaveApiService } from '@/api/leave/leave.api.service';
 import { IAttendanceMemberRow, IAttendanceReport } from '@/types/leave/leave.types';
 import logger from '@/utils/errorLogger';
 
-export const AttendanceSummaryTab = () => {
+/**
+ * Monthly attendance per member: worked days (= meal vouchers), expected / logged hours,
+ * office / remote / leave days, plus the Romanian PDF report for the accountant.
+ */
+const AttendanceReportPage: React.FC = () => {
   const { t } = useTranslation('leave');
+  useDocumentTitle(t('reporting.pageTitle', { defaultValue: 'Attendance' }));
+
   const [month, setMonth] = useState<Dayjs>(dayjs().startOf('month'));
   const [report, setReport] = useState<IAttendanceReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -141,10 +151,15 @@ export const AttendanceSummaryTab = () => {
     [t]
   );
 
+  const refreshLabel = t('summary.refresh', { defaultValue: 'Refresh' });
+
   return (
     <Flex vertical gap={16}>
-      <Flex justify="space-between" align="center" wrap="wrap" gap={12}>
-        <Flex align="center" gap={12} wrap="wrap">
+      <CustomPageHeader
+        title={t('reporting.pageTitle', { defaultValue: 'Attendance' })}
+        style={{ padding: 0 }}
+      >
+        <Flex wrap gap={8} align="center" style={{ maxWidth: '100%' }}>
           <DatePicker
             picker="month"
             allowClear={false}
@@ -152,49 +167,64 @@ export const AttendanceSummaryTab = () => {
             onChange={value => value && setMonth(value.startOf('month'))}
             aria-label={t('summary.monthPicker', { defaultValue: 'Select month' })}
           />
-          {report && (
-            <Typography.Text type="secondary">
-              {t('summary.workDaysInMonth', {
-                defaultValue: 'Official work days in this month: {{count}}',
-                count: report.work_days,
-              })}
-            </Typography.Text>
-          )}
+          <Tooltip title={refreshLabel}>
+            <Button
+              icon={<ReloadOutlined />}
+              aria-label={refreshLabel}
+              loading={isLoading}
+              onClick={fetchReport}
+            />
+          </Tooltip>
+          <Button
+            type="primary"
+            icon={<FilePdfOutlined />}
+            loading={isExporting}
+            disabled={!report?.members.length}
+            onClick={handleExport}
+          >
+            {t('summary.exportPdf', { defaultValue: 'Download PDF report' })}
+          </Button>
         </Flex>
-        <Button
-          type="primary"
-          icon={<FilePdfOutlined />}
-          loading={isExporting}
-          disabled={!report?.members.length}
-          onClick={handleExport}
-        >
-          {t('summary.exportPdf', { defaultValue: 'Download PDF report' })}
-        </Button>
-      </Flex>
+      </CustomPageHeader>
 
       {hasError ? (
-        <Alert
-          type="error"
-          showIcon
-          message={t('loadError', { defaultValue: 'Could not load data.' })}
-          action={
-            <Button size="small" onClick={fetchReport}>
+        <Result
+          status="error"
+          title={t('loadError', { defaultValue: 'Could not load data.' })}
+          extra={
+            <Button type="primary" onClick={fetchReport}>
               {t('retry', { defaultValue: 'Retry' })}
             </Button>
           }
         />
       ) : (
-        <Table<IAttendanceMemberRow>
-          rowKey="team_member_id"
-          size="middle"
-          loading={isLoading}
-          columns={columns}
-          dataSource={report?.members || []}
-          pagination={false}
-          scroll={{ x: 'max-content' }}
-          locale={{ emptyText: t('summary.empty', { defaultValue: 'No team members found.' }) }}
-        />
+        <Card
+          style={{ borderRadius: 8 }}
+          styles={{ body: { padding: 0 } }}
+          title={
+            <Flex align="baseline" gap={8}>
+              <Typography.Text type="secondary" style={{ fontWeight: 400 }}>
+                {t('summary.workDaysLabel', { defaultValue: 'Official work days in this month' })}:
+              </Typography.Text>
+              <Typography.Text strong style={{ fontSize: 20 }}>
+                {report?.work_days ?? '–'}
+              </Typography.Text>
+            </Flex>
+          }
+        >
+          <Table<IAttendanceMemberRow>
+            rowKey="team_member_id"
+            size="middle"
+            loading={isLoading}
+            columns={columns}
+            dataSource={report?.members || []}
+            pagination={false}
+            scroll={{ x: 'max-content' }}
+            locale={{ emptyText: t('summary.empty', { defaultValue: 'No team members found.' }) }}
+          />
+        </Card>
       )}
+
       <Typography.Text type="secondary" style={{ fontSize: 12 }}>
         {t('summary.footnote', {
           defaultValue:
@@ -205,6 +235,9 @@ export const AttendanceSummaryTab = () => {
   );
 };
 
+export default AttendanceReportPage;
+
+// Helpers
 /** 176 -> "176", 14.4500 -> "14.45" */
 const formatHours = (value: number) => String(Math.round(value * 100) / 100);
 

@@ -17,18 +17,18 @@
   },
   "admin": {
     "title": "休假与考勤",
-    "subtitle": "用于餐券的月度考勤、年度假期额度和休假申请。",
+    "subtitle": "年度假期额度和休假申请。",
     "holidaysHint": "法定节假日不计入工作日。请在以下位置管理：",
     "holidaysLink": "管理中心设置",
     "tabs": {
-      "summary": "月度汇总",
       "balances": "假期额度",
       "requests": "休假申请"
-    }
+    },
+    "attendanceMoved": "月度考勤汇总现位于",
+    "attendanceLink": "报表 → 考勤"
   },
   "summary": {
     "monthPicker": "选择月份",
-    "workDaysInMonth": "本月法定工作日：{{count}}",
     "empty": "未找到团队成员。",
     "extraWorkedHint": "在周末或节假日签到。您可以为此授予额外假期。",
     "footnote": "法定工作日 = 周一至周五减去法定节假日。出勤天数 = 法定工作日减去已批准的年假和病假；也即餐券数量。",
@@ -44,7 +44,9 @@
       "extra_worked_days": "非工作日出勤"
     },
     "exportPdf": "下载 PDF 报告",
-    "hoursHint": "应计 = 出勤天数 × 每日工时。已记录 = 在任务上记录的时间。"
+    "hoursHint": "应计 = 出勤天数 × 每日工时。已记录 = 在任务上记录的时间。",
+    "refresh": "刷新",
+    "workDaysLabel": "本月法定工作日"
   },
   "balances": {
     "yearPicker": "选择年份",
@@ -146,5 +148,8 @@
     "deleteConfirm": "删除此休假？天数将退回额度。",
     "editHint": "仅计算工作日。更改会立即更新额度。",
     "readOnlyHint": "已记录的休假只能由管理员修改。"
+  },
+  "reporting": {
+    "pageTitle": "考勤"
   }
 }
