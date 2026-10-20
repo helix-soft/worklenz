@@ -289,6 +289,8 @@
       "blockOverlap": "Überschneidet sich mit einem anderen Eintrag",
       "errorTitle": "Die Einträge dieser Woche konnten nicht geladen werden",
       "retry": "Erneut versuchen",
+      "resizeHint": "Ziehe die obere oder untere Kante, um die Zeit zu ändern",
+      "resizeFailed": "Der Zeiteintrag konnte nicht geändert werden",
       "empty": "Diese Woche wurde noch nichts erfasst. Nutzen Sie die Schnellerfassung."
     },
     "rangeDuration": "Dauer: {{duration}}",

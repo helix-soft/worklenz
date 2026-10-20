@@ -289,6 +289,8 @@
       "blockOverlap": "与另一条记录重叠",
       "errorTitle": "无法加载本周的工时记录",
       "retry": "重试",
+      "resizeHint": "拖动上边缘或下边缘即可更改时间",
+      "resizeFailed": "无法更改时间记录",
       "empty": "本周尚未记录工时。使用快速记录添加时间。"
     },
     "rangeDuration": "时长：{{duration}}",

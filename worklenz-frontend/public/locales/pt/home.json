@@ -289,6 +289,8 @@
       "blockOverlap": "Sobrepõe-se a outro registro",
       "errorTitle": "Não foi possível carregar os registros desta semana",
       "retry": "Tentar novamente",
+      "resizeHint": "Arraste a borda superior ou inferior para alterar o horário",
+      "resizeFailed": "Não foi possível alterar o registro de tempo",
       "empty": "Nada registrado nesta semana ainda. Use o registro rápido para adicionar tempo."
     },
     "rangeDuration": "Duração: {{duration}}",

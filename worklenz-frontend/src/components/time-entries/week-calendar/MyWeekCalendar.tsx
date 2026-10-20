@@ -40,6 +40,8 @@ interface MyWeekCalendarProps {
   ghostEvents?: IWeekGhostEvent[];
   selectedGhostId?: string | null;
   onSelectGhost?: (ghost: IWeekGhostEvent) => void;
+  /** When set, logs can be resized by dragging their top/bottom edge. */
+  onResizeEntry?: ResizeEntryHandler;
 }
 
 /** A calendar event shown as a faded placeholder on the hour grid. */
@@ -68,6 +70,7 @@ export const MyWeekCalendar: React.FC<MyWeekCalendarProps> = memo(
     ghostEvents = NO_GHOSTS,
     selectedGhostId = null,
     onSelectGhost,
+    onResizeEntry,
   }) => {
     const { t } = useTranslation('home');
     const { token } = theme.useToken();
@@ -213,6 +216,7 @@ export const MyWeekCalendar: React.FC<MyWeekCalendarProps> = memo(
                       ghostEvents={ghostEvents}
                       selectedGhostId={selectedGhostId}
                       onSelectGhost={onSelectGhost}
+                      onResizeEntry={onResizeEntry}
                     />
                   ))}
                 </div>
@@ -355,7 +359,17 @@ const DayColumn: React.FC<{
   ghostEvents: IWeekGhostEvent[];
   selectedGhostId: string | null;
   onSelectGhost?: (ghost: IWeekGhostEvent) => void;
-}> = ({ day, now, holidayName, onOpenEntry, ghostEvents, selectedGhostId, onSelectGhost }) => {
+  onResizeEntry?: ResizeEntryHandler;
+}> = ({
+  day,
+  now,
+  holidayName,
+  onOpenEntry,
+  ghostEvents,
+  selectedGhostId,
+  onSelectGhost,
+  onResizeEntry,
+}) => {
   const { token } = theme.useToken();
   const isToday = day.date.isSame(now, 'day');
   const nowMinute = now.diff(day.date, 'minute');
@@ -409,6 +423,8 @@ const DayColumn: React.FC<{
             key={item.key}
             segment={{ ...item.segment, lane: item.lane, laneCount: item.laneCount }}
             onOpenEntry={onOpenEntry}
+            onResizeEntry={onResizeEntry}
+            dayStart={day.date}
           />
         ) : (
           <GhostBlock
@@ -440,104 +456,238 @@ const DayColumn: React.FC<{
 const EntryBlock: React.FC<{
   segment: IWeekCalendarSegment;
   onOpenEntry: (entry: IWeekCalendarEntry) => void;
-}> = ({ segment, onOpenEntry }) => {
+  onResizeEntry?: ResizeEntryHandler;
+  dayStart: Dayjs;
+}> = ({ segment, onOpenEntry, onResizeEntry, dayStart }) => {
   const { t } = useTranslation('home');
   const { token } = theme.useToken();
   const { entry } = segment;
   const color = entry.projectColor || token.colorPrimary;
-  const top = (segment.startMinute / 60) * HOUR_HEIGHT;
-  const height = Math.max(
-    MIN_BLOCK_HEIGHT,
-    ((segment.endMinute - segment.startMinute) / 60) * HOUR_HEIGHT - 2
-  );
+
+  // Drag-to-resize (Clockify style): the top handle moves the start, the bottom one the end,
+  // snapped to SNAP_MINUTES. The preview stays until the saved log comes back (or on error).
+  const [preview, setPreview] = useState<{ startMinute: number; endMinute: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef<{ edge: 'start' | 'end'; pointerY: number } | null>(null);
+  useEffect(() => setPreview(null), [entry.start.valueOf(), entry.seconds]);
+
+  const entryEnd = entry.start.add(entry.seconds, 'second');
+  // Only edges that fall on this day can be dragged (a log crossing midnight is split in two).
+  const canResizeStart = Boolean(onResizeEntry) && entry.start.isSame(dayStart, 'day');
+  const canResizeEnd = Boolean(onResizeEntry) && entryEnd.subtract(1, 'second').isSame(dayStart, 'day');
+
+  const startMinute = preview?.startMinute ?? segment.startMinute;
+  const endMinute = preview?.endMinute ?? segment.endMinute;
+  const top = (startMinute / 60) * HOUR_HEIGHT;
+  const height = Math.max(MIN_BLOCK_HEIGHT, ((endMinute - startMinute) / 60) * HOUR_HEIGHT - 2);
   const widthPercent = 100 / segment.laneCount;
-  const end = entry.start.add(entry.seconds, 'second');
-  const timeRange = `${entry.start.format('HH:mm')} – ${end.format('HH:mm')}`;
-  const duration = formatDurationClock(entry.seconds);
+
+  const shownStart = preview ? dayStart.add(preview.startMinute, 'minute') : entry.start;
+  const shownSeconds = preview ? (preview.endMinute - preview.startMinute) * 60 : entry.seconds;
+  const shownEnd = shownStart.add(shownSeconds, 'second');
+  const timeRange = `${shownStart.format('HH:mm')} – ${shownEnd.format('HH:mm')}`;
+  const duration = formatDurationClock(shownSeconds);
   const title = entry.title || entry.taskName;
   const label = `${title}, ${entry.projectName}, ${timeRange} (${duration})`;
+  const resizeHint = t('logTime.week.resizeHint', {
+    defaultValue: 'Drag the top or bottom edge to change the time',
+  });
+
+  const handlePointerDown = (edge: 'start' | 'end') => (event: React.PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = { edge, pointerY: event.clientY };
+    setIsDragging(true);
+    setPreview({ startMinute: segment.startMinute, endMinute: segment.endMinute });
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    const deltaMinutes = ((event.clientY - drag.pointerY) / HOUR_HEIGHT) * 60;
+    const snap = (minute: number) => Math.round(minute / SNAP_MINUTES) * SNAP_MINUTES;
+    if (drag.edge === 'start') {
+      const next = Math.min(
+        Math.max(0, snap(segment.startMinute + deltaMinutes)),
+        segment.endMinute - SNAP_MINUTES
+      );
+      setPreview({ startMinute: next, endMinute: segment.endMinute });
+    } else {
+      const next = Math.max(
+        Math.min(MINUTES_IN_DAY, snap(segment.endMinute + deltaMinutes)),
+        segment.startMinute + SNAP_MINUTES
+      );
+      setPreview({ startMinute: segment.startMinute, endMinute: next });
+    }
+  };
+
+  const handlePointerUp = async (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    event.stopPropagation();
+    dragRef.current = null;
+    setIsDragging(false);
+    const result = preview;
+    if (
+      !result ||
+      !onResizeEntry ||
+      (result.startMinute === segment.startMinute && result.endMinute === segment.endMinute)
+    ) {
+      setPreview(null);
+      return;
+    }
+    // The start only moves with the top edge; the duration covers the whole log.
+    const newStart = result.startMinute !== segment.startMinute ? dayStart.add(result.startMinute, 'minute') : entry.start;
+    const newEnd =
+      result.endMinute !== segment.endMinute ? dayStart.add(result.endMinute, 'minute') : entryEnd;
+    const isSaved = await onResizeEntry(entry, newStart, newEnd.diff(newStart, 'second'));
+    if (!isSaved) setPreview(null);
+  };
+
+  const renderHandle = (edge: 'start' | 'end') => (
+    <div
+      aria-hidden
+      onPointerDown={handlePointerDown(edge)}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => {
+        dragRef.current = null;
+        setIsDragging(false);
+        setPreview(null);
+      }}
+      onClick={event => event.stopPropagation()}
+      className="week-log-resize-handle"
+      style={{
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        [edge === 'start' ? 'top' : 'bottom']: 0,
+        height: RESIZE_HANDLE_HEIGHT,
+        cursor: 'ns-resize',
+        zIndex: 2,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: edge === 'start' ? 'flex-start' : 'flex-end',
+        touchAction: 'none',
+      }}
+    >
+      <span
+        style={{
+          width: 14,
+          margin: '2px 0',
+          borderTop: `1px solid ${token.colorTextTertiary}`,
+          borderBottom: `1px solid ${token.colorTextTertiary}`,
+          height: 3,
+          opacity: isDragging ? 1 : undefined,
+        }}
+      />
+    </div>
+  );
 
   return (
-    <Tooltip
-      title={
-        <div>
-          {/* Same layout for every log: task, project, time, activity, then the description */}
-          <div style={{ fontWeight: 600 }}>{entry.taskName}</div>
-          <div style={{ opacity: 0.8 }}>{entry.projectName}</div>
-          <div>
-            {timeRange} ({duration})
-          </div>
-          {entry.activity && (
-            <div>
-              {t(getTimeLogActivityKey(entry.activity), {
-                defaultValue: getTimeLogActivityDefaultLabel(entry.activity),
-              })}
-            </div>
-          )}
-          {entry.description && (
-            <div style={{ marginTop: 6, fontSize: 12, opacity: 0.85 }}>{entry.description}</div>
-          )}
-          {segment.isOverlapping && (
-            <div style={{ marginTop: 4 }}>
-              <WarningOutlined />{' '}
-              {t('logTime.week.blockOverlap', { defaultValue: 'Overlaps another log' })}
-            </div>
-          )}
-        </div>
-      }
+    <div
+      className="week-log-block"
+      style={{
+        position: 'absolute',
+        top: top + 1,
+        height,
+        left: `calc(${segment.lane * widthPercent}% + 2px)`,
+        width: `calc(${widthPercent}% - 4px)`,
+        zIndex: isDragging ? 3 : 1,
+      }}
     >
-      <button
-        type="button"
-        aria-label={label}
-        onClick={() => onOpenEntry(entry)}
-        style={{
-          position: 'absolute',
-          top: top + 1,
-          height,
-          left: `calc(${segment.lane * widthPercent}% + 2px)`,
-          width: `calc(${widthPercent}% - 4px)`,
-          padding: '2px 4px 2px 6px',
-          border: segment.isOverlapping
-            ? `1px dashed ${token.colorWarning}`
-            : `1px solid ${token.colorBorderSecondary}`,
-          borderLeft: `3px solid ${color}`,
-          borderRadius: 4,
-          background: `color-mix(in srgb, ${color} 18%, ${token.colorBgContainer})`,
-          color: token.colorText,
-          textAlign: 'left',
-          overflow: 'hidden',
-          cursor: 'pointer',
-          zIndex: 1,
-          fontSize: 11,
-          lineHeight: 1.3,
-        }}
+      <Tooltip
+        open={isDragging ? false : undefined}
+        title={
+          <div>
+            {/* Same layout for every log: task, project, time, activity, then the description */}
+            <div style={{ fontWeight: 600 }}>{entry.taskName}</div>
+            <div style={{ opacity: 0.8 }}>{entry.projectName}</div>
+            <div>
+              {timeRange} ({duration})
+            </div>
+            {entry.activity && (
+              <div>
+                {t(getTimeLogActivityKey(entry.activity), {
+                  defaultValue: getTimeLogActivityDefaultLabel(entry.activity),
+                })}
+              </div>
+            )}
+            {entry.description && (
+              <div style={{ marginTop: 6, fontSize: 12, opacity: 0.85 }}>{entry.description}</div>
+            )}
+            {segment.isOverlapping && (
+              <div style={{ marginTop: 4 }}>
+                <WarningOutlined />{' '}
+                {t('logTime.week.blockOverlap', { defaultValue: 'Overlaps another log' })}
+              </div>
+            )}
+            {onResizeEntry && <div style={{ marginTop: 4, opacity: 0.7, fontSize: 12 }}>{resizeHint}</div>}
+          </div>
+        }
       >
-        <div
+        <button
+          type="button"
+          aria-label={label}
+          onClick={() => onOpenEntry(entry)}
           style={{
-            fontWeight: 600,
-            whiteSpace: 'nowrap',
+            width: '100%',
+            height: '100%',
+            padding: '2px 4px 2px 6px',
+            border: isDragging
+              ? `1px solid ${token.colorPrimary}`
+              : segment.isOverlapping
+                ? `1px dashed ${token.colorWarning}`
+                : `1px solid ${token.colorBorderSecondary}`,
+            borderLeft: `3px solid ${color}`,
+            borderRadius: 4,
+            background: `color-mix(in srgb, ${color} 18%, ${token.colorBgContainer})`,
+            color: token.colorText,
+            textAlign: 'left',
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
+            cursor: 'pointer',
+            fontSize: 11,
+            lineHeight: 1.3,
+            boxShadow: isDragging ? token.boxShadowSecondary : undefined,
           }}
         >
-          {title}
-        </div>
-        {height >= 34 && (
           <div
             style={{
-              color: token.colorTextSecondary,
+              fontWeight: 600,
               whiteSpace: 'nowrap',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
             }}
           >
-            {timeRange}
+            {title}
           </div>
-        )}
-      </button>
-    </Tooltip>
+          {(height >= 34 || isDragging) && (
+            <div
+              style={{
+                color: isDragging ? token.colorPrimary : token.colorTextSecondary,
+                fontWeight: isDragging ? 600 : undefined,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {isDragging ? `${timeRange} (${duration})` : timeRange}
+            </div>
+          )}
+        </button>
+      </Tooltip>
+      {canResizeStart && renderHandle('start')}
+      {canResizeEnd && renderHandle('end')}
+    </div>
   );
 };
+
+/** Saves a resized log; resolves true when saved (the preview then waits for the reload). */
+export type ResizeEntryHandler = (
+  entry: IWeekCalendarEntry,
+  start: Dayjs,
+  seconds: number
+) => Promise<boolean>;
 
 const GhostBlock: React.FC<{
   item: Extract<LayoutItem, { kind: 'ghost' }>;
@@ -620,6 +770,8 @@ interface LaneFields {
 const HOUR_HEIGHT = 44;
 const MINUTES_IN_DAY = 24 * 60;
 const NO_GHOSTS: IWeekGhostEvent[] = [];
+const SNAP_MINUTES = 5;
+const RESIZE_HANDLE_HEIGHT = 7;
 const GUTTER_WIDTH = 48;
 const MIN_BLOCK_HEIGHT = 16;
 const MIN_BODY_HEIGHT = 360;

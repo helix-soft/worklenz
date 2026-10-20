@@ -289,6 +289,8 @@
       "blockOverlap": "Mbivendoset me një regjistrim tjetër",
       "errorTitle": "Regjistrimet e kësaj jave nuk u ngarkuan",
       "retry": "Provo përsëri",
+      "resizeHint": "Tërhiq skajin e sipërm ose të poshtëm për të ndryshuar kohën",
+      "resizeFailed": "Regjistrimi i kohës nuk u ndryshua dot",
       "empty": "Ende asgjë e regjistruar këtë javë. Përdorni regjistrimin e shpejtë për të shtuar kohë."
     },
     "rangeDuration": "Kohëzgjatja: {{duration}}",

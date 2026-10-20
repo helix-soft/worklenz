@@ -198,7 +198,7 @@ export const WeekTimeGrid = ({
                 }}
               >
                 {segmentsByDay[dayIndex].map(segment => (
-                  <EventBlock key={segment.event.id} segment={segment} onOpenEvent={onOpenEvent} />
+                  <EventBlock key={segment.event.id} segment={segment} now={now} onOpenEvent={onOpenEvent} />
                 ))}
                 {isToday && (
                   <div
@@ -353,14 +353,18 @@ const Chip = ({
 
 const EventBlock = ({
   segment,
+  now,
   onOpenEvent,
 }: {
   segment: IEventSegment;
+  now: Dayjs;
   onOpenEvent: (event: IGoogleCalendarEvent) => void;
 }) => {
   const { t } = useTranslation('home');
   const { token } = theme.useToken();
   const { event, startMinute, endMinute, lane, laneCount } = segment;
+  // Events that have already ended are greyed out so what's still ahead stands out.
+  const isPast = !dayjs(event.end_at || event.start_at).isAfter(now);
   const color = getCalendarColor(event);
   const height = ((endMinute - startMinute) / 60) * HOUR_HEIGHT;
   const title = event.title || t('homeCalendar.google.untitled', { defaultValue: '(No title)' });
@@ -377,12 +381,19 @@ const EventBlock = ({
           height: Math.max(height - 2, 18),
           left: `calc(${(lane / laneCount) * 100}% + 2px)`,
           width: `calc(${100 / laneCount}% - 4px)`,
-          background: `color-mix(in srgb, ${color} 22%, ${token.colorBgContainer})`,
-          border: `1px solid color-mix(in srgb, ${color} 55%, ${token.colorBgContainer})`,
-          color: token.colorText,
+          background: isPast
+            ? token.colorFillSecondary
+            : `color-mix(in srgb, ${color} 22%, ${token.colorBgContainer})`,
+          border: isPast
+            ? `1px solid ${token.colorBorder}`
+            : `1px solid color-mix(in srgb, ${color} 55%, ${token.colorBgContainer})`,
+          color: isPast ? token.colorTextTertiary : token.colorText,
         }}
       >
-        <span className="home-calendar-time-grid-event-time" style={{ color }}>
+        <span
+          className="home-calendar-time-grid-event-time"
+          style={{ color: isPast ? token.colorTextTertiary : color }}
+        >
           {time}
         </span>
         <span className="home-calendar-time-grid-event-title">{title}</span>

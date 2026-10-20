@@ -60,6 +60,7 @@ import { TimeRangeDurationHint } from '@/components/time-entries/TimeRangeDurati
 import {
   IWeekGhostEvent,
   MyWeekCalendar,
+  ResizeEntryHandler,
 } from '@/components/time-entries/week-calendar/MyWeekCalendar';
 import {
   getCalendarColor,
@@ -667,6 +668,37 @@ const HomeLogTime: React.FC = () => {
     [weekLogs.logs, handleOpenTask]
   );
 
+  // Drag-resize on the week calendar: keeps the log's task, description and activity.
+  const handleResizeEntry = useCallback<ResizeEntryHandler>(
+    async (entry, start, seconds) => {
+      const log = weekLogs.logs.find(l => l.id === entry.id);
+      if (!log || seconds <= 0) return false;
+      try {
+        const res = await taskTimeLogsApiService.update(log.id, {
+          id: log.task_id,
+          seconds_spent: seconds,
+          formatted_start: start.toISOString(),
+          description: log.description || undefined,
+          activity: log.activity || undefined,
+        });
+        if (!res.done) throw new Error(res.message || 'Failed to update the time log');
+        setWeekRefreshKey(key => key + 1);
+        refreshData();
+        return true;
+      } catch (error) {
+        const message =
+          (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          (error as Error)?.message;
+        notification.error({
+          message: t('logTime.week.resizeFailed', { defaultValue: 'Could not change the time log' }),
+          description: message,
+        });
+        return false;
+      }
+    },
+    [weekLogs.logs, refreshData, t]
+  );
+
   const handleLogViewChange = (view: LogView) => {
     setLogView(view);
     storeLogView(view);
@@ -1022,6 +1054,7 @@ const HomeLogTime: React.FC = () => {
                   ghostEvents={ghostEvents}
                   selectedGhostId={selectedGhost?.id ?? null}
                   onSelectGhost={handleSelectGhost}
+                  onResizeEntry={handleResizeEntry}
                 />
               </>
             ) : (

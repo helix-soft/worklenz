@@ -289,6 +289,8 @@
       "blockOverlap": "Overlaps another log",
       "errorTitle": "Couldn't load this week's logs",
       "retry": "Try again",
+      "resizeHint": "Drag the top or bottom edge to change the time",
+      "resizeFailed": "Could not change the time log",
       "empty": "Nothing logged this week yet. Use Quick Time Entry to add time."
     },
     "rangeDuration": "Duration: {{duration}}",
