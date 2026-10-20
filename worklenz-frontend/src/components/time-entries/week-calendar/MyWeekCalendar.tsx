@@ -25,6 +25,7 @@ import {
   getTimeLogActivityDefaultLabel,
   getTimeLogActivityKey,
 } from '@/shared/time-log-activities';
+import { useHolidayNames } from '@/hooks/useHolidayNames';
 
 interface MyWeekCalendarProps {
   weekStart: Dayjs;
@@ -49,6 +50,8 @@ export const MyWeekCalendar: React.FC<MyWeekCalendarProps> = memo(
     const [now, setNow] = useState(() => dayjs());
 
     const days = useMemo(() => buildWeekCalendar(entries, weekStart), [entries, weekStart]);
+    // Official and company holidays of the week; their columns are tinted like in the Planner.
+    const holidayNames = useHolidayNames(weekStart, weekStart.add(6, 'day'));
     const weekTotal = days.reduce((sum, day) => sum + day.totalSeconds, 0);
     const weekOverlap = days.reduce((sum, day) => sum + day.overlapSeconds, 0);
     const isCurrentWeek = getWeekStart(now).isSame(weekStart, 'day');
@@ -172,7 +175,7 @@ export const MyWeekCalendar: React.FC<MyWeekCalendarProps> = memo(
                 ref={scrollRef}
                 style={{ flex: 1, minHeight: 0, overflowY: 'auto', position: 'relative' }}
               >
-                <DayHeaderRow days={days} now={now} />
+                <DayHeaderRow days={days} now={now} holidayNames={holidayNames} />
                 <div style={{ display: 'flex', height: HOUR_HEIGHT * 24, position: 'relative' }}>
                   <HourGutter />
                   {days.map(day => (
@@ -180,6 +183,7 @@ export const MyWeekCalendar: React.FC<MyWeekCalendarProps> = memo(
                       key={day.date.valueOf()}
                       day={day}
                       now={now}
+                      holidayName={holidayNames.get(day.date.format('YYYY-MM-DD'))}
                       onOpenEntry={onOpenEntry}
                     />
                   ))}
@@ -205,7 +209,11 @@ export const MyWeekCalendar: React.FC<MyWeekCalendarProps> = memo(
 
 MyWeekCalendar.displayName = 'MyWeekCalendar';
 
-const DayHeaderRow: React.FC<{ days: IWeekCalendarDay[]; now: Dayjs }> = ({ days, now }) => {
+const DayHeaderRow: React.FC<{
+  days: IWeekCalendarDay[];
+  now: Dayjs;
+  holidayNames: Map<string, string>;
+}> = ({ days, now, holidayNames }) => {
   const { t } = useTranslation('home');
   const { token } = theme.useToken();
 
@@ -223,6 +231,7 @@ const DayHeaderRow: React.FC<{ days: IWeekCalendarDay[]; now: Dayjs }> = ({ days
       <div style={{ width: GUTTER_WIDTH, flexShrink: 0 }} />
       {days.map(day => {
         const isToday = day.date.isSame(now, 'day');
+        const holidayName = holidayNames.get(day.date.format('YYYY-MM-DD'));
         return (
           <div
             key={day.date.valueOf()}
@@ -231,7 +240,7 @@ const DayHeaderRow: React.FC<{ days: IWeekCalendarDay[]; now: Dayjs }> = ({ days
               minWidth: 0,
               padding: '6px 8px',
               borderLeft: `1px solid ${token.colorBorderSecondary}`,
-              background: isToday ? token.colorPrimaryBg : undefined,
+              background: isToday ? token.colorPrimaryBg : dayColumnBg(day.date, holidayName, token),
             }}
           >
             <Typography.Text
@@ -244,6 +253,16 @@ const DayHeaderRow: React.FC<{ days: IWeekCalendarDay[]; now: Dayjs }> = ({ days
             >
               {day.date.format('ddd, MMM D')}
             </Typography.Text>
+            {holidayName && (
+              <Tooltip title={holidayName}>
+                <Typography.Text
+                  ellipsis
+                  style={{ fontSize: 11, display: 'block', color: token.colorError, fontWeight: 600 }}
+                >
+                  {holidayName}
+                </Typography.Text>
+              </Tooltip>
+            )}
             <Flex align="center" gap={6}>
               <Typography.Text
                 strong
@@ -303,8 +322,9 @@ const HourGutter: React.FC = () => {
 const DayColumn: React.FC<{
   day: IWeekCalendarDay;
   now: Dayjs;
+  holidayName?: string;
   onOpenEntry: (entry: IWeekCalendarEntry) => void;
-}> = ({ day, now, onOpenEntry }) => {
+}> = ({ day, now, holidayName, onOpenEntry }) => {
   const { token } = theme.useToken();
   const isToday = day.date.isSame(now, 'day');
   const nowMinute = now.diff(day.date, 'minute');
@@ -316,6 +336,7 @@ const DayColumn: React.FC<{
         minWidth: 0,
         position: 'relative',
         borderLeft: `1px solid ${token.colorBorderSecondary}`,
+        backgroundColor: dayColumnBg(day.date, holidayName, token),
         backgroundImage: `repeating-linear-gradient(to bottom, ${token.colorBorderSecondary} 0, ${token.colorBorderSecondary} 1px, transparent 1px, transparent ${HOUR_HEIGHT}px)`,
       }}
     >
@@ -445,3 +466,14 @@ const MIN_BLOCK_HEIGHT = 16;
 const MIN_BODY_HEIGHT = 360;
 const MIN_GRID_WIDTH = 640;
 const DEFAULT_SCROLL_HOUR = 8;
+
+/** Same tints as the Planner: holidays red, weekends grey. */
+const dayColumnBg = (
+  date: Dayjs,
+  holidayName: string | undefined,
+  token: ReturnType<typeof theme.useToken>['token']
+) => {
+  if (holidayName) return token.colorErrorBg;
+  if (date.day() === 0 || date.day() === 6) return token.colorFillQuaternary;
+  return undefined;
+};
