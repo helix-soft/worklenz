@@ -130,7 +130,31 @@
     "weekdayMiniSat": "S",
     "weekdayMiniSun": "S",
     "officialHoliday": "Official holiday",
-    "companyHoliday": "Company holiday"
+    "companyHoliday": "Company holiday",
+    "agendaView": "Agenda",
+    "agenda": {
+      "holiday": "Holiday",
+      "due": "Due",
+      "empty": "Nothing scheduled this week."
+    },
+    "google": {
+      "allDay": "All day",
+      "untitled": "(No title)",
+      "openInGoogle": "Open in Google Calendar",
+      "close": "Close",
+      "calendar": "Calendar",
+      "location": "Location",
+      "meeting": "Video call",
+      "organizer": "Organizer",
+      "attendees": "Guests ({{count}})",
+      "description": "Description",
+      "readOnlyHint": "Synced from Google Calendar. Edit it in Google Calendar.",
+      "more": "+{{count}} more",
+      "needsReconnect": "Google Calendar needs to be reconnected in Settings → Integrations",
+      "lastSynced": "Last synced {{date}}",
+      "sync": "Sync calendar",
+      "connect": "Connect Google Calendar"
+    }
   },
   "activityLogs": {
     "title": "Recent Activity",

@@ -33,11 +33,20 @@ import { IHomeCalendarTask } from '@/types/home/home-page.types';
 import HomeAddTaskModal from '@/pages/home/task-list/HomeAddTaskModal';
 import PillToggle from '@/pages/home/PillToggle';
 import MultiSelectFilterDropdown from './MultiSelectFilterDropdown';
+import { useNavigate } from 'react-router-dom';
+import { SyncOutlined } from '@ant-design/icons';
+import { IGoogleCalendarEvent } from '@/types/google-calendar.types';
+import { useGoogleCalendarEvents } from './useGoogleCalendarEvents';
+import { AgendaView } from './AgendaView';
+import { GoogleEventDetailsModal } from './GoogleEventDetailsModal';
 import './homeCalendar.css';
 
 dayjs.extend(isoWeek);
 
-type CalendarViewType = 'month' | 'week' | 'year';
+type CalendarViewType = 'month' | 'week' | 'year' | 'agenda';
+
+/** Google events shown per day cell in Week/Month before collapsing into "+N". */
+const MAX_EVENT_PILLS = 2;
 
 // Matches the status-category colors used by HomeProgressDonut so the calendar's
 // todo/doing/done counts read consistently with the rest of the Home page.
@@ -91,13 +100,13 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
 
   const rangeStart = useMemo(() => {
     if (calView === 'year') return cursor.startOf('year');
-    if (calView === 'week') return cursor.startOf('isoWeek');
+    if (calView === 'week' || calView === 'agenda') return cursor.startOf('isoWeek');
     return cursor.startOf('month').startOf('isoWeek');
   }, [calView, cursor]);
 
   const rangeEnd = useMemo(() => {
     if (calView === 'year') return cursor.endOf('year');
-    if (calView === 'week') return cursor.endOf('isoWeek');
+    if (calView === 'week' || calView === 'agenda') return cursor.endOf('isoWeek');
     return cursor.endOf('month').endOf('isoWeek');
   }, [calView, cursor]);
 
@@ -184,6 +193,58 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
     [holidaysByDate, t]
   );
 
+  // Read-only Google Calendar events of the current user (Settings → Integrations).
+  const navigate = useNavigate();
+  const {
+    status: googleStatus,
+    eventsByDate: googleEventsByDate,
+    isSyncing: isGoogleSyncing,
+    sync: syncGoogleCalendar,
+  } = useGoogleCalendarEvents(rangeStart, rangeEnd);
+  const [selectedGoogleEvent, setSelectedGoogleEvent] = useState<IGoogleCalendarEvent | null>(null);
+
+  const renderGoogleEventPills = useCallback(
+    (date: Dayjs) => {
+      const events = googleEventsByDate.get(date.format('YYYY-MM-DD'));
+      if (!events?.length) return null;
+      const visible = events.slice(0, MAX_EVENT_PILLS);
+      const hidden = events.length - visible.length;
+      return (
+        <div className="home-calendar__gcal-list" onClick={e => e.stopPropagation()}>
+          {visible.map(event => {
+            const time = event.is_all_day ? '' : `${dayjs(event.start_at).format('HH:mm')} `;
+            const title = event.title || t('homeCalendar.google.untitled', { defaultValue: '(No title)' });
+            return (
+              <Tooltip key={event.id} title={`${time}${title}`}>
+                <button
+                  type="button"
+                  className="home-calendar__gcal-pill"
+                  onClick={() => setSelectedGoogleEvent(event)}
+                >
+                  {time}
+                  {title}
+                </button>
+              </Tooltip>
+            );
+          })}
+          {hidden > 0 && (
+            <button
+              type="button"
+              className="home-calendar__gcal-more"
+              onClick={() => {
+                setCursor(date);
+                setCalView('agenda');
+              }}
+            >
+              {t('homeCalendar.google.more', { defaultValue: '+{{count}} more', count: hidden })}
+            </button>
+          )}
+        </div>
+      );
+    },
+    [googleEventsByDate, t]
+  );
+
   // Team-scoped project list — independent of which tasks are currently
   // loaded, so projects with no due tasks in the visible range still show up.
   const { data: teamProjectsData, isFetching: projectsLoading } = useGetProjectsByTeamQuery();
@@ -253,8 +314,9 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
   };
 
   const goToday = () => setCursor(dayjs());
-  const goPrev = () => setCursor(c => c.subtract(1, calView));
-  const goNext = () => setCursor(c => c.add(1, calView));
+  const stepUnit = calView === 'agenda' ? 'week' : calView;
+  const goPrev = () => setCursor(c => c.subtract(1, stepUnit));
+  const goNext = () => setCursor(c => c.add(1, stepUnit));
 
   const openAddModal = useCallback((date: Dayjs) => {
     setModalDate(date);
@@ -439,7 +501,7 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
   const navTitle =
     calView === 'year'
       ? cursor.format('YYYY')
-      : calView === 'week'
+      : calView === 'week' || calView === 'agenda'
         ? `${rangeStart.format('MMM D')} – ${rangeEnd.format('MMM D, YYYY')}`
         : cursor.format('MMMM YYYY');
 
@@ -495,6 +557,7 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
                     </div>
                     {renderHolidayPills(date)}
                     {renderTimeOffPill(date)}
+                    {renderGoogleEventPills(date)}
                     <div className="home-calendar-day-tasks">
                       {renderDaySummary(dayTasks, date)}
                     </div>
@@ -533,6 +596,7 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
                 </span>
                 {renderHolidayPills(date)}
                 {renderTimeOffPill(date)}
+                {renderGoogleEventPills(date)}
               </div>
               <div
                 className="home-calendar-week-col-body"
@@ -613,7 +677,7 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
     <div className={`home-calendar-root ${isDarkMode ? 'home-calendar-dark' : ''}`}>
       <div className="home-calendar-toolbar">
         <div className="home-calendar-view-toggle">
-          {(['week', 'month', 'year'] as CalendarViewType[]).map(view => (
+          {(['week', 'month', 'year', 'agenda'] as CalendarViewType[]).map(view => (
             <button
               key={view}
               type="button"
@@ -624,7 +688,9 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
                 ? t('homeCalendar.weekView', { defaultValue: 'Week' })
                 : view === 'month'
                   ? t('homeCalendar.monthView', { defaultValue: 'Month' })
-                  : t('homeCalendar.yearView', { defaultValue: 'Year' })}
+                  : view === 'year'
+                    ? t('homeCalendar.yearView', { defaultValue: 'Year' })
+                    : t('homeCalendar.agendaView', { defaultValue: 'Agenda' })}
             </button>
           ))}
         </div>
@@ -636,6 +702,39 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
           {navTitle}
         </Typography.Text>
         <Button size="small" icon={<RightOutlined />} onClick={goNext} />
+
+        {googleStatus?.connected ? (
+          <Tooltip
+            title={
+              googleStatus.status === 'needs_reauth'
+                ? t('homeCalendar.google.needsReconnect', {
+                    defaultValue: 'Google Calendar needs to be reconnected in Settings → Integrations',
+                  })
+                : googleStatus.last_synced_at
+                  ? t('homeCalendar.google.lastSynced', {
+                      defaultValue: 'Last synced {{date}}',
+                      date: dayjs(googleStatus.last_synced_at).format('YYYY-MM-DD HH:mm'),
+                    })
+                  : undefined
+            }
+          >
+            <Button
+              size="small"
+              icon={<SyncOutlined />}
+              loading={isGoogleSyncing}
+              disabled={googleStatus.status === 'needs_reauth'}
+              onClick={() => void syncGoogleCalendar()}
+            >
+              {t('homeCalendar.google.sync', { defaultValue: 'Sync calendar' })}
+            </Button>
+          </Tooltip>
+        ) : (
+          googleStatus?.configured && (
+            <Button type="link" size="small" onClick={() => navigate('/worklenz/settings/integrations')}>
+              {t('homeCalendar.google.connect', { defaultValue: 'Connect Google Calendar' })}
+            </Button>
+          )
+        )}
 
         <div className="home-calendar-toolbar-spacer" />
 
@@ -684,6 +783,20 @@ const HomeCalendar: React.FC<HomeCalendarProps> = ({ onTimeOffClick }) => {
       {calView === 'month' && renderMonth()}
       {calView === 'week' && renderWeek()}
       {calView === 'year' && renderYear()}
+      {calView === 'agenda' && (
+        <AgendaView
+          days={Array.from({ length: 7 }, (_, i) => rangeStart.add(i, 'day'))}
+          eventsByDate={googleEventsByDate}
+          tasksByDate={tasksByDate}
+          timeOffByDate={timeOffByDate}
+          holidaysByDate={holidaysByDate}
+          onOpenEvent={setSelectedGoogleEvent}
+          onOpenTask={openTaskDrawer}
+          onOpenTimeOff={onTimeOffClick}
+        />
+      )}
+
+      <GoogleEventDetailsModal event={selectedGoogleEvent} onClose={() => setSelectedGoogleEvent(null)} />
 
       <HomeAddTaskModal
         open={modalOpen}

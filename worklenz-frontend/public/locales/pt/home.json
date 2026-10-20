@@ -130,7 +130,31 @@
     "weekdayMiniSat": "S",
     "weekdayMiniSun": "D",
     "officialHoliday": "Feriado oficial",
-    "companyHoliday": "Feriado da empresa"
+    "companyHoliday": "Feriado da empresa",
+    "agendaView": "Agenda",
+    "agenda": {
+      "holiday": "Feriado",
+      "due": "Prazo",
+      "empty": "Nada agendado nesta semana."
+    },
+    "google": {
+      "allDay": "Dia inteiro",
+      "untitled": "(Sem título)",
+      "openInGoogle": "Abrir no Google Agenda",
+      "close": "Fechar",
+      "calendar": "Agenda",
+      "location": "Local",
+      "meeting": "Videochamada",
+      "organizer": "Organizador",
+      "attendees": "Convidados ({{count}})",
+      "description": "Descrição",
+      "readOnlyHint": "Sincronizado do Google Agenda. Edite no Google Agenda.",
+      "more": "+{{count}} mais",
+      "needsReconnect": "É preciso reconectar o Google Agenda em Configurações → Integrações",
+      "lastSynced": "Última sincronização: {{date}}",
+      "sync": "Sincronizar agenda",
+      "connect": "Conectar Google Agenda"
+    }
   },
   "activityLogs": {
     "title": "Atividade Recente",

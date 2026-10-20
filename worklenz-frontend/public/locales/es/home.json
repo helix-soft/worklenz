@@ -130,7 +130,31 @@
     "weekdayMiniSat": "S",
     "weekdayMiniSun": "D",
     "officialHoliday": "Festivo oficial",
-    "companyHoliday": "Festivo de la empresa"
+    "companyHoliday": "Festivo de la empresa",
+    "agendaView": "Agenda",
+    "agenda": {
+      "holiday": "Festivo",
+      "due": "Vence",
+      "empty": "No hay nada programado esta semana."
+    },
+    "google": {
+      "allDay": "Todo el día",
+      "untitled": "(Sin título)",
+      "openInGoogle": "Abrir en Google Calendar",
+      "close": "Cerrar",
+      "calendar": "Calendario",
+      "location": "Ubicación",
+      "meeting": "Videollamada",
+      "organizer": "Organizador",
+      "attendees": "Invitados ({{count}})",
+      "description": "Descripción",
+      "readOnlyHint": "Sincronizado desde Google Calendar. Edítalo en Google Calendar.",
+      "more": "+{{count}} más",
+      "needsReconnect": "Hay que volver a conectar Google Calendar en Configuración → Integraciones",
+      "lastSynced": "Última sincronización: {{date}}",
+      "sync": "Sincronizar calendario",
+      "connect": "Conectar Google Calendar"
+    }
   },
   "activityLogs": {
     "title": "Actividad Reciente",

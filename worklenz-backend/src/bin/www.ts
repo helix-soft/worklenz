@@ -15,6 +15,7 @@ import {startCronJobs} from "../cron_jobs";
 import {startRecurringTasksJob} from "../cron_jobs/recurring-tasks";
 import {startProjectFilesCleanupJob} from "../cron_jobs/project-files-cleanup-job";
 import {startTaskExportCleanupJob} from "../cron_jobs/task-export-cleanup-job";
+import {startGoogleCalendarSyncJob} from "../cron_jobs/google-calendar-sync-job";
 import FileConstants from "../shared/file-constants";
 import {initRedis} from "../redis/client";
 import DbTaskStatusChangeListener from "../pg_notify_listeners/db-task-status-changed";
@@ -119,6 +120,7 @@ function onListening() {
   process.env.ENABLE_RECURRING_JOBS === "true" && startRecurringTasksJob();
   startProjectFilesCleanupJob();
   startTaskExportCleanupJob();
+  startGoogleCalendarSyncJob();
   // void initRedis();
   FileConstants.init();
   void DbTaskStatusChangeListener.connect();

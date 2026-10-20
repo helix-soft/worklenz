@@ -130,7 +130,31 @@
     "weekdayMiniSat": "Sh",
     "weekdayMiniSun": "D",
     "officialHoliday": "Festë zyrtare",
-    "companyHoliday": "Festë e kompanisë"
+    "companyHoliday": "Festë e kompanisë",
+    "agendaView": "Axhenda",
+    "agenda": {
+      "holiday": "Festë",
+      "due": "Afati",
+      "empty": "Asgjë e planifikuar këtë javë."
+    },
+    "google": {
+      "allDay": "Gjithë ditën",
+      "untitled": "(Pa titull)",
+      "openInGoogle": "Hape në Google Calendar",
+      "close": "Mbyll",
+      "calendar": "Kalendari",
+      "location": "Vendndodhja",
+      "meeting": "Video-thirrje",
+      "organizer": "Organizatori",
+      "attendees": "Të ftuarit ({{count}})",
+      "description": "Përshkrimi",
+      "readOnlyHint": "Sinkronizuar nga Google Calendar. Ndryshojeni në Google Calendar.",
+      "more": "+{{count}} të tjera",
+      "needsReconnect": "Google Calendar duhet rilidhur te Cilësimet → Integrimet",
+      "lastSynced": "Sinkronizimi i fundit: {{date}}",
+      "sync": "Sinkronizo kalendarin",
+      "connect": "Lidh Google Calendar"
+    }
   },
   "activityLogs": {
     "title": "Aktiviteti i Fundit",

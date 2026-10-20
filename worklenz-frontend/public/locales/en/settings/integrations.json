@@ -20,8 +20,21 @@
   },
   "googleCalendar": {
     "title": "Google Calendar",
-    "description": "Sync your tasks and deadlines with Google Calendar to manage your schedule, set reminders, and never miss important project milestones."
+    "description": "Sync your tasks and deadlines with Google Calendar to manage your schedule, set reminders, and never miss important project milestones.",
+    "readOnlyDescription": "Show the events of your Google calendars on Home → Calendar. Read-only: nothing is changed in Google.",
+    "connectedMessage": "Google Calendar connected",
+    "connectError": "Could not connect Google Calendar. Please try again.",
+    "needsReconnect": "Needs reconnect",
+    "connected": "Connected",
+    "lastSynced": "Last synced: {{date}} · {{count}} calendars",
+    "notSyncedYet": "Not synced yet",
+    "reauthHint": "Google access expired or was revoked. Connect again to continue syncing.",
+    "syncError": "Last sync failed. Try again later.",
+    "notConfigured": "Google Calendar is not configured on this server yet. Ask your administrator.",
+    "reconnect": "Reconnect",
+    "syncNow": "Sync now",
+    "disconnectConfirm": "Disconnect Google Calendar? Synced events are removed from Worklenz.",
+    "disconnect": "Disconnect"
   },
-  "connect": "Connect",
-  "comingSoon": "Coming Soon"
+  "cancel": "Cancel"
 }

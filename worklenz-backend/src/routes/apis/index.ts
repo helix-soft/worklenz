@@ -75,6 +75,7 @@ import projectRatecardApiRouter from "../../ee/routes/apis/project-ratecard-api-
 import ratecardApiRouter from "../../ee/routes/apis/ratecard-api-router";
 import holidayApiRouter from "./holiday-api-router";
 import leaveApiRouter from "./leave-api-router";
+import googleCalendarApiRouter from "./google-calendar-api-router";
 import userActivityLogsApiRouter from "./user-activity-logs-api-router";
 import supportApiRouter from "./support-api-router";
 import accountApiRouter from "./account-api-router";
@@ -194,6 +195,7 @@ api.use("/ratecard", ratecardApiRouter);
 
 api.use("/holidays", holidayApiRouter);
 api.use("/leave", leaveApiRouter);
+api.use("/google-calendar", googleCalendarApiRouter);
 
 api.use("/logs", userActivityLogsApiRouter);
 

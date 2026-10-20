@@ -1,6 +1,6 @@
 {
   "connect": "Verbinden",
-  "comingSoon": "Demnächst verfügbar",
+  "comingSoon": "Demnächst",
   "availableSoon": "Demnächst verfügbar",
   "slack": {
     "title": "Slack",
@@ -20,8 +20,21 @@
   },
   "googleCalendar": {
     "title": "Google Kalender",
-    "description": "Synchronisieren Sie Ihre Aufgaben und Fristen mit Google Kalender, um Ihren Zeitplan zu verwalten, Erinnerungen einzustellen und wichtige Projektmeilensteine nicht zu verpassen."
+    "description": "Synchronisieren Sie Ihre Aufgaben und Fristen mit Google Kalender, um Ihren Zeitplan zu verwalten, Erinnerungen einzustellen und wichtige Projektmeilensteine nicht zu verpassen.",
+    "readOnlyDescription": "Zeigt die Termine deiner Google Kalender unter Start → Kalender. Nur lesend: in Google wird nichts geändert.",
+    "connectedMessage": "Google Kalender verbunden",
+    "connectError": "Google Kalender konnte nicht verbunden werden. Bitte erneut versuchen.",
+    "needsReconnect": "Neu verbinden",
+    "connected": "Verbunden",
+    "lastSynced": "Zuletzt synchronisiert: {{date}} · {{count}} Kalender",
+    "notSyncedYet": "Noch nicht synchronisiert",
+    "reauthHint": "Der Google-Zugriff ist abgelaufen oder wurde widerrufen. Verbinde erneut, um weiter zu synchronisieren.",
+    "syncError": "Die letzte Synchronisierung ist fehlgeschlagen. Später erneut versuchen.",
+    "notConfigured": "Google Kalender ist auf diesem Server noch nicht eingerichtet. Wende dich an deinen Administrator.",
+    "reconnect": "Neu verbinden",
+    "syncNow": "Jetzt synchronisieren",
+    "disconnectConfirm": "Google Kalender trennen? Synchronisierte Termine werden aus Worklenz entfernt.",
+    "disconnect": "Trennen"
   },
-  "connect": "Verbinden",
-  "comingSoon": "Demnächst"
+  "cancel": "Abbrechen"
 }

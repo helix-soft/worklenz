@@ -1,0 +1,108 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import dayjs, { Dayjs } from 'dayjs';
+import { googleCalendarApiService } from '@/api/google-calendar/google-calendar.api.service';
+import { IGoogleCalendarEvent, IGoogleCalendarStatus } from '@/types/google-calendar.types';
+import logger from '@/utils/errorLogger';
+
+const AUTO_SYNC_AFTER_MS = 5 * 60 * 1000;
+
+/**
+ * The current user's Google Calendar connection and its events in [start, end].
+ * When the calendar opens and the last sync is older than five minutes, a sync runs in the
+ * background and the events are reloaded afterwards.
+ */
+export const useGoogleCalendarEvents = (start: Dayjs, end: Dayjs) => {
+  const [status, setStatus] = useState<IGoogleCalendarStatus | null>(null);
+  const [events, setEvents] = useState<IGoogleCalendarEvent[]>([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const hasAutoSynced = useRef(false);
+  const startKey = start.format('YYYY-MM-DD');
+  const endKey = end.format('YYYY-MM-DD');
+
+  const loadEvents = useCallback(async () => {
+    try {
+      const res = await googleCalendarApiService.getEvents(startKey, endKey);
+      if (res.done) setEvents(res.body);
+    } catch (error) {
+      logger.error('Error fetching Google Calendar events', error);
+    }
+  }, [startKey, endKey]);
+
+  const sync = useCallback(async () => {
+    setIsSyncing(true);
+    try {
+      const res = await googleCalendarApiService.sync();
+      if (res.done) setStatus(res.body);
+      await loadEvents();
+    } catch (error) {
+      logger.error('Error syncing Google Calendar', error);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [loadEvents]);
+
+  // Status once on mount, then a background sync if the data is stale.
+  useEffect(() => {
+    googleCalendarApiService
+      .getStatus()
+      .then(res => {
+        if (!res.done) return;
+        setStatus(res.body);
+        const lastSync = res.body.last_synced_at ? dayjs(res.body.last_synced_at).valueOf() : 0;
+        if (
+          res.body.connected &&
+          res.body.status === 'active' &&
+          !hasAutoSynced.current &&
+          Date.now() - lastSync > AUTO_SYNC_AFTER_MS
+        ) {
+          hasAutoSynced.current = true;
+          void sync();
+        }
+      })
+      .catch(error => logger.error('Error fetching Google Calendar status', error));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (status?.connected) void loadEvents();
+    else setEvents([]);
+  }, [status?.connected, loadEvents]);
+
+  /** Events per local day ("YYYY-MM-DD"); multi-day events appear on every day they cover. */
+  const eventsByDate = useMemo(() => {
+    const map = new Map<string, IGoogleCalendarEvent[]>();
+    const add = (key: string, event: IGoogleCalendarEvent) =>
+      map.set(key, [...(map.get(key) || []), event]);
+    events.forEach(event => {
+      const { first, last } = getEventDays(event);
+      for (let day = first; !day.isAfter(last, 'day'); day = day.add(1, 'day')) {
+        add(day.format('YYYY-MM-DD'), event);
+      }
+    });
+    map.forEach(list => list.sort(compareEvents));
+    return map;
+  }, [events]);
+
+  return { status, eventsByDate, isSyncing, sync };
+};
+
+/** First and last local day an event covers (a timed event ending at midnight ends the day before). */
+export const getEventDays = (event: IGoogleCalendarEvent) => {
+  if (event.is_all_day) {
+    return { first: dayjs(event.start_date), last: dayjs(event.end_date || event.start_date) };
+  }
+  const startAt = dayjs(event.start_at);
+  const endAt = dayjs(event.end_at || event.start_at);
+  const last = endAt.isAfter(startAt) ? endAt.subtract(1, 'minute') : startAt;
+  return { first: startAt.startOf('day'), last: last.startOf('day') };
+};
+
+/** All-day first, then by start time. */
+export const compareEvents = (a: IGoogleCalendarEvent, b: IGoogleCalendarEvent) => {
+  if (a.is_all_day !== b.is_all_day) return a.is_all_day ? -1 : 1;
+  return dayjs(a.start_at || a.start_date).valueOf() - dayjs(b.start_at || b.start_date).valueOf();
+};
+
+/** "9:50am – 11:50am" */
+export const formatEventTimeRange = (event: IGoogleCalendarEvent) =>
+  `${dayjs(event.start_at).format('h:mma')} – ${dayjs(event.end_at).format('h:mma')}`;

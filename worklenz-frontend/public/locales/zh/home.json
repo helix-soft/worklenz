@@ -130,7 +130,31 @@
     "weekdayMiniSat": "六",
     "weekdayMiniSun": "日",
     "officialHoliday": "法定节假日",
-    "companyHoliday": "公司假日"
+    "companyHoliday": "公司假日",
+    "agendaView": "日程",
+    "agenda": {
+      "holiday": "节假日",
+      "due": "截止",
+      "empty": "本周没有安排。"
+    },
+    "google": {
+      "allDay": "全天",
+      "untitled": "（无标题）",
+      "openInGoogle": "在 Google 日历中打开",
+      "close": "关闭",
+      "calendar": "日历",
+      "location": "地点",
+      "meeting": "视频通话",
+      "organizer": "组织者",
+      "attendees": "参与者（{{count}}）",
+      "description": "描述",
+      "readOnlyHint": "从 Google 日历同步。请在 Google 日历中编辑。",
+      "more": "还有 {{count}} 项",
+      "needsReconnect": "需要在设置 → 集成中重新连接 Google 日历",
+      "lastSynced": "上次同步：{{date}}",
+      "sync": "同步日历",
+      "connect": "连接 Google 日历"
+    }
   },
   "activityLogs": {
     "title": "最近活动",

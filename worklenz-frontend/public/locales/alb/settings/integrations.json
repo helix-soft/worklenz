@@ -1,6 +1,6 @@
 {
   "connect": "Lidhu",
-  "comingSoon": "Në dispozicion së shpejti",
+  "comingSoon": "Së shpejti",
   "availableSoon": "Në dispozicion së shpejti",
   "slack": {
     "title": "Slack",
@@ -20,8 +20,21 @@
   },
   "googleCalendar": {
     "title": "Google Calendar",
-    "description": "Sinkronizoni detyrat dhe afatet tuaja me Google Calendar për të menaxhuar orarin tuaj, për të vendosur kujtues dhe për të mos humbur asnjëherë pikat kryesore të rëndësishme të projektit."
+    "description": "Sinkronizoni detyrat dhe afatet tuaja me Google Calendar për të menaxhuar orarin tuaj, për të vendosur kujtues dhe për të mos humbur asnjëherë pikat kryesore të rëndësishme të projektit.",
+    "readOnlyDescription": "Shfaq ngjarjet e kalendarëve tuaj Google te Kreu → Kalendari. Vetëm për lexim: asgjë nuk ndryshohet në Google.",
+    "connectedMessage": "Google Calendar u lidh",
+    "connectError": "Google Calendar nuk u lidh. Provo përsëri.",
+    "needsReconnect": "Duhet rilidhur",
+    "connected": "I lidhur",
+    "lastSynced": "Sinkronizimi i fundit: {{date}} · {{count}} kalendarë",
+    "notSyncedYet": "Ende pa sinkronizuar",
+    "reauthHint": "Qasja në Google skadoi ose u revokua. Lidhu përsëri për të vazhduar sinkronizimin.",
+    "syncError": "Sinkronizimi i fundit dështoi. Provo më vonë.",
+    "notConfigured": "Google Calendar nuk është konfiguruar ende në këtë server. Pyet administratorin.",
+    "reconnect": "Rilidh",
+    "syncNow": "Sinkronizo tani",
+    "disconnectConfirm": "Të shkëputet Google Calendar? Ngjarjet e sinkronizuara hiqen nga Worklenz.",
+    "disconnect": "Shkëput"
   },
-  "connect": "Lidhu",
-  "comingSoon": "Së shpejti"
+  "cancel": "Anulo"
 }

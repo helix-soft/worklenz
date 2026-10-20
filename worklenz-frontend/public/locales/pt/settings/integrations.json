@@ -20,8 +20,21 @@
   },
   "googleCalendar": {
     "title": "Google Calendar",
-    "description": "Sincronize suas tarefas e prazos com o Google Calendar para gerenciar sua agenda, definir lembretes e nunca perder marcos importantes do projeto."
+    "description": "Sincronize suas tarefas e prazos com o Google Calendar para gerenciar sua agenda, definir lembretes e nunca perder marcos importantes do projeto.",
+    "readOnlyDescription": "Mostra os eventos das suas agendas Google em Início → Calendário. Somente leitura: nada é alterado no Google.",
+    "connectedMessage": "Google Agenda conectado",
+    "connectError": "Não foi possível conectar o Google Agenda. Tente novamente.",
+    "needsReconnect": "Requer reconexão",
+    "connected": "Conectado",
+    "lastSynced": "Última sincronização: {{date}} · {{count}} agendas",
+    "notSyncedYet": "Ainda não sincronizado",
+    "reauthHint": "O acesso ao Google expirou ou foi revogado. Conecte novamente para continuar sincronizando.",
+    "syncError": "A última sincronização falhou. Tente mais tarde.",
+    "notConfigured": "O Google Agenda ainda não está configurado neste servidor. Fale com o administrador.",
+    "reconnect": "Reconectar",
+    "syncNow": "Sincronizar agora",
+    "disconnectConfirm": "Desconectar o Google Agenda? Os eventos sincronizados serão removidos do Worklenz.",
+    "disconnect": "Desconectar"
   },
-  "connect": "Conectar",
-  "comingSoon": "Em breve"
+  "cancel": "Cancelar"
 }

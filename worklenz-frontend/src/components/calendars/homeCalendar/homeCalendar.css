@@ -506,3 +506,173 @@
   background: #1677ff;
   color: #fff;
 }
+
+/* ── Google Calendar events (read-only, one uniform color) ─────── */
+.home-calendar__gcal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.home-calendar__gcal-pill,
+.home-calendar__gcal-more {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  border: 0;
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 4px;
+}
+
+.home-calendar__gcal-pill {
+  background: #efdbff;
+  color: #391085;
+  font-weight: 600;
+}
+
+.home-calendar__gcal-more {
+  background: transparent;
+  color: #722ed1;
+}
+
+.home-calendar__gcal-pill:focus-visible,
+.home-calendar__gcal-more:focus-visible {
+  outline: 2px solid #1677ff;
+  outline-offset: 1px;
+}
+
+.home-calendar-dark .home-calendar__gcal-pill {
+  background: #301c4d;
+  color: #d3adf7;
+}
+
+.home-calendar-dark .home-calendar__gcal-more {
+  color: #b37feb;
+}
+
+/* ── Agenda view ──────────────────────────────────────────────── */
+.home-calendar-agenda {
+  border: 1px solid var(--border-color, #e8e8e8);
+  border-radius: 8px;
+  overflow: auto;
+  background: #fff;
+}
+
+.home-calendar-agenda-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.home-calendar-agenda-day {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  font-weight: 600;
+  background: #f5f5f5;
+  border-bottom: 1px solid var(--border-color, #e8e8e8);
+}
+
+.home-calendar-agenda-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+}
+
+.home-calendar-agenda-row-clickable {
+  cursor: pointer;
+}
+
+.home-calendar-agenda-row-clickable:hover {
+  background: #fafafa;
+}
+
+.home-calendar-agenda-row-clickable:focus-visible {
+  outline: 2px solid #1677ff;
+  outline-offset: -2px;
+}
+
+.home-calendar-agenda-time {
+  flex: 0 0 150px;
+  color: rgba(0, 0, 0, 0.55);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.home-calendar-agenda-dot {
+  flex: 0 0 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.home-calendar-agenda-dot-event {
+  background: #722ed1;
+}
+
+.home-calendar-agenda-dot-holiday {
+  background: #f5222d;
+}
+
+.home-calendar-agenda-dot-timeOff {
+  background: #fa8c16;
+}
+
+.home-calendar-agenda-dot-task {
+  background: #1677ff;
+}
+
+.home-calendar-agenda-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-calendar-agenda-subtitle {
+  margin-left: 8px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.home-calendar-dark .home-calendar-agenda {
+  background: #1d1d1d;
+  border-color: #303030;
+}
+
+.home-calendar-dark .home-calendar-agenda-day {
+  background: #262626;
+  border-color: #303030;
+}
+
+.home-calendar-dark .home-calendar-agenda-row {
+  border-color: #303030;
+}
+
+.home-calendar-dark .home-calendar-agenda-row-clickable:hover {
+  background: #2a2a2a;
+}
+
+.home-calendar-dark .home-calendar-agenda-time,
+.home-calendar-dark .home-calendar-agenda-subtitle,
+.home-calendar-dark .home-calendar-agenda-empty {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+@media (max-width: 576px) {
+  .home-calendar-agenda-time {
+    flex-basis: 96px;
+    font-size: 12px;
+  }
+}

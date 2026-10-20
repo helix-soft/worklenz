@@ -20,6 +20,21 @@
   },
   "googleCalendar": {
     "title": "Google Calendar",
-    "description": "将您的任务和截止日期与 Google Calendar 同步，以管理您的日程安排、设置提醒，并且永远不会错过重要的项目里程碑。"
-  }
+    "description": "将您的任务和截止日期与 Google Calendar 同步，以管理您的日程安排、设置提醒，并且永远不会错过重要的项目里程碑。",
+    "readOnlyDescription": "在首页 → 日历中显示你的 Google 日历事件。只读：不会更改 Google 中的任何内容。",
+    "connectedMessage": "已连接 Google 日历",
+    "connectError": "无法连接 Google 日历，请重试。",
+    "needsReconnect": "需要重新连接",
+    "connected": "已连接",
+    "lastSynced": "上次同步：{{date}} · {{count}} 个日历",
+    "notSyncedYet": "尚未同步",
+    "reauthHint": "Google 授权已过期或被撤销。请重新连接以继续同步。",
+    "syncError": "上次同步失败，请稍后重试。",
+    "notConfigured": "此服务器尚未配置 Google 日历，请联系管理员。",
+    "reconnect": "重新连接",
+    "syncNow": "立即同步",
+    "disconnectConfirm": "断开 Google 日历？已同步的事件将从 Worklenz 中删除。",
+    "disconnect": "断开连接"
+  },
+  "cancel": "取消"
 }
